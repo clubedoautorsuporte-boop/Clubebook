@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc *)",
+      "Bash(node -e \"require\\('pdfkit'\\); console.log\\('pdfkit OK'\\)\")",
+      "Bash(npm run *)"
+    ]
+  }
+}
