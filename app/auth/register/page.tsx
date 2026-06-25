@@ -18,7 +18,7 @@ export default function RegisterPage() {
         <div className="relative rounded-2xl border border-white/10 bg-[#0d0d14] p-8 shadow-2xl">
           {/* Logo */}
           <div className="mb-8 flex flex-col items-center gap-3">
-            <Image src="/logo.png" alt="Clube do Autor IA" width={56} height={56} className="object-contain" />
+            <Image src="/logo.png" alt="Clube do Autor IA" width={84} height={84} className="object-contain" style={{ width: 84, height: 'auto' }} />
             <div className="text-center">
               <div className="mb-1 inline-flex items-center gap-1 rounded-full border border-teal-500/30 bg-teal-500/10 px-3 py-0.5 text-xs font-medium text-teal-400">
                 <Sparkles className="h-3 w-3" />

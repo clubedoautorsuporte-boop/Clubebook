@@ -19,7 +19,7 @@ const NAV = [
 function Logo() {
   return (
     <a href="#inicio" className="flex items-center gap-2.5">
-      <Image src="/logo.png" alt="Clube do Autor IA" width={36} height={36} className="size-9 object-contain" />
+      <Image src="/logo.png" alt="Clube do Autor IA" width={54} height={54} className="object-contain" style={{ width: 54, height: 'auto' }} />
       <span className="font-heading text-base font-extrabold leading-none text-foreground">
         Clube do Autor <span className="text-brand">IA</span>
       </span>

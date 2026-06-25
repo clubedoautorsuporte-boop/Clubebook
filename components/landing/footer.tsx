@@ -29,7 +29,7 @@ export function Footer() {
         <div className="grid gap-10 border-b border-line pb-12 lg:grid-cols-[1.4fr_repeat(4,1fr)]">
           <div>
             <div className="flex items-center gap-2.5">
-              <Image src="/logo.png" alt="Clube do Autor IA" width={36} height={36} className="size-9 object-contain" />
+              <Image src="/logo.png" alt="Clube do Autor IA" width={54} height={54} className="object-contain" style={{ width: 54, height: 'auto' }} />
               <span className="font-heading text-base font-extrabold text-foreground">
                 Clube do Autor <span className="text-brand">IA</span>
               </span>
