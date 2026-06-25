@@ -1,6 +1,7 @@
 import { signIn } from '@/auth'
 import Link from 'next/link'
-import { BookOpen, Sparkles } from 'lucide-react'
+import Image from 'next/image'
+import { Sparkles } from 'lucide-react'
 
 export const metadata = {
   title: 'Criar conta | Clube do Autor IA',
@@ -17,9 +18,7 @@ export default function RegisterPage() {
         <div className="relative rounded-2xl border border-white/10 bg-[#0d0d14] p-8 shadow-2xl">
           {/* Logo */}
           <div className="mb-8 flex flex-col items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-teal-500/20">
-              <BookOpen className="h-6 w-6 text-teal-400" />
-            </div>
+            <Image src="/logo.png" alt="Clube do Autor IA" width={56} height={56} className="object-contain" />
             <div className="text-center">
               <div className="mb-1 inline-flex items-center gap-1 rounded-full border border-teal-500/30 bg-teal-500/10 px-3 py-0.5 text-xs font-medium text-teal-400">
                 <Sparkles className="h-3 w-3" />

@@ -1,4 +1,5 @@
-import { AtSign, BookOpen, Globe, Heart, Mail } from 'lucide-react'
+import { AtSign, Globe, Heart, Mail } from 'lucide-react'
+import Image from 'next/image'
 
 const COLUMNS = [
   {
@@ -28,12 +29,7 @@ export function Footer() {
         <div className="grid gap-10 border-b border-line pb-12 lg:grid-cols-[1.4fr_repeat(4,1fr)]">
           <div>
             <div className="flex items-center gap-2.5">
-              <div className="flex size-9 items-center justify-center rounded-xl bg-brand-gradient">
-                <BookOpen
-                  className="size-[18px] text-white"
-                  aria-hidden="true"
-                />
-              </div>
+              <Image src="/logo.png" alt="Clube do Autor IA" width={36} height={36} className="size-9 object-contain" />
               <span className="font-heading text-base font-extrabold text-foreground">
                 Clube do Autor <span className="text-brand">IA</span>
               </span>

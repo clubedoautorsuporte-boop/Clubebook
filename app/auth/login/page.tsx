@@ -1,6 +1,6 @@
 import { signIn } from '@/auth'
 import Link from 'next/link'
-import { BookOpen } from 'lucide-react'
+import Image from 'next/image'
 
 export const metadata = {
   title: 'Entrar | Clube do Autor IA',
@@ -17,9 +17,7 @@ export default function LoginPage() {
         <div className="relative rounded-2xl border border-white/10 bg-[#0d0d14] p-8 shadow-2xl">
           {/* Logo */}
           <div className="mb-8 flex flex-col items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-teal-500/20">
-              <BookOpen className="h-6 w-6 text-teal-400" />
-            </div>
+            <Image src="/logo.png" alt="Clube do Autor IA" width={56} height={56} className="object-contain" />
             <div className="text-center">
               <h1 className="text-xl font-bold text-white">Acesse sua área</h1>
               <p className="mt-1 text-sm text-white/40">Entre com sua conta para continuar</p>

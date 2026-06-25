@@ -1,7 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { BookOpen, Menu, X, LogIn, UserPlus } from 'lucide-react'
+import { Menu, X, LogIn, UserPlus } from 'lucide-react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { useCta } from './cta-context'
@@ -18,9 +19,7 @@ const NAV = [
 function Logo() {
   return (
     <a href="#inicio" className="flex items-center gap-2.5">
-      <div className="flex size-9 items-center justify-center rounded-xl bg-brand-gradient shadow-[0_0_18px_rgba(79,127,255,0.5)]">
-        <BookOpen className="size-5 text-white" aria-hidden="true" />
-      </div>
+      <Image src="/logo.png" alt="Clube do Autor IA" width={36} height={36} className="size-9 object-contain" />
       <span className="font-heading text-base font-extrabold leading-none text-foreground">
         Clube do Autor <span className="text-brand">IA</span>
       </span>
