@@ -17,7 +17,7 @@ export default function LoginPage() {
         <div className="relative rounded-2xl border border-white/10 bg-[#0d0d14] p-8 shadow-2xl">
           {/* Logo */}
           <div className="mb-8 flex flex-col items-center gap-3">
-            <Image src="/logo.png" alt="Clube do Autor IA" width={84} height={84} className="object-contain" style={{ width: 84, height: 'auto' }} />
+            <Image src="/logo.png" alt="Clube do Autor IA" width={168} height={168} className="object-contain" style={{ width: 168, height: 'auto' }} />
             <div className="text-center">
               <h1 className="text-xl font-bold text-white">Acesse sua área</h1>
               <p className="mt-1 text-sm text-white/40">Entre com sua conta para continuar</p>
