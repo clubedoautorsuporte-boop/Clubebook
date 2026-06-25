@@ -38,6 +38,9 @@ export async function GET() {
         {/* Title */}
         <div
           style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
             fontSize: 52,
             fontWeight: 900,
             color: 'white',
@@ -45,17 +48,16 @@ export async function GET() {
             textTransform: 'uppercase',
             letterSpacing: 3,
             lineHeight: 1.2,
-            textShadow: '0 2px 12px rgba(0,0,0,0.2)',
           }}
         >
-          SEU PLANEJAMENTO
-          <br />
-          CHEGOU
+          <span>SEU PLANEJAMENTO</span>
+          <span>CHEGOU</span>
         </div>
 
         {/* Subtitle */}
         <div
           style={{
+            display: 'flex',
             marginTop: 20,
             fontSize: 20,
             color: 'rgba(255,255,255,0.75)',

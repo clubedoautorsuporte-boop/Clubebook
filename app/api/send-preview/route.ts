@@ -216,32 +216,23 @@ export async function POST(req: Request) {
     (googleDocUrl ? `📝 *Ver no Google Docs:*\n${googleDocUrl}\n\n` : '') +
     `👉 Para receber o ebook completo, finalize em:\n${siteUrl}`
 
+  // Envia texto primeiro (confiável), depois tenta imagem em produção
   try {
-    if (isProduction) {
-      // Em produção: imagem branded + texto com link
-      const ogImageUrl = `${siteUrl}/api/og`
-      await sendImageViaZApi(phoneDigits, ogImageUrl, msgComDownload)
-      await sendButtonViaZApi(
-        phoneDigits,
-        `👉 Toque no botão abaixo para confirmar que recebeu o seu planejamento:`,
-        'Confirme Etapa',
-      )
-    } else {
-      // Em desenvolvimento: texto simples
-      await sendTextViaZApi(phoneDigits, msgComDownload)
-    }
+    await sendTextViaZApi(phoneDigits, msgComDownload)
     whatsappSent = true
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err)
     console.error('[send-preview] z-api error:', msg)
     whatsappError = msg
-    // Fallback
+  }
+
+  // Em produção: adicionalmente tenta enviar imagem branded
+  if (isProduction && whatsappSent) {
     try {
-      await sendTextViaZApi(phoneDigits, msgComDownload)
-      whatsappSent = true
-      whatsappError = undefined
-    } catch (fallbackErr) {
-      console.error('[send-preview] fallback error:', fallbackErr)
+      const ogImageUrl = `${siteUrl}/api/og`
+      await sendImageViaZApi(phoneDigits, ogImageUrl, `✅ Seu planejamento "${plan.titulo}" chegou!`)
+    } catch {
+      // imagem é extra — não afeta o resultado
     }
   }
 
