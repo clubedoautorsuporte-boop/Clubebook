@@ -2,10 +2,13 @@ import { auth } from '@/auth'
 import { CtaProvider } from '@/components/landing/cta-context'
 import { Header } from '@/components/landing/header'
 import { Hero } from '@/components/landing/hero'
+import { EbookShowcase } from '@/components/landing/ebook-showcase'
 import { FeatureStrip } from '@/components/landing/feature-strip'
-import { HowItWorks } from '@/components/landing/how-it-works'
 import { Solutions } from '@/components/landing/solutions'
-import { StatsBand } from '@/components/landing/stats-band'
+import { Comparison } from '@/components/landing/comparison'
+import { LeadMagnet } from '@/components/landing/lead-magnet'
+import { HowItWorks } from '@/components/landing/how-it-works'
+import { TrustStats } from '@/components/landing/trust-stats'
 import { Benefits } from '@/components/landing/benefits'
 import { Testimonials } from '@/components/landing/testimonials'
 import { Pricing } from '@/components/landing/pricing'
@@ -25,10 +28,13 @@ export default async function Page() {
           userImage={session?.user?.image}
         />
         <Hero />
+        <EbookShowcase />
         <FeatureStrip />
-        <HowItWorks />
         <Solutions />
-        <StatsBand />
+        <Comparison />
+        <LeadMagnet />
+        <HowItWorks />
+        <TrustStats />
         <Benefits />
         <Testimonials />
         <Pricing />
