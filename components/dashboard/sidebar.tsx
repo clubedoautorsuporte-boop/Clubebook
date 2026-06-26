@@ -18,7 +18,6 @@ type SidebarProps = {
   userName?: string | null
   userImage?: string | null
   userEmail?: string | null
-  ebookCount?: number
   credits?: number
   userId?: string | null
 }
@@ -81,7 +80,7 @@ function ReferralWidget({ userId }: { userId?: string | null }) {
   )
 }
 
-export function Sidebar({ userName, userImage, userEmail, ebookCount = 0, credits = 1300, userId }: SidebarProps) {
+export function Sidebar({ userName, userImage, userEmail, credits = 1000, userId }: SidebarProps) {
   const pathname = usePathname()
 
   const navItem = (href: string, Icon: React.ElementType, label: string, external = false) => {
@@ -100,11 +99,6 @@ export function Sidebar({ userName, userImage, userEmail, ebookCount = 0, credit
       >
         <Icon className="size-4 shrink-0" />
         {label}
-        {label === 'Meus Ebooks' && ebookCount > 0 && (
-          <span className="ml-auto rounded-full bg-[#4f7fff20] px-2 py-0.5 text-[10px] font-bold text-[#4f7fff]">
-            {ebookCount}
-          </span>
-        )}
       </Link>
     )
   }

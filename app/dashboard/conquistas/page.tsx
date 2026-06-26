@@ -1,6 +1,12 @@
 import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
+import { cache } from 'react'
 import { Trophy } from 'lucide-react'
+
+// cache() deduplica a query se dashboard/page.tsx já tiver chamado no mesmo request
+const getEbookCount = cache(async (userId: string) =>
+  prisma.delivery.count({ where: { userId } })
+)
 import { cn } from '@/lib/utils'
 
 const BADGES = [
@@ -73,7 +79,7 @@ export default async function ConquistasPage() {
 
   let total = 0
   if (userId) {
-    total = await prisma.delivery.count({ where: { userId } })
+    total = await getEbookCount(userId)
   }
 
   const nextBadge = BADGES.filter(b => !b.emBreve && !b.requisito(total))[0]

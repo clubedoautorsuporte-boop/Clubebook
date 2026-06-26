@@ -1,6 +1,5 @@
 import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
-import { prisma } from '@/lib/prisma'
 import { Sidebar, BottomNav } from '@/components/dashboard/sidebar'
 import { Bell, Plus } from 'lucide-react'
 import Link from 'next/link'
@@ -14,24 +13,10 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const session = await auth()
   if (!session) redirect('/auth/login')
 
-  const userId = session.user?.id
-  let ebookCount = 0
-  let credits = 1000
-  if (userId) {
-    try {
-      // Queries paralelas — não esperam uma pela outra
-      const [count, user] = await Promise.all([
-        prisma.delivery.count({ where: { userId } }),
-        prisma.user.findUnique({ where: { id: userId }, select: { credits: true } }),
-      ])
-      ebookCount = count
-      if (user) credits = user.credits
-    } catch {
-      // silencioso — mantém valores padrão
-    }
-  }
-
+  // Créditos vêm do token JWT — zero queries ao banco aqui
+  const credits = (session.user as { credits?: number })?.credits ?? 1000
   const firstName = session.user?.name?.split(' ')[0] ?? 'Autor'
+  const userId = session.user?.id
 
   return (
     <div className="flex min-h-screen bg-[#080b14]">
@@ -41,7 +26,6 @@ export default async function DashboardLayout({ children }: { children: React.Re
           userName={session.user?.name}
           userImage={session.user?.image}
           userEmail={session.user?.email}
-          ebookCount={ebookCount}
           credits={credits}
           userId={userId}
         />
