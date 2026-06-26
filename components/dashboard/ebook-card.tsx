@@ -1,9 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { BookOpen, FileDown, ExternalLink, Clock, MoreHorizontal } from 'lucide-react'
+import { ExternalLink, Clock } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { useState } from 'react'
 
 type EbookCardProps = {
   slug: string
@@ -14,40 +13,86 @@ type EbookCardProps = {
   expired: boolean
 }
 
+const GRADIENTS = [
+  ['#1e3a5f', '#2563eb'],
+  ['#0f4c3a', '#10b981'],
+  ['#3b1f6b', '#8b5cf6'],
+  ['#7c2d12', '#f97316'],
+  ['#1e3a5f', '#0ea5e9'],
+  ['#14532d', '#22c55e'],
+  ['#831843', '#ec4899'],
+  ['#1e1b4b', '#6366f1'],
+]
+
+function titleToGradient(titulo: string): [string, string] {
+  let hash = 0
+  for (let i = 0; i < titulo.length; i++) hash = titulo.charCodeAt(i) + ((hash << 5) - hash)
+  return GRADIENTS[Math.abs(hash) % GRADIENTS.length] as [string, string]
+}
+
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })
 }
 
 export function EbookCard({ slug, titulo, subtitulo, capitulosCount, createdAt, expired }: EbookCardProps) {
-  const [menuOpen, setMenuOpen] = useState(false)
+  const [from, to] = titleToGradient(titulo)
+  const initial = titulo.charAt(0).toUpperCase()
 
   return (
     <article className={cn(
       'group relative flex flex-col rounded-2xl border bg-[#0f1523] transition-all duration-200',
-      expired ? 'border-[#1c2438] opacity-60' : 'border-[#1c2438] hover:border-[#4f7fff50] hover:shadow-[0_0_24px_rgba(79,127,255,0.08)]',
+      expired
+        ? 'border-[#1c2438] opacity-55'
+        : 'border-[#1c2438] hover:border-[#4f7fff50] hover:shadow-[0_0_28px_rgba(79,127,255,0.09)]',
     )}>
-      {/* Cover area */}
-      <div className="relative flex h-36 items-center justify-center rounded-t-2xl bg-gradient-to-br from-[#0d1526] to-[#111827]">
-        <div className="grid h-16 w-16 place-items-center rounded-2xl bg-gradient-to-br from-[#4f7fff20] to-[#00e5c310] ring-1 ring-[#4f7fff20]">
-          <BookOpen className="size-8 text-[#4f7fff]" />
+      {/* Dynamic cover */}
+      <div
+        className="relative flex h-40 items-end justify-between overflow-hidden rounded-t-2xl p-4"
+        style={{ background: `linear-gradient(145deg, ${from}, ${to})` }}
+      >
+        {/* Shine */}
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/10 to-transparent" />
+        {/* Spine */}
+        <div className="pointer-events-none absolute inset-y-0 left-0 w-1 bg-black/20" />
+
+        {/* Initial letter */}
+        <div className="relative z-10 grid h-14 w-14 place-items-center rounded-xl bg-white/15 text-2xl font-extrabold text-white backdrop-blur-sm">
+          {initial}
         </div>
-        {/* Status badge */}
-        <span className={cn(
-          'absolute right-3 top-3 rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide',
-          expired ? 'bg-amber-500/10 text-amber-400' : 'bg-teal-500/10 text-teal-400',
-        )}>
-          {expired ? 'Expirado' : 'Disponível'}
-        </span>
-        {/* Chapter count */}
-        <span className="absolute bottom-3 left-3 rounded-lg bg-[#080b14]/80 px-2 py-1 text-[10px] font-medium text-[#6b7a99] backdrop-blur-sm">
-          {capitulosCount} capítulos
-        </span>
+
+        {/* Status + chapters */}
+        <div className="relative z-10 flex flex-col items-end gap-1.5">
+          <span className={cn(
+            'rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide',
+            expired ? 'bg-amber-500/20 text-amber-300' : 'bg-white/15 text-white',
+          )}>
+            {expired ? 'Expirado' : '✓ Disponível'}
+          </span>
+          <span className="rounded-lg bg-black/25 px-2 py-0.5 text-[10px] text-white/80 backdrop-blur-sm">
+            {capitulosCount} caps
+          </span>
+        </div>
       </div>
 
       {/* Info */}
       <div className="flex flex-1 flex-col p-4">
         <h3 className="line-clamp-1 font-semibold leading-tight text-white">{titulo}</h3>
-        {subtitulo && <p className="mt-0.5 line-clamp-1 text-xs text-[#6b7a99]">{subtitulo}</p>}
+        {subtitulo && (
+          <p className="mt-0.5 line-clamp-1 text-xs text-[#6b7a99]">{subtitulo}</p>
+        )}
+
+        {/* Format badges */}
+        <div className="mt-2.5 flex gap-1.5">
+          {['PDF', 'DOCX', 'EPUB'].map(fmt => (
+            <span
+              key={fmt}
+              className="rounded-md bg-[#4f7fff12] px-1.5 py-0.5 text-[10px] font-bold text-[#4f7fff]"
+            >
+              {fmt}
+            </span>
+          ))}
+        </div>
+
         <div className="mt-2 flex items-center gap-1 text-[11px] text-[#3a4a66]">
           <Clock className="size-3" />
           {formatDate(createdAt)}
@@ -66,15 +111,14 @@ export function EbookCard({ slug, titulo, subtitulo, capitulosCount, createdAt, 
             <a
               href={`/api/pdf/${slug}`}
               download
-              className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-[#4f7fff15] py-2 text-xs font-semibold text-[#4f7fff] transition hover:bg-[#4f7fff25]"
+              className="flex flex-1 items-center justify-center gap-1 rounded-xl bg-[#4f7fff15] py-2 text-xs font-semibold text-[#4f7fff] transition hover:bg-[#4f7fff25]"
             >
-              <FileDown className="size-3" />
-              Baixar PDF
+              ↓ Baixar PDF
             </a>
           </div>
         ) : (
           <div className="mt-4 rounded-xl bg-[#1c2438] py-2 text-center text-xs text-[#3a4a66]">
-            Link expirado após 30 dias
+            Expirado após 30 dias
           </div>
         )}
       </div>

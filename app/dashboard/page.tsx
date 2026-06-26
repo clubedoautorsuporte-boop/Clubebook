@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { Sidebar, BottomNav } from '@/components/dashboard/sidebar'
 import { EbookCard } from '@/components/dashboard/ebook-card'
 import { EmptyState } from '@/components/dashboard/empty-state'
+import { QuickCreate } from '@/components/dashboard/quick-create'
 import { Bell, BookOpen, CheckCircle2, Clock4, Plus, Sparkles, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 import type { BriefingPlan } from '@/lib/generate-pdf'
@@ -55,6 +56,7 @@ export default async function DashboardPage() {
           userImage={session?.user?.image}
           userEmail={session?.user?.email}
           ebookCount={total}
+          userId={userId}
         />
       </div>
 
@@ -67,6 +69,12 @@ export default async function DashboardPage() {
             <p className="text-xs text-[#6b7a99]">Bem-vindo à sua área de criação</p>
           </div>
           <div className="flex items-center gap-3">
+            {/* Aurora status */}
+            <div className="hidden items-center gap-1.5 rounded-full border border-[#00e5c318] bg-[#00e5c308] px-3 py-1.5 sm:flex">
+              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#00e5c3]" />
+              <span className="text-[11px] font-medium text-[#00e5c3]">Aurora online · ~47min</span>
+            </div>
+
             <button className="relative grid h-9 w-9 place-items-center rounded-xl border border-[#1c2438] text-[#6b7a99] transition hover:text-white">
               <Bell className="size-4" />
               <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-[#4f7fff]" />
@@ -100,7 +108,7 @@ export default async function DashboardPage() {
           </div>
 
           {/* Stats */}
-          <div className="mb-8 grid grid-cols-3 gap-3">
+          <div className="mb-6 grid grid-cols-3 gap-3">
             {[
               { label: 'Total de ebooks', value: total, icon: BookOpen, color: 'text-[#4f7fff]', bg: 'bg-[#4f7fff10]' },
               { label: 'Disponíveis', value: ativos, icon: CheckCircle2, color: 'text-[#00e5c3]', bg: 'bg-[#00e5c310]' },
@@ -117,7 +125,7 @@ export default async function DashboardPage() {
           </div>
 
           {/* Ebooks section */}
-          <div className="flex items-center justify-between mb-5">
+          <div className="flex items-center justify-between mb-4">
             <div>
               <h2 className="text-base font-bold text-white">Meus Ebooks</h2>
               <p className="text-xs text-[#6b7a99]">
@@ -131,6 +139,13 @@ export default async function DashboardPage() {
               </Link>
             )}
           </div>
+
+          {/* Quick create — always visible above ebook grid */}
+          {total > 0 && (
+            <div className="mb-6">
+              <QuickCreate />
+            </div>
+          )}
 
           {total === 0 ? (
             <EmptyState />

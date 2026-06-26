@@ -3,22 +3,34 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
-import { BookOpen, LayoutDashboard, Settings, HelpCircle, LogOut, Plus, TrendingUp } from 'lucide-react'
+import { BookOpen, LayoutDashboard, Settings, HelpCircle, LogOut, Plus, TrendingUp, Gift, Copy, Check } from 'lucide-react'
 import { signOut } from 'next-auth/react'
 import { cn } from '@/lib/utils'
+import { useState } from 'react'
 
 type SidebarProps = {
   userName?: string | null
   userImage?: string | null
   userEmail?: string | null
   ebookCount?: number
+  userId?: string | null
 }
 
-const NAV = [
-  { href: '/dashboard', icon: LayoutDashboard, label: 'Meus Ebooks' },
-  { href: '/dashboard/stats', icon: TrendingUp, label: 'Estatísticas' },
-  { href: '/dashboard/configuracoes', icon: Settings, label: 'Configurações' },
-  { href: 'mailto:clubedoautor.suporte@gmail.com', icon: HelpCircle, label: 'Suporte', external: true },
+const NAV_SECTIONS = [
+  {
+    label: 'CRIAÇÃO',
+    items: [
+      { href: '/dashboard', icon: LayoutDashboard, label: 'Meus Ebooks' },
+      { href: '/dashboard/stats', icon: TrendingUp, label: 'Estatísticas' },
+    ],
+  },
+  {
+    label: 'CONTA',
+    items: [
+      { href: '/dashboard/configuracoes', icon: Settings, label: 'Configurações' },
+      { href: 'mailto:clubedoautor.suporte@gmail.com', icon: HelpCircle, label: 'Suporte', external: true },
+    ],
+  },
 ]
 
 function Avatar({ name, image }: { name?: string | null; image?: string | null }) {
@@ -31,7 +43,38 @@ function Avatar({ name, image }: { name?: string | null; image?: string | null }
   )
 }
 
-export function Sidebar({ userName, userImage, userEmail, ebookCount = 0 }: SidebarProps) {
+function ReferralWidget({ userId }: { userId?: string | null }) {
+  const [copied, setCopied] = useState(false)
+
+  const copy = () => {
+    const url = `${typeof window !== 'undefined' ? window.location.origin : ''}/?ref=${userId ?? ''}`
+    navigator.clipboard.writeText(url).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    })
+  }
+
+  return (
+    <div className="mx-3 mb-3 rounded-xl border border-[#00e5c318] bg-[#00e5c306] p-3.5">
+      <div className="flex items-center gap-2 mb-1.5">
+        <Gift className="size-3.5 text-[#00e5c3]" />
+        <span className="text-xs font-bold text-[#00e5c3]">Indique e ganhe</span>
+      </div>
+      <p className="text-[11px] leading-relaxed text-[#6b7a99] mb-2.5">
+        Indique um amigo e ganhe 1 ebook grátis quando ele criar o primeiro.
+      </p>
+      <button
+        onClick={copy}
+        className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-[#00e5c330] bg-[#00e5c310] py-1.5 text-[11px] font-semibold text-[#00e5c3] transition hover:bg-[#00e5c320]"
+      >
+        {copied ? <Check className="size-3" /> : <Copy className="size-3" />}
+        {copied ? 'Copiado!' : 'Copiar link de indicação'}
+      </button>
+    </div>
+  )
+}
+
+export function Sidebar({ userName, userImage, userEmail, ebookCount = 0, userId }: SidebarProps) {
   const pathname = usePathname()
 
   return (
@@ -46,7 +89,7 @@ export function Sidebar({ userName, userImage, userEmail, ebookCount = 0 }: Side
       </div>
 
       {/* CTA criar */}
-      <div className="px-4 pt-5">
+      <div className="px-4 pt-5 pb-2">
         <Link
           href="/"
           className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#4f7fff] to-[#2554e0] py-2.5 text-sm font-semibold text-white shadow-[0_0_20px_rgba(79,127,255,0.3)] transition hover:shadow-[0_0_28px_rgba(79,127,255,0.45)]"
@@ -56,33 +99,43 @@ export function Sidebar({ userName, userImage, userEmail, ebookCount = 0 }: Side
         </Link>
       </div>
 
-      {/* Nav */}
-      <nav className="mt-4 flex flex-1 flex-col gap-0.5 px-3">
-        {NAV.map(({ href, icon: Icon, label, external }) => {
-          const active = !external && pathname === href
-          return (
-            <Link
-              key={href}
-              href={href}
-              {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-              className={cn(
-                'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-all',
-                active
-                  ? 'bg-[#4f7fff15] font-semibold text-[#4f7fff]'
-                  : 'text-[#6b7a99] hover:bg-[#0f1523] hover:text-white',
-              )}
-            >
-              <Icon className="size-4 shrink-0" />
-              {label}
-              {label === 'Meus Ebooks' && ebookCount > 0 && (
-                <span className="ml-auto rounded-full bg-[#4f7fff20] px-2 py-0.5 text-[10px] font-bold text-[#4f7fff]">
-                  {ebookCount}
-                </span>
-              )}
-            </Link>
-          )
-        })}
+      {/* Nav with sections */}
+      <nav className="flex flex-1 flex-col gap-4 overflow-y-auto px-3 py-3">
+        {NAV_SECTIONS.map(section => (
+          <div key={section.label}>
+            <p className="mb-1 px-3 text-[9px] font-bold tracking-widest text-[#2a3553]">{section.label}</p>
+            <div className="flex flex-col gap-0.5">
+              {section.items.map(({ href, icon: Icon, label, external }) => {
+                const active = !external && pathname === href
+                return (
+                  <Link
+                    key={href}
+                    href={href}
+                    {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                    className={cn(
+                      'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-all',
+                      active
+                        ? 'bg-[#4f7fff15] font-semibold text-[#4f7fff]'
+                        : 'text-[#6b7a99] hover:bg-[#0f1523] hover:text-white',
+                    )}
+                  >
+                    <Icon className="size-4 shrink-0" />
+                    {label}
+                    {label === 'Meus Ebooks' && ebookCount > 0 && (
+                      <span className="ml-auto rounded-full bg-[#4f7fff20] px-2 py-0.5 text-[10px] font-bold text-[#4f7fff]">
+                        {ebookCount}
+                      </span>
+                    )}
+                  </Link>
+                )
+              })}
+            </div>
+          </div>
+        ))}
       </nav>
+
+      {/* Referral widget */}
+      <ReferralWidget userId={userId} />
 
       {/* User */}
       <div className="border-t border-[#1c2438] p-4">
