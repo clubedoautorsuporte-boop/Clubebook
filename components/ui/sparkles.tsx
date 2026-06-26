@@ -1,75 +1,103 @@
 "use client"
 
-import { useEffect, useId, useState } from "react"
-import Particles from "@tsparticles/react"
-import { initParticlesEngine } from "@tsparticles/engine"
-import { loadSlim } from "@tsparticles/slim"
+import { useEffect, useRef } from "react"
+import { cn } from "@/lib/utils"
 
 interface SparklesProps {
   className?: string
-  size?: number
-  minSize?: number | null
+  color?: string
   density?: number
   speed?: number
-  minSpeed?: number | null
-  opacity?: number
-  opacitySpeed?: number
-  minOpacity?: number | null
-  color?: string
-  background?: string
-  direction?: string
-  options?: Record<string, unknown>
+}
+
+interface Particle {
+  x: number
+  y: number
+  size: number
+  opacity: number
+  vx: number
+  vy: number
+  life: number
+  maxLife: number
 }
 
 export function Sparkles({
   className,
-  size = 1,
-  minSize = null,
-  density = 800,
-  speed = 1,
-  minSpeed = null,
-  opacity = 1,
-  opacitySpeed = 3,
-  minOpacity = null,
-  color = "#FFFFFF",
-  background = "transparent",
-  options = {},
+  color = "#00e5c3",
+  density = 60,
+  speed = 0.5,
 }: SparklesProps) {
-  const [isReady, setIsReady] = useState(false)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
-    initParticlesEngine(async (engine) => {
-      await loadSlim(engine)
-    }).then(() => {
-      setIsReady(true)
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext("2d")
+    if (!ctx) return
+
+    let animId: number
+    const particles: Particle[] = []
+
+    const resize = () => {
+      canvas.width = canvas.offsetWidth
+      canvas.height = canvas.offsetHeight
+    }
+    resize()
+    window.addEventListener("resize", resize)
+
+    const spawn = (): Particle => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      size: Math.random() * 1.5 + 0.5,
+      opacity: 0,
+      vx: (Math.random() - 0.5) * speed * 0.4,
+      vy: -Math.random() * speed * 0.6 - 0.1,
+      life: 0,
+      maxLife: Math.random() * 120 + 80,
     })
-  }, [])
 
-  const id = useId()
+    for (let i = 0; i < density; i++) {
+      const p = spawn()
+      p.life = Math.random() * p.maxLife
+      p.opacity = Math.sin((p.life / p.maxLife) * Math.PI) * 0.7
+      particles.push(p)
+    }
 
-  const defaultOptions = {
-    background: { color: { value: background } },
-    fullScreen: { enable: false, zIndex: 1 },
-    fpsLimit: 120,
-    particles: {
-      color: { value: color },
-      move: {
-        enable: true,
-        direction: "none",
-        speed: { min: minSpeed || speed / 10, max: speed },
-        straight: false,
-      },
-      number: { value: density },
-      opacity: {
-        value: { min: minOpacity || opacity / 10, max: opacity },
-        animation: { enable: true, sync: false, speed: opacitySpeed },
-      },
-      size: { value: { min: minSize || size / 2.5, max: size } },
-    },
-    detectRetina: true,
-  }
+    const hex2rgb = (hex: string) => {
+      const r = parseInt(hex.slice(1, 3), 16)
+      const g = parseInt(hex.slice(3, 5), 16)
+      const b = parseInt(hex.slice(5, 7), 16)
+      return `${r},${g},${b}`
+    }
+    const rgb = hex2rgb(color.startsWith("#") ? color : "#00e5c3")
 
-  return isReady ? (
-    <Particles id={id} options={{ ...defaultOptions, ...options }} className={className} />
-  ) : null
+    const tick = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      for (const p of particles) {
+        p.life++
+        p.x += p.vx
+        p.y += p.vy
+        p.opacity = Math.sin((p.life / p.maxLife) * Math.PI) * 0.75
+        if (p.life >= p.maxLife) Object.assign(p, spawn(), { life: 0 })
+        ctx.beginPath()
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2)
+        ctx.fillStyle = `rgba(${rgb},${p.opacity})`
+        ctx.fill()
+      }
+      animId = requestAnimationFrame(tick)
+    }
+    tick()
+
+    return () => {
+      cancelAnimationFrame(animId)
+      window.removeEventListener("resize", resize)
+    }
+  }, [color, density, speed])
+
+  return (
+    <canvas
+      ref={canvasRef}
+      className={cn("absolute inset-0 h-full w-full", className)}
+    />
+  )
 }
