@@ -827,34 +827,6 @@ export default function CriarPage() {
             </button>
           </div>
 
-          {loading && (
-            <div className="mt-6 space-y-3 rounded-xl border border-[#1c2438] bg-[#0f1523] p-4">
-              <p className="text-xs font-semibold text-[#6b7a99]">PROGRESSO DA GERAÇÃO</p>
-              <div className="space-y-2 text-xs">
-                <div className={cn('flex items-center gap-2', geracaoEtapa?.includes('título') ? 'text-[#00e5c3]' : 'text-[#3a4a66]')}>
-                  {geracaoEtapa?.includes('título') ? '⏳' : '✓'} Criando título...
-                </div>
-                <div className={cn('flex items-center gap-2', geracaoEtapa?.includes('planejamento') ? 'text-[#00e5c3]' : 'text-[#3a4a66]')}>
-                  {geracaoEtapa?.includes('planejamento') ? '⏳' : geracaoEtapa?.includes('sumário') ? '✓' : '-'} Gerando planejamento...
-                </div>
-                <div className={cn('flex items-center gap-2', geracaoEtapa?.includes('sumário') ? 'text-[#00e5c3]' : 'text-[#3a4a66]')}>
-                  {geracaoEtapa?.includes('sumário') ? '⏳' : geracaoEtapa?.includes('introdução') ? '✓' : '-'} Criando sumário...
-                </div>
-                <div className={cn('flex items-center gap-2', geracaoEtapa?.includes('introdução') ? 'text-[#00e5c3]' : 'text-[#3a4a66]')}>
-                  {geracaoEtapa?.includes('introdução') ? '⏳' : geracaoEtapa?.includes('capítulos') ? '✓' : '-'} Gerando introdução...
-                </div>
-                <div className={cn('flex items-center gap-2', geracaoEtapa?.includes('capítulos') ? 'text-[#00e5c3]' : 'text-[#3a4a66]')}>
-                  {geracaoEtapa?.includes('capítulos') ? '⏳' : geracaoEtapa?.includes('formatando') ? '✓' : '-'} Criando capítulos...
-                </div>
-                <div className={cn('flex items-center gap-2', geracaoEtapa?.includes('formatando') ? 'text-[#00e5c3]' : 'text-[#3a4a66]')}>
-                  {geracaoEtapa?.includes('formatando') ? '⏳' : geracaoEtapa?.includes('WhatsApp') ? '✓' : '-'} Formatando ebook...
-                </div>
-                <div className={cn('flex items-center gap-2', geracaoEtapa?.includes('WhatsApp') ? 'text-[#00e5c3]' : 'text-[#3a4a66]')}>
-                  {geracaoEtapa?.includes('WhatsApp') ? '⏳' : '-'} Enviando via WhatsApp...
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       )}
     </div>
