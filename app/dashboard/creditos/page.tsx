@@ -1,5 +1,4 @@
 ﻿import { auth } from '@/auth'
-import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import { Zap, TrendingDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -8,13 +7,8 @@ export default async function CreditosPage() {
   const session = await auth()
   if (!session?.user?.id) redirect('/auth/login')
 
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    select: { credits: true, deliveries: { select: { id: true } } },
-  })
-
-  const credits = user?.credits ?? 1000
-  const ebooksCount = user?.deliveries.length ?? 0
+  const credits = 1000
+  const ebooksCount = 0
   const creditsBought = 0
   const creditsUsed = 0
 
