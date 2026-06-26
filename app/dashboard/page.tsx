@@ -3,7 +3,8 @@ import { prisma } from '@/lib/prisma'
 import { Sidebar, BottomNav } from '@/components/dashboard/sidebar'
 import { EbookCard } from '@/components/dashboard/ebook-card'
 import { EmptyState } from '@/components/dashboard/empty-state'
-import { BookOpen } from 'lucide-react'
+import { Bell, BookOpen, CheckCircle2, Clock4, Plus, Sparkles, ArrowRight } from 'lucide-react'
+import Link from 'next/link'
 import type { BriefingPlan } from '@/lib/generate-pdf'
 
 export default async function DashboardPage() {
@@ -40,58 +41,110 @@ export default async function DashboardPage() {
     })
   }
 
+  const total = rows.length
+  const ativos = rows.filter(r => !r.expired).length
+  const expirados = rows.filter(r => r.expired).length
+  const firstName = session?.user?.name?.split(' ')[0] ?? 'Autor'
+
   return (
     <div className="flex min-h-screen bg-[#080b14]">
-      {/* Sidebar — desktop only */}
-      <div className="hidden md:flex">
+      {/* Sidebar desktop */}
+      <div className="hidden md:flex md:flex-col">
         <Sidebar
           userName={session?.user?.name}
           userImage={session?.user?.image}
           userEmail={session?.user?.email}
+          ebookCount={total}
         />
       </div>
 
       {/* Main */}
-      <main className="flex-1 overflow-y-auto px-5 pb-24 pt-8 md:pb-10 md:pl-8 md:pr-8">
-        {/* Header */}
-        <div className="mb-8 flex items-center justify-between">
+      <div className="flex flex-1 flex-col overflow-hidden">
+        {/* Top bar */}
+        <header className="flex items-center justify-between border-b border-[#1c2438] bg-[#080b14] px-6 py-4">
           <div>
-            <h1 className="text-2xl font-bold text-white">
-              Olá, {session?.user?.name?.split(' ')[0] ?? 'Autor'} 👋
-            </h1>
-            <p className="mt-1 text-sm text-[#6b7a99]">
-              {rows.length > 0
-                ? `Você tem ${rows.length} ebook${rows.length > 1 ? 's' : ''} gerado${rows.length > 1 ? 's' : ''}`
-                : 'Crie seu primeiro ebook agora'}
-            </p>
+            <h1 className="text-lg font-bold text-white">Olá, {firstName} 👋</h1>
+            <p className="text-xs text-[#6b7a99]">Bem-vindo à sua área de criação</p>
           </div>
-          <div className="hidden items-center gap-2 md:flex">
-            <div className="grid h-9 w-9 place-items-center rounded-lg bg-[#4f7fff15] text-[#4f7fff]">
-              <BookOpen className="size-4" />
+          <div className="flex items-center gap-3">
+            <button className="relative grid h-9 w-9 place-items-center rounded-xl border border-[#1c2438] text-[#6b7a99] transition hover:text-white">
+              <Bell className="size-4" />
+              <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-[#4f7fff]" />
+            </button>
+            <Link
+              href="/"
+              className="hidden items-center gap-2 rounded-xl bg-gradient-to-r from-[#4f7fff] to-[#2554e0] px-4 py-2 text-sm font-semibold text-white shadow-[0_0_16px_rgba(79,127,255,0.3)] transition hover:-translate-y-0.5 sm:flex"
+            >
+              <Plus className="size-4" />
+              Criar Ebook
+            </Link>
+          </div>
+        </header>
+
+        <main className="flex-1 overflow-y-auto px-5 pb-24 pt-6 md:px-8 md:pb-8">
+
+          {/* Banner */}
+          <div className="mb-6 flex items-center justify-between gap-4 rounded-2xl border border-[#4f7fff20] bg-gradient-to-r from-[#4f7fff08] to-[#00e5c308] px-5 py-4">
+            <div className="flex items-center gap-3">
+              <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#4f7fff15]">
+                <Sparkles className="size-5 text-[#4f7fff]" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-white">Novidade: receba seu ebook em ~47 minutos</p>
+                <p className="text-xs text-[#6b7a99]">PDF + DOCX + EPUB com direitos comerciais 100% seus</p>
+              </div>
             </div>
+            <Link href="/" className="flex shrink-0 items-center gap-1 text-xs font-semibold text-[#4f7fff] hover:underline">
+              Criar agora <ArrowRight className="size-3" />
+            </Link>
           </div>
-        </div>
 
-        {/* Section title */}
-        {rows.length > 0 && (
-          <h2 className="mb-4 text-xs font-semibold uppercase tracking-widest text-[#3a4a66]">
-            Meus Ebooks
-          </h2>
-        )}
-
-        {/* Content */}
-        {rows.length === 0 ? (
-          <EmptyState />
-        ) : (
-          <div className="grid gap-4 sm:grid-cols-2">
-            {rows.map(r => (
-              <EbookCard key={r.slug} {...r} />
+          {/* Stats */}
+          <div className="mb-8 grid grid-cols-3 gap-3">
+            {[
+              { label: 'Total de ebooks', value: total, icon: BookOpen, color: 'text-[#4f7fff]', bg: 'bg-[#4f7fff10]' },
+              { label: 'Disponíveis', value: ativos, icon: CheckCircle2, color: 'text-[#00e5c3]', bg: 'bg-[#00e5c310]' },
+              { label: 'Expirados', value: expirados, icon: Clock4, color: 'text-amber-400', bg: 'bg-amber-400/10' },
+            ].map(({ label, value, icon: Icon, color, bg }) => (
+              <div key={label} className="rounded-2xl border border-[#1c2438] bg-[#0f1523] p-4">
+                <div className={`mb-3 inline-grid h-9 w-9 place-items-center rounded-xl ${bg} ${color}`}>
+                  <Icon className="size-4" />
+                </div>
+                <div className="text-2xl font-extrabold text-white">{value}</div>
+                <div className="mt-0.5 text-xs text-[#6b7a99]">{label}</div>
+              </div>
             ))}
           </div>
-        )}
-      </main>
 
-      {/* Bottom nav — mobile only */}
+          {/* Ebooks section */}
+          <div className="flex items-center justify-between mb-5">
+            <div>
+              <h2 className="text-base font-bold text-white">Meus Ebooks</h2>
+              <p className="text-xs text-[#6b7a99]">
+                {total > 0 ? `Continue de onde parou ou crie um novo.` : 'Comece criando seu primeiro ebook.'}
+              </p>
+            </div>
+            {total > 0 && (
+              <Link href="/" className="flex items-center gap-1.5 rounded-xl border border-[#1c2438] bg-[#0f1523] px-3 py-2 text-xs font-semibold text-white transition hover:border-[#4f7fff40]">
+                <Plus className="size-3.5" />
+                Novo
+              </Link>
+            )}
+          </div>
+
+          {total === 0 ? (
+            <EmptyState />
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {rows.map(r => (
+                <EbookCard key={r.slug} {...r} />
+              ))}
+            </div>
+          )}
+        </main>
+      </div>
+
+      {/* Bottom nav mobile */}
       <BottomNav />
     </div>
   )
