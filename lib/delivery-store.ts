@@ -14,6 +14,7 @@ export type DeliveryRecord = {
 
 export async function createDelivery(data: {
   nomeAutor: string
+  email?: string
   planJson: BriefingPlan
   pdfBase64: string
   userId?: string
@@ -28,6 +29,7 @@ export async function createDelivery(data: {
       planJson: data.planJson as object,
       pdfBase64: data.pdfBase64,
       expiresAt,
+      ...(data.email ? { email: data.email } : {}),
       ...(data.userId ? { userId: data.userId } : {}),
     },
   })

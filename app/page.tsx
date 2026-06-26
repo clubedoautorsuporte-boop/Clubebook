@@ -1,3 +1,4 @@
+import { auth } from '@/auth'
 import { CtaProvider } from '@/components/landing/cta-context'
 import { Header } from '@/components/landing/header'
 import { Hero } from '@/components/landing/hero'
@@ -12,11 +13,17 @@ import { Faq } from '@/components/landing/faq'
 import { FinalCta } from '@/components/landing/final-cta'
 import { Footer } from '@/components/landing/footer'
 
-export default function Page() {
+export default async function Page() {
+  const session = await auth()
+
   return (
     <CtaProvider>
       <main className="overflow-x-hidden">
-        <Header />
+        <Header
+          isLoggedIn={!!session}
+          userName={session?.user?.name}
+          userImage={session?.user?.image}
+        />
         <Hero />
         <FeatureStrip />
         <HowItWorks />

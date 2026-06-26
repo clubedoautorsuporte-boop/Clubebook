@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { auth } from '@/auth'
 import { rateLimitSendPreview } from '@/lib/rate-limit'
 import { sanitizeField, validateEmail } from '@/lib/sanitize'
 import { generateEbookPdf, type BriefingPlan } from '@/lib/generate-pdf'
@@ -93,6 +94,9 @@ async function sendTextViaZApi(phone: string, message: string): Promise<void> {
 }
 
 export async function POST(req: Request) {
+  const session = await auth()
+  const loggedUserId = session?.user?.id
+
   const ip =
     req.headers.get('x-client-ip') ??
     req.headers.get('x-forwarded-for') ??
@@ -165,6 +169,8 @@ export async function POST(req: Request) {
         nomeAutor,
         planJson: briefing,
         pdfBase64: pdfBuffer.toString('base64'),
+        ...(emailValido ? { email } : {}),
+        ...(loggedUserId ? { userId: loggedUserId } : {}),
       })
       deliveryUrl = `${siteUrl}/receiver/${slug}`
       pdfDownloadUrl = `${siteUrl}/api/pdf/${slug}`

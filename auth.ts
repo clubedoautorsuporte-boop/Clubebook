@@ -26,4 +26,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return session
     },
   },
+  events: {
+    async signIn({ user }) {
+      if (!user?.id || !user?.email) return
+      // Vincula deliveries gerados com o mesmo email antes do cadastro
+      await prisma.delivery.updateMany({
+        where: { email: user.email, userId: null },
+        data: { userId: user.id },
+      }).catch(() => {/* não bloquear o login se falhar */})
+    },
+  },
 })

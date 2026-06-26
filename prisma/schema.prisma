@@ -57,6 +57,7 @@ model Delivery {
   id        String   @id @default(cuid())
   slug      String   @unique @db.VarChar(32)
   nomeAutor String   @db.VarChar(100)
+  email     String?  @db.VarChar(254)
   planJson  Json
   pdfBase64 String   @db.Text
   createdAt DateTime @default(now())
@@ -66,4 +67,5 @@ model Delivery {
 
   @@index([slug])
   @@index([expiresAt])
+  @@index([email])
 }
