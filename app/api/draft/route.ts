@@ -16,11 +16,37 @@ const schema = z.object({
   estrategia: z.string().max(20).optional().default(''),
 })
 
+// Garante que o usuário existe no banco e retorna o ID cuid correto
+async function resolveUserId(session: { user?: { id?: string; email?: string | null; name?: string | null; image?: string | null } }): Promise<string | null> {
+  const rawId = session.user?.id
+  const email = session.user?.email
+  if (!rawId) return null
+
+  // ID já é cuid (não numérico) → usa diretamente
+  if (!/^\d+$/.test(rawId)) return rawId
+
+  // ID numérico = Google OAuth ID → busca/cria usuário pelo email
+  if (!email) return null
+  try {
+    const dbUser = await prisma.user.upsert({
+      where: { email },
+      update: {},
+      create: { email, name: session.user?.name, image: session.user?.image, credits: 1000 },
+      select: { id: true },
+    })
+    return dbUser.id
+  } catch {
+    return null
+  }
+}
+
 // POST — criar ou atualizar rascunho
 export async function POST(req: Request) {
   const session = await auth()
   if (!session?.user?.id) return Response.json({ error: 'Não autenticado' }, { status: 401 })
-  const userId = session.user.id
+
+  const userId = await resolveUserId(session as Parameters<typeof resolveUserId>[0])
+  if (!userId) return Response.json({ error: 'Usuário não encontrado' }, { status: 401 })
 
   let body: unknown
   try { body = await req.json() } catch { return Response.json({ error: 'JSON inválido' }, { status: 400 }) }
@@ -45,14 +71,10 @@ export async function POST(req: Request) {
   try {
     if (draftId) {
       // Atualiza rascunho existente (só se pertence ao usuário)
-      const draft = await prisma.draft.updateMany({
-        where: { id: draftId, userId },
-        data,
-      })
-      if (draft.count === 0) return Response.json({ error: 'Rascunho não encontrado' }, { status: 404 })
+      const updated = await prisma.draft.updateMany({ where: { id: draftId, userId }, data })
+      if (updated.count === 0) return Response.json({ error: 'Rascunho não encontrado' }, { status: 404 })
       return Response.json({ draftId })
     } else {
-      // Cria novo rascunho
       const draft = await prisma.draft.create({ data })
       return Response.json({ draftId: draft.id })
     }
@@ -66,7 +88,9 @@ export async function POST(req: Request) {
 export async function DELETE(req: Request) {
   const session = await auth()
   if (!session?.user?.id) return Response.json({ error: 'Não autenticado' }, { status: 401 })
-  const userId = session.user.id
+
+  const userId = await resolveUserId(session as Parameters<typeof resolveUserId>[0])
+  if (!userId) return Response.json({ ok: true }) // silencioso
 
   const { searchParams } = new URL(req.url)
   const draftId = searchParams.get('id')

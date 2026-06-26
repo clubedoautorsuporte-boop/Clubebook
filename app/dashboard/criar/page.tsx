@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef, useEffect, useCallback, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import {
   ArrowRight, ArrowLeft, Lightbulb, CheckCircle2, Loader2,
@@ -110,7 +110,16 @@ function GeneroSelect({ value, onChange }: { value: string; onChange: (v: string
   )
 }
 
+// Wrapper com Suspense obrigatório para useSearchParams no Next.js 14
 export default function CriarPage() {
+  return (
+    <Suspense fallback={<div className="flex min-h-[60vh] items-center justify-center"><Loader2 className="size-6 animate-spin text-[#4f7fff]" /></div>}>
+      <CriarPageContent />
+    </Suspense>
+  )
+}
+
+function CriarPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [step, setStep] = useState<Step>(1)
