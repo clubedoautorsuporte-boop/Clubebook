@@ -16,6 +16,7 @@
     "@base-ui/react": "^1.5.0",
     "@number-flow/react": "^0.6.0",
     "@prisma/client": "^5.22.0",
+    "@tsparticles/engine": "^4.2.1",
     "@tsparticles/react": "^4.2.1",
     "@tsparticles/slim": "^4.2.1",
     "@vercel/analytics": "1.6.1",

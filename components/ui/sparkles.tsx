@@ -1,7 +1,8 @@
 "use client"
 
 import { useEffect, useId, useState } from "react"
-import Particles, { initParticlesEngine } from "@tsparticles/react"
+import Particles from "@tsparticles/react"
+import { initParticlesEngine } from "@tsparticles/engine"
 import { loadSlim } from "@tsparticles/slim"
 
 interface SparklesProps {
