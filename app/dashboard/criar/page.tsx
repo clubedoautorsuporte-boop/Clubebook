@@ -137,6 +137,7 @@ export default function CriarPage() {
   const [fonteInput, setFonteInput] = useState('')
   const [topicos, setTopicos] = useState<string[]>([])
   const [topicoInput, setTopicoInput] = useState('')
+  const [estrategia, setEstrategia] = useState<'completa' | 'fiel' | ''>('')
 
   // Step 3
   const [telefone, setTelefone] = useState('')
@@ -488,23 +489,86 @@ export default function CriarPage() {
                       </p>
                     </div>
                   ) : (
-                    <div className="mb-3 space-y-2">
-                      {fontes.map((f, i) => {
-                        const tabInfo = FONTE_TABS.find(t => t.id === f.tipo)
-                        const Icon = tabInfo?.Icon ?? FileText
-                        return (
-                          <div key={i} className="flex items-center gap-2.5 rounded-xl border border-[#1c2438] bg-[#0f1523] px-3 py-2.5">
-                            <Icon className="size-4 shrink-0 text-[#4f7fff]" />
-                            <div className="flex-1 min-w-0">
-                              <span className="block truncate text-xs text-[#c4d0e8]">{fonteLabel(f)}</span>
-                              <span className="text-[10px] capitalize text-[#3a4a66]">{f.tipo}</span>
-                            </div>
-                            <button onClick={() => setFontes(fs => fs.filter((_, j) => j !== i))} className="shrink-0 text-[#3a4a66] hover:text-red-400 transition">
-                              <X className="size-3.5" />
+                    <div className="space-y-4">
+                      {/* Fontes adicionadas */}
+                      {fontes.length > 0 && (
+                        <div className="space-y-2.5">
+                          {fontes.map((f, i) => {
+                            const tabInfo = FONTE_TABS.find(t => t.id === f.tipo)
+                            const Icon = tabInfo?.Icon ?? FileText
+                            return (
+                              <div key={i} className="flex items-center gap-2.5 rounded-xl border border-[#1c2438] bg-[#0f1523] px-3 py-2.5">
+                                <Icon className="size-4 shrink-0 text-[#4f7fff]" />
+                                <div className="flex-1 min-w-0">
+                                  <span className="block truncate text-xs text-[#c4d0e8]">{fonteLabel(f)}</span>
+                                  <span className="text-[10px] capitalize text-[#3a4a66]">{f.tipo}</span>
+                                </div>
+                                <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-[#00e5c315] text-[#00e5c3]">Pronto</span>
+                                <button onClick={() => setFontes(fs => fs.filter((_, j) => j !== i))} className="shrink-0 text-[#3a4a66] hover:text-red-400 transition">
+                                  <X className="size-3.5" />
+                                </button>
+                              </div>
+                            )
+                          })}
+                        </div>
+                      )}
+
+                      {/* Estratégia de uso */}
+                      {fontes.length > 0 && (
+                        <div className="space-y-3">
+                          <p className="text-sm font-bold text-white">Como a Sábhia deve usar suas fontes?</p>
+
+                          <div className="grid grid-cols-2 gap-3">
+                            {/* Sábhia completa */}
+                            <button
+                              type="button"
+                              onClick={() => setEstrategia('completa')}
+                              className={cn(
+                                'rounded-xl border-2 p-3.5 text-left transition',
+                                estrategia === 'completa'
+                                  ? 'border-[#00e5c3] bg-[#00e5c308]'
+                                  : 'border-[#2a3553] bg-[#0f1523] hover:border-[#3a4a66]'
+                              )}
+                            >
+                              <div className="flex gap-2">
+                                <CheckCircle2 className={cn('size-4 shrink-0 mt-0.5', estrategia === 'completa' ? 'text-[#00e5c3]' : 'text-[#6b7a99]')} />
+                                <div className="flex-1 min-w-0">
+                                  <p className={cn('text-xs font-bold', estrategia === 'completa' ? 'text-[#00e5c3]' : 'text-[#c4d0e8]')}>Sábhia completa o conteúdo</p>
+                                  <p className={cn('text-xs mt-1', estrategia === 'completa' ? 'text-[#6b7a99]' : 'text-[#3a4a66]')}>Usa seu material como base e enriquece com criatividade.</p>
+                                </div>
+                              </div>
+                            </button>
+
+                            {/* Fiel ao conteúdo */}
+                            <button
+                              type="button"
+                              onClick={() => setEstrategia('fiel')}
+                              className={cn(
+                                'rounded-xl border-2 p-3.5 text-left transition',
+                                estrategia === 'fiel'
+                                  ? 'border-[#00e5c3] bg-[#00e5c308]'
+                                  : 'border-[#2a3553] bg-[#0f1523] hover:border-[#3a4a66]'
+                              )}
+                            >
+                              <div className="flex gap-2">
+                                <FileText className={cn('size-4 shrink-0 mt-0.5', estrategia === 'fiel' ? 'text-[#00e5c3]' : 'text-[#6b7a99]')} />
+                                <div className="flex-1 min-w-0">
+                                  <p className={cn('text-xs font-bold', estrategia === 'fiel' ? 'text-[#00e5c3]' : 'text-[#c4d0e8]')}>Fiel ao conteúdo original</p>
+                                  <p className={cn('text-xs mt-1', estrategia === 'fiel' ? 'text-[#6b7a99]' : 'text-[#3a4a66]')}>Organiza apenas o que você forneceu.</p>
+                                </div>
+                              </div>
                             </button>
                           </div>
-                        )
-                      })}
+                        </div>
+                      )}
+
+                      {/* Botão adicionar fonte */}
+                      <button
+                        onClick={() => { setShowAddFonte(true); setFonteTab('texto'); setFonteInput('') }}
+                        className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-[#1c2438] py-3 text-sm text-[#6b7a99] transition hover:border-[#4f7fff40] hover:text-white"
+                      >
+                        <Plus className="size-4" /> Adicionar Fonte
+                      </button>
                     </div>
                   )}
 
