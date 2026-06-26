@@ -58,7 +58,7 @@ export default async function DashboardPage() {
           </p>
         </div>
         <Link
-          href="/"
+          href="/dashboard/criar"
           className="flex items-center gap-1.5 rounded-xl bg-[#00e5c3] px-4 py-2 text-sm font-bold text-[#040810] transition hover:bg-[#00cfb0]"
         >
           <Plus className="size-4" />

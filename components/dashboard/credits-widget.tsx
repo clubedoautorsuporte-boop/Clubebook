@@ -16,7 +16,7 @@ export function CreditsWidget({ count }: { count: number }) {
         </div>
       </div>
       <Link
-        href="/"
+        href="/dashboard/criar"
         className="grid h-6 w-6 place-items-center rounded-lg bg-[#4f7fff20] text-[#4f7fff] transition hover:bg-[#4f7fff35]"
       >
         <Plus className="size-3.5" strokeWidth={2.5} />

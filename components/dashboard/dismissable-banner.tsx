@@ -31,7 +31,7 @@ export function DismissableBanner() {
       </div>
       <div className="flex shrink-0 items-center gap-2">
         <Link
-          href="/"
+          href="/dashboard/criar"
           className="hidden items-center gap-1.5 rounded-xl bg-[#00e5c3] px-4 py-2 text-xs font-bold text-[#040810] transition hover:bg-[#00cfb0] sm:flex"
         >
           Criar meu ebook agora

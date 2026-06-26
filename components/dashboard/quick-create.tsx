@@ -17,12 +17,12 @@ export function QuickCreate() {
         <input
           type="text"
           readOnly
-          onClick={() => router.push('/')}
+          onClick={() => router.push('/dashboard/criar')}
           placeholder="Sobre qual tema você quer criar um ebook?"
           className="flex-1 cursor-pointer rounded-xl border border-[#1c2438] bg-[#080b14] px-4 py-2.5 text-sm text-[#3a4a66] placeholder:text-[#3a4a66] focus:outline-none"
         />
         <button
-          onClick={() => router.push('/')}
+          onClick={() => router.push('/dashboard/criar')}
           className="flex shrink-0 items-center gap-1.5 rounded-xl bg-gradient-to-r from-[#4f7fff] to-[#2554e0] px-4 py-2.5 text-sm font-bold text-white shadow-[0_0_16px_rgba(79,127,255,0.3)] transition hover:shadow-[0_0_24px_rgba(79,127,255,0.5)]"
         >
           Gerar

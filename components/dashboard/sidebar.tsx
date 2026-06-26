@@ -5,7 +5,7 @@ import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, Settings, HelpCircle, LogOut, Plus, TrendingUp,
-  Gift, Copy, Check, BookOpen, DollarSign, Gem, Library, Flame,
+  Gift, Copy, Check, Gem, Library, Flame,
   ShoppingCart, Globe2, Calculator, Store, GraduationCap, Trophy,
   CalendarDays,
 } from 'lucide-react'
@@ -130,7 +130,7 @@ export function Sidebar({ userName, userImage, userEmail, ebookCount = 0, userId
       {/* CTA criar */}
       <div className="px-3 mb-2">
         <Link
-          href="/"
+          href="/dashboard/criar"
           className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#4f7fff] to-[#2554e0] py-2.5 text-sm font-semibold text-white shadow-[0_0_16px_rgba(79,127,255,0.25)] transition hover:shadow-[0_0_24px_rgba(79,127,255,0.4)]"
         >
           <Plus className="size-4" />
@@ -196,7 +196,7 @@ export function BottomNav() {
     <nav className="fixed inset-x-0 bottom-0 z-40 flex border-t border-[#1c2438] bg-[#080b14] md:hidden">
       {[
         { href: '/dashboard', icon: LayoutDashboard, label: 'Ebooks' },
-        { href: '/', icon: Plus, label: 'Criar', highlight: true },
+        { href: '/dashboard/criar', icon: Plus, label: 'Criar', highlight: true },
         { href: '/dashboard/nichos', icon: Flame, label: 'Nichos' },
         { href: '/dashboard/conquistas', icon: Trophy, label: 'Troféus' },
       ].map(({ href, icon: Icon, label, highlight }) => (

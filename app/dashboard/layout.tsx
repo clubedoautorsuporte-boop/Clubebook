@@ -53,7 +53,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
               <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-[#4f7fff]" />
             </button>
             <Link
-              href="/"
+              href="/dashboard/criar"
               className="hidden items-center gap-2 rounded-xl bg-gradient-to-r from-[#4f7fff] to-[#2554e0] px-4 py-2 text-sm font-semibold text-white shadow-[0_0_16px_rgba(79,127,255,0.3)] transition hover:-translate-y-0.5 sm:flex"
             >
               <Plus className="size-4" />

@@ -8,7 +8,7 @@ const CARDS = [
     iconColor: 'text-white',
     title: 'Criar novo ebook',
     description: 'A Aurora IA escreve, formata e entrega o ebook completo em ~47 minutos',
-    href: '/',
+    href: '/dashboard/criar',
   },
   {
     icon: MessageSquare,
@@ -16,7 +16,7 @@ const CARDS = [
     iconColor: 'text-[#00e5c3]',
     title: 'Enviar ideia por WhatsApp',
     description: 'Mande seu tema pelo WhatsApp e receba o briefing completo antes de pagar',
-    href: '/',
+    href: '/dashboard/criar',
   },
   {
     icon: BookOpen,
