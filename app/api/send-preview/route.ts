@@ -18,12 +18,12 @@ const capituloSchema = z.object({
 const bodySchema = z.object({
   nome: z.string().max(100).optional().default(''),
   email: z.string().max(254).optional().default(''),
-  telefone: z.string().max(20),
+  telefone: z.string().min(10).max(20),
   plan: z.object({
     titulo: z.string(),
-    subtitulo: z.string(),
+    subtitulo: z.string().optional().default(''),
     capitulos: z.array(capituloSchema),
-    promessa: z.string(),
+    promessa: z.string().optional().default(''),
     mensagem_final: z.string().optional().default(''),
   }),
 })

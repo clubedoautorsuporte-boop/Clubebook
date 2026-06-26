@@ -264,7 +264,7 @@ export default function CriarPage() {
         const errData = await planRes.json()
         throw new Error(errData.error || 'Falha ao gerar planejamento')
       }
-      const { plan } = await planRes.json()
+      const plan = await planRes.json()
 
       setGeracaoEtapa('Criando sumário...')
       await new Promise(r => setTimeout(r, 500))
