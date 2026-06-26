@@ -3,12 +3,14 @@ import { prisma } from '@/lib/prisma'
 
 const ADMIN_EMAIL = 'clubedoautor.suporte@gmail.com'
 
-export async function GET(_req: Request, { params }: { params: { id: string } }) {
+export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
   if (session?.user?.email !== ADMIN_EMAIL) return Response.json({ error: 'Acesso negado' }, { status: 403 })
 
+  const { id } = await params
+
   const user = await prisma.user.findUnique({
-    where: { id: params.id },
+    where: { id },
     select: {
       id: true, name: true, email: true, image: true, credits: true, createdAt: true,
       deliveries: {
@@ -27,19 +29,18 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
   return Response.json(user)
 }
 
-export async function DELETE(_req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
   if (session?.user?.email !== ADMIN_EMAIL) return Response.json({ error: 'Acesso negado' }, { status: 403 })
 
-  // Impede o admin de deletar a própria conta
-  const target = await prisma.user.findUnique({ where: { id: params.id }, select: { email: true } })
+  const { id } = await params
+
+  const target = await prisma.user.findUnique({ where: { id }, select: { email: true } })
   if (!target) return Response.json({ error: 'Usuário não encontrado' }, { status: 404 })
   if (target.email === ADMIN_EMAIL) return Response.json({ error: 'Não é possível deletar a conta admin' }, { status: 403 })
 
-  // Cascade: drafts e accounts são deletados pelo onDelete: Cascade do schema
-  // Deliveries têm userId nullable — desvincula em vez de deletar
-  await prisma.delivery.updateMany({ where: { userId: params.id }, data: { userId: null } })
-  await prisma.user.delete({ where: { id: params.id } })
+  await prisma.delivery.updateMany({ where: { userId: id }, data: { userId: null } })
+  await prisma.user.delete({ where: { id } })
 
   return Response.json({ success: true })
 }
