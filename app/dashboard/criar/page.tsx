@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowRight, ArrowLeft, Lightbulb, CheckCircle2, Loader2, Sparkles } from 'lucide-react'
+import { ArrowRight, ArrowLeft, Lightbulb, CheckCircle2, Loader2, Sparkles, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 type Step = 1 | 2 | 3
@@ -13,15 +13,45 @@ const PASSOS = [
   { n: 3, label: 'GERAR' },
 ]
 
-const SUGESTOES = [
-  'Finanças pessoais para iniciantes',
-  'Emagrecimento saudável sem sofrimento',
-  'Marketing digital do zero',
-  'IA e ChatGPT para seu negócio',
-  'Produtividade e foco extremo',
-  'Investimentos para quem começa agora',
-  'Criação de conteúdo que vende',
-  'Mindset empreendedor',
+const OBJETIVOS = [
+  {
+    icone: '💰',
+    cor: 'bg-emerald-500/15 text-emerald-400',
+    label: 'Revender e lucrar com meu ebook',
+    tema: 'Como criar renda extra vendendo ebooks digitais todos os dias',
+  },
+  {
+    icone: '📖',
+    cor: 'bg-blue-500/15 text-blue-400',
+    label: 'Ensinar algo que eu sei fazer',
+    tema: '',
+    placeholder: 'Ex: Como fazer bolos gourmet, Como investir na bolsa...',
+  },
+  {
+    icone: '🏆',
+    cor: 'bg-amber-500/15 text-amber-400',
+    label: 'Construir minha autoridade online',
+    tema: 'Guia definitivo para se tornar referência no seu nicho em 90 dias',
+  },
+  {
+    icone: '🎯',
+    cor: 'bg-purple-500/15 text-purple-400',
+    label: 'Captar clientes para meu negócio',
+    tema: 'Como atrair clientes qualificados com conteúdo digital gratuito',
+  },
+  {
+    icone: '💝',
+    cor: 'bg-pink-500/15 text-pink-400',
+    label: 'Deixar um legado de conhecimento',
+    tema: 'Lições de vida e experiências que transformam quem lê',
+  },
+  {
+    icone: '✨',
+    cor: 'bg-[#4f7fff15] text-[#4f7fff]',
+    label: 'Outro objetivo',
+    tema: '',
+    placeholder: 'Descreva seu tema livremente...',
+  },
 ]
 
 export default function CriarPage() {
@@ -30,7 +60,8 @@ export default function CriarPage() {
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
-  const [showSugestoes, setShowSugestoes] = useState(false)
+  const [showObjetivos, setShowObjetivos] = useState(false)
+  const [objetivoPlaceholder, setObjetivoPlaceholder] = useState('')
 
   const [form, setForm] = useState({
     tema: '',
@@ -42,9 +73,10 @@ export default function CriarPage() {
 
   const set = (k: keyof typeof form, v: string) => setForm(f => ({ ...f, [k]: v }))
 
-  const handleSugestao = (s: string) => {
-    set('tema', s)
-    setShowSugestoes(false)
+  const handleObjetivo = (obj: typeof OBJETIVOS[0]) => {
+    set('tema', obj.tema)
+    setObjetivoPlaceholder(obj.placeholder ?? '')
+    setShowObjetivos(false)
   }
 
   const canNext1 = form.tema.trim().length >= 3 && form.nome.trim().length >= 2
@@ -54,7 +86,6 @@ export default function CriarPage() {
     setLoading(true)
     setError('')
     try {
-      // Step 1: generate plan
       const planRes = await fetch('/api/ebook-plan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -63,19 +94,12 @@ export default function CriarPage() {
       if (!planRes.ok) throw new Error('Falha ao gerar planejamento')
       const { plan } = await planRes.json()
 
-      // Step 2: send preview + PDF
       const sendRes = await fetch('/api/send-preview', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          nome: form.nome,
-          email: form.email,
-          telefone: form.telefone,
-          plan,
-        }),
+        body: JSON.stringify({ nome: form.nome, email: form.email, telefone: form.telefone, plan }),
       })
       if (!sendRes.ok) throw new Error('Falha ao enviar ebook')
-
       setSuccess(true)
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Erro inesperado. Tente novamente.')
@@ -92,7 +116,7 @@ export default function CriarPage() {
         </div>
         <h1 className="font-heading text-3xl font-extrabold text-white">Ebook em produção!</h1>
         <p className="mt-3 max-w-sm text-[#6b7a99]">
-          Seu planejamento foi gerado e o ebook completo chegará no WhatsApp em ~47 minutos.
+          Seu planejamento foi gerado. O ebook completo chegará no WhatsApp em ~47 minutos.
         </p>
         <div className="mt-8 flex gap-3">
           <button
@@ -113,30 +137,23 @@ export default function CriarPage() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl px-5 py-8 md:py-12">
-      {/* Progress steps — exato estilo Sábhia */}
+    <div className="mx-auto max-w-xl px-5 py-8 md:py-12">
+      {/* Progress steps */}
       <div className="mb-10 flex items-center justify-center gap-0">
         {PASSOS.map((p, i) => (
           <div key={p.n} className="flex items-center">
             <div className="flex flex-col items-center">
-              <div
-                className={cn(
-                  'grid h-8 w-8 place-items-center rounded-full text-sm font-bold transition-all',
-                  step === p.n
-                    ? 'bg-[#00e5c3] text-[#040810] shadow-[0_0_16px_rgba(0,229,195,0.5)]'
-                    : step > p.n
-                    ? 'bg-[#00e5c330] text-[#00e5c3]'
-                    : 'border border-[#2a3553] bg-[#0f1523] text-[#3a4a66]',
-                )}
-              >
+              <div className={cn(
+                'grid h-8 w-8 place-items-center rounded-full text-sm font-bold transition-all',
+                step === p.n
+                  ? 'bg-[#00e5c3] text-[#040810] shadow-[0_0_16px_rgba(0,229,195,0.5)]'
+                  : step > p.n
+                  ? 'bg-[#00e5c330] text-[#00e5c3]'
+                  : 'border border-[#2a3553] bg-[#0f1523] text-[#3a4a66]',
+              )}>
                 {step > p.n ? '✓' : p.n}
               </div>
-              <span
-                className={cn(
-                  'mt-1.5 text-[9px] font-bold tracking-widest',
-                  step === p.n ? 'text-[#00e5c3]' : 'text-[#2a3553]',
-                )}
-              >
+              <span className={cn('mt-1.5 text-[9px] font-bold tracking-widest', step === p.n ? 'text-[#00e5c3]' : 'text-[#2a3553]')}>
                 {p.label}
               </span>
             </div>
@@ -157,38 +174,66 @@ export default function CriarPage() {
             Conte o básico para a Aurora começar a criar com você.
           </p>
 
-          {/* Help card */}
-          <div className="relative mb-6">
+          {/* Objetivo selection overlay */}
+          {showObjetivos ? (
+            <div className="mb-6 overflow-hidden rounded-2xl border border-[#1c2438] bg-[#0b0f1c]">
+              {/* Header */}
+              <div className="flex flex-col items-center py-6 px-5">
+                <div className="mb-3 grid h-10 w-10 place-items-center rounded-xl bg-[#00e5c315]">
+                  <Lightbulb className="size-5 text-[#00e5c3]" />
+                </div>
+                <h2 className="text-lg font-bold text-white">Qual o seu objetivo?</h2>
+                <p className="mt-1 text-sm text-[#6b7a99]">Escolha o que mais combina com você</p>
+              </div>
+
+              {/* Options */}
+              <div className="px-3 pb-3 space-y-1.5">
+                {OBJETIVOS.map((obj) => (
+                  <button
+                    key={obj.label}
+                    onClick={() => handleObjetivo(obj)}
+                    className="flex w-full items-center gap-3 rounded-xl border border-[#1c2438] bg-[#0f1523] px-4 py-3.5 text-left transition hover:border-[#4f7fff40] hover:bg-[#111827]"
+                  >
+                    <div className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl text-lg ${obj.cor}`}>
+                      {obj.icone}
+                    </div>
+                    <span className="flex-1 text-sm font-medium text-white">{obj.label}</span>
+                    <ArrowRight className="size-4 shrink-0 text-[#3a4a66]" />
+                  </button>
+                ))}
+              </div>
+
+              {/* Cancel */}
+              <div className="flex justify-center py-4">
+                <button
+                  onClick={() => setShowObjetivos(false)}
+                  className="flex items-center gap-1.5 text-sm text-[#3a4a66] transition hover:text-white"
+                >
+                  <X className="size-3.5" />
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          ) : (
+            /* Collapsed inspiration card */
             <button
-              onClick={() => setShowSugestoes(s => !s)}
-              className="flex w-full items-center gap-3 rounded-2xl border border-dashed border-[#00e5c340] bg-[#00e5c308] p-4 text-left transition hover:border-[#00e5c360]"
+              onClick={() => setShowObjetivos(true)}
+              className="mb-6 flex w-full items-center gap-3 rounded-2xl border border-dashed border-[#00e5c340] bg-[#00e5c306] p-4 text-left transition hover:border-[#00e5c360] hover:bg-[#00e5c30a]"
             >
               <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#00e5c320]">
                 <Lightbulb className="size-5 text-[#00e5c3]" />
               </div>
-              <div>
+              <div className="flex-1">
                 <p className="text-sm font-bold uppercase tracking-wide text-[#00e5c3]">
                   PRECISO DE INSPIRAÇÃO, NÃO TENHO IDEIA
                 </p>
-                <p className="text-xs text-[#6b7a99]">Clique para ver sugestões de temas lucrativos</p>
+                <p className="text-xs text-[#6b7a99]">Clique para escolher seu objetivo e receber sugestão de tema</p>
               </div>
-              <Sparkles className="ml-auto size-4 text-[#00e5c350]" />
+              <Sparkles className="size-4 shrink-0 text-[#00e5c350]" />
             </button>
-            {showSugestoes && (
-              <div className="absolute left-0 right-0 z-10 mt-2 rounded-2xl border border-[#1c2438] bg-[#0b0f1c] p-2 shadow-2xl">
-                {SUGESTOES.map(s => (
-                  <button
-                    key={s}
-                    onClick={() => handleSugestao(s)}
-                    className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm text-[#c8d3eb] transition hover:bg-[#0f1523]"
-                  >
-                    <span className="text-[#00e5c3]">→</span> {s}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+          )}
 
+          {/* Form fields */}
           <div className="space-y-4">
             <div>
               <label className="mb-1.5 block text-xs font-semibold text-[#6b7a99]">
@@ -198,7 +243,7 @@ export default function CriarPage() {
                 type="text"
                 value={form.tema}
                 onChange={e => set('tema', e.target.value)}
-                placeholder="Ex: Finanças pessoais para iniciantes, Emagrecimento..."
+                placeholder={objetivoPlaceholder || 'Ex: Finanças pessoais para iniciantes, Emagrecimento...'}
                 className="w-full rounded-xl border border-[#1c2438] bg-[#0b0f1c] px-4 py-3 text-sm text-white placeholder:text-[#3a4a66] focus:border-[#4f7fff50] focus:outline-none"
               />
             </div>
@@ -267,7 +312,7 @@ export default function CriarPage() {
 
             <div>
               <label className="mb-1.5 block text-xs font-semibold text-[#6b7a99]">
-                E-mail <span className="text-[#3a4a66]">(opcional — para receber também por e-mail)</span>
+                E-mail <span className="text-[#3a4a66]">(opcional)</span>
               </label>
               <input
                 type="email"
@@ -281,18 +326,15 @@ export default function CriarPage() {
             <div className="rounded-xl border border-[#00e5c318] bg-[#00e5c306] p-4">
               <div className="flex items-start gap-2.5">
                 <span className="mt-0.5 text-sm">⚡</span>
-                <div className="text-xs leading-relaxed text-[#6b7a99]">
+                <p className="text-xs leading-relaxed text-[#6b7a99]">
                   <span className="font-semibold text-[#00e5c3]">Entrega em ~47 minutos:</span> planejamento completo em ~5 min + ebook PDF, DOCX e EPUB com direitos comerciais 100% seus.
-                </div>
+                </p>
               </div>
             </div>
           </div>
 
           <div className="mt-8 flex gap-3">
-            <button
-              onClick={() => setStep(1)}
-              className="flex items-center gap-2 rounded-xl border border-[#1c2438] bg-[#0f1523] px-5 py-4 text-sm font-semibold text-[#6b7a99] transition hover:text-white"
-            >
+            <button onClick={() => setStep(1)} className="flex items-center gap-2 rounded-xl border border-[#1c2438] bg-[#0f1523] px-5 py-4 text-sm font-semibold text-[#6b7a99] transition hover:text-white">
               <ArrowLeft className="size-4" />
               Voltar
             </button>
@@ -318,7 +360,6 @@ export default function CriarPage() {
             Confirme os dados e a Aurora começa a escrever agora.
           </p>
 
-          {/* Summary */}
           <div className="mb-6 overflow-hidden rounded-2xl border border-[#1c2438] bg-[#0f1523]">
             <div className="border-b border-[#1c2438] px-5 py-3">
               <p className="text-xs font-bold uppercase tracking-wider text-[#3a4a66]">Resumo</p>
@@ -343,11 +384,7 @@ export default function CriarPage() {
           )}
 
           <div className="flex gap-3">
-            <button
-              onClick={() => setStep(2)}
-              disabled={loading}
-              className="flex items-center gap-2 rounded-xl border border-[#1c2438] bg-[#0f1523] px-5 py-4 text-sm font-semibold text-[#6b7a99] transition hover:text-white disabled:opacity-40"
-            >
+            <button onClick={() => setStep(2)} disabled={loading} className="flex items-center gap-2 rounded-xl border border-[#1c2438] bg-[#0f1523] px-5 py-4 text-sm font-semibold text-[#6b7a99] transition hover:text-white disabled:opacity-40">
               <ArrowLeft className="size-4" />
               Voltar
             </button>
@@ -357,15 +394,9 @@ export default function CriarPage() {
               className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#4f7fff] to-[#2554e0] py-4 text-sm font-bold text-white shadow-[0_0_24px_rgba(79,127,255,0.4)] transition hover:shadow-[0_0_36px_rgba(79,127,255,0.6)] disabled:cursor-not-allowed disabled:opacity-60"
             >
               {loading ? (
-                <>
-                  <Loader2 className="size-4 animate-spin" />
-                  Gerando seu ebook...
-                </>
+                <><Loader2 className="size-4 animate-spin" /> Gerando seu ebook...</>
               ) : (
-                <>
-                  <Sparkles className="size-4" />
-                  Gerar meu ebook agora
-                </>
+                <><Sparkles className="size-4" /> Gerar meu ebook agora</>
               )}
             </button>
           </div>
