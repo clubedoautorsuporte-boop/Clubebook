@@ -19,6 +19,7 @@ type SidebarProps = {
   userImage?: string | null
   userEmail?: string | null
   ebookCount?: number
+  credits?: number
   userId?: string | null
 }
 
@@ -80,7 +81,7 @@ function ReferralWidget({ userId }: { userId?: string | null }) {
   )
 }
 
-export function Sidebar({ userName, userImage, userEmail, ebookCount = 0, userId }: SidebarProps) {
+export function Sidebar({ userName, userImage, userEmail, ebookCount = 0, credits = 1300, userId }: SidebarProps) {
   const pathname = usePathname()
 
   const navItem = (href: string, Icon: React.ElementType, label: string, external = false) => {
@@ -125,7 +126,7 @@ export function Sidebar({ userName, userImage, userEmail, ebookCount = 0, userId
       </div>
 
       {/* Credits widget */}
-      <CreditsWidget count={ebookCount} />
+      <CreditsWidget credits={credits} />
 
       {/* CTA criar */}
       <div className="px-3 mb-2">

@@ -16,8 +16,11 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   const userId = session.user?.id
   let ebookCount = 0
+  let credits = 1300
   if (userId) {
     ebookCount = await prisma.delivery.count({ where: { userId } })
+    const user = await prisma.user.findUnique({ where: { id: userId }, select: { credits: true } })
+    if (user) credits = user.credits
   }
 
   const firstName = session.user?.name?.split(' ')[0] ?? 'Autor'
@@ -31,6 +34,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           userImage={session.user?.image}
           userEmail={session.user?.email}
           ebookCount={ebookCount}
+          credits={credits}
           userId={userId}
         />
       </div>
