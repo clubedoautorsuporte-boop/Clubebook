@@ -56,24 +56,24 @@ export default async function CreditosPage() {
       </div>
 
       {/* Main Stats */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-8">
+      <div className="space-y-3 mb-8">
         {/* Saldo disponível - maior */}
-        <div className="lg:col-span-1 rounded-2xl border border-[#1c2438] bg-gradient-to-br from-[#0a5e55] to-[#051a15] p-6">
+        <div className="rounded-2xl border border-[#1c2438] bg-gradient-to-br from-[#0a5e55] to-[#051a15] p-6">
           <p className="text-sm text-[#6b7a99] mb-2">Saldo disponível</p>
           <p className="text-5xl font-bold text-[#00e5c3] mb-1">{credits.toLocaleString()}</p>
           <p className="text-xs text-[#6b7a99]">Equivalente a R$ {(credits / 100).toFixed(2)}</p>
         </div>
 
-        {/* Total comprado */}
-        <div className="rounded-2xl border border-[#1c2438] bg-[#0f1523] p-6">
-          <p className="text-sm text-[#6b7a99] mb-2">Total comprado</p>
-          <p className="text-4xl font-bold text-white">{creditsBought}</p>
-        </div>
-
-        {/* Total utilizado */}
-        <div className="rounded-2xl border border-[#1c2438] bg-[#0f1523] p-6">
-          <p className="text-sm text-[#6b7a99] mb-2">Total utilizado</p>
-          <p className="text-4xl font-bold text-white">{creditsUsed}</p>
+        {/* Total comprado + Total utilizado */}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="rounded-2xl border border-[#1c2438] bg-[#0f1523] p-4">
+            <p className="text-xs text-[#6b7a99] mb-2">Total comprado</p>
+            <p className="text-3xl font-bold text-white">{creditsBought}</p>
+          </div>
+          <div className="rounded-2xl border border-[#1c2438] bg-[#0f1523] p-4">
+            <p className="text-xs text-[#6b7a99] mb-2">Total utilizado</p>
+            <p className="text-3xl font-bold text-white">{creditsUsed}</p>
+          </div>
         </div>
       </div>
 
