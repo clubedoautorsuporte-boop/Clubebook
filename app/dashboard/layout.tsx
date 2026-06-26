@@ -18,9 +18,14 @@ export default async function DashboardLayout({ children }: { children: React.Re
   let ebookCount = 0
   let credits = 1300
   if (userId) {
-    ebookCount = await prisma.delivery.count({ where: { userId } })
-    const user = await prisma.user.findUnique({ where: { id: userId }, select: { credits: true } })
-    if (user) credits = user.credits
+    try {
+      ebookCount = await prisma.delivery.count({ where: { userId } })
+      const user = await prisma.user.findUnique({ where: { id: userId }, select: { credits: true } })
+      if (user) credits = user.credits
+    } catch (err) {
+      console.error('Erro ao buscar dados do usuário:', err)
+      credits = 1300
+    }
   }
 
   const firstName = session.user?.name?.split(' ')[0] ?? 'Autor'
