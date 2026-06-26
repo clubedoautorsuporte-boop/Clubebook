@@ -20,6 +20,7 @@ export default async function DashboardPage() {
     capitulosCount: number
     createdAt: string
     expired: boolean
+    tipo: string
   }
 
   type DraftRow = {
@@ -35,7 +36,7 @@ export default async function DashboardPage() {
         prisma.delivery.findMany({
           where: { userId },
           orderBy: { createdAt: 'desc' },
-          select: { slug: true, planJson: true, createdAt: true, expiresAt: true },
+          select: { slug: true, planJson: true, createdAt: true, expiresAt: true, tipo: true },
         }),
         prisma.draft.findMany({
           where: { userId },
@@ -44,7 +45,7 @@ export default async function DashboardPage() {
         }),
       ])
 
-      rows = deliveries.map((d: { slug: string; planJson: unknown; createdAt: Date; expiresAt: Date }) => {
+      rows = deliveries.map((d: { slug: string; planJson: unknown; createdAt: Date; expiresAt: Date; tipo: string }) => {
         const plan = d.planJson as BriefingPlan
         return {
           slug: d.slug,
@@ -53,6 +54,7 @@ export default async function DashboardPage() {
           capitulosCount: Array.isArray(plan.capitulos) ? plan.capitulos.length : 0,
           createdAt: d.createdAt.toISOString(),
           expired: d.expiresAt < new Date(),
+          tipo: d.tipo ?? 'preview',
         }
       })
 
@@ -69,10 +71,12 @@ export default async function DashboardPage() {
     }
   }
 
-  const total = rows.length + drafts.length
+  const livros   = rows.filter(r => r.tipo === 'livro')
+  const previas  = rows.filter(r => r.tipo !== 'livro')
+  const total    = rows.length + drafts.length
 
   return (
-    <div className="px-5 pt-6 md:px-8">
+    <div className="px-5 pt-6 pb-12 md:px-8">
       {/* Dismissable banner */}
       <DismissableBanner />
 
@@ -96,37 +100,63 @@ export default async function DashboardPage() {
       {total === 0 ? (
         <EmptyState />
       ) : (
-        <>
-          <div className="mb-6">
-            <QuickCreate />
-          </div>
+        <div className="space-y-10">
+          <QuickCreate />
 
-          {/* Rascunhos em andamento */}
+          {/* ── Rascunhos em andamento ── */}
           {drafts.length > 0 && (
-            <div className="mb-8">
-              <p className="mb-3 text-xs font-bold uppercase tracking-widest text-[#4f7fff]">
-                ✏ Em andamento ({drafts.length})
-              </p>
+            <section>
+              <div className="mb-3 flex items-center gap-2">
+                <span className="h-px flex-1 bg-[#1c2438]" />
+                <p className="text-[11px] font-bold uppercase tracking-widest text-[#4f7fff]">
+                  ✏ Em criação ({drafts.length})
+                </p>
+                <span className="h-px flex-1 bg-[#1c2438]" />
+              </div>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {drafts.map(d => <DraftCard key={d.id} {...d} />)}
               </div>
-            </div>
+            </section>
           )}
 
-          {/* Ebooks concluídos */}
-          {rows.length > 0 && (
-            <div>
-              {drafts.length > 0 && (
-                <p className="mb-3 text-xs font-bold uppercase tracking-widest text-[#00e5c3]">
-                  ✓ Concluídos ({rows.length})
+          {/* ── Livros completos gerados ── */}
+          {livros.length > 0 && (
+            <section>
+              <div className="mb-3 flex items-center gap-2">
+                <span className="h-px flex-1 bg-[#1c2438]" />
+                <p className="text-[11px] font-bold uppercase tracking-widest text-[#00e5c3]">
+                  📖 Livros completos ({livros.length})
                 </p>
-              )}
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {rows.map(r => <EbookCard key={r.slug} {...r} />)}
+                <span className="h-px flex-1 bg-[#1c2438]" />
               </div>
-            </div>
+              <p className="mb-4 -mt-1 text-[12px] text-[#4a5578]">
+                Livros escritos pela Aurora IA com conteúdo completo, prontos para download.
+              </p>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {livros.map(r => <EbookCard key={r.slug} {...r} tipo="livro" />)}
+              </div>
+            </section>
           )}
-        </>
+
+          {/* ── Prévias / Briefings ── */}
+          {previas.length > 0 && (
+            <section>
+              <div className="mb-3 flex items-center gap-2">
+                <span className="h-px flex-1 bg-[#1c2438]" />
+                <p className="text-[11px] font-bold uppercase tracking-widest text-[#6b7a99]">
+                  📋 Prévias geradas ({previas.length})
+                </p>
+                <span className="h-px flex-1 bg-[#1c2438]" />
+              </div>
+              <p className="mb-4 -mt-1 text-[12px] text-[#4a5578]">
+                Briefings e planejamentos — o livro completo é gerado após a confirmação.
+              </p>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {previas.map(r => <EbookCard key={r.slug} {...r} tipo="preview" />)}
+              </div>
+            </section>
+          )}
+        </div>
       )}
     </div>
   )

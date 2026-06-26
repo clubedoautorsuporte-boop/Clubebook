@@ -79,6 +79,7 @@ model Delivery {
   slug      String   @unique @db.VarChar(32)
   nomeAutor String   @db.VarChar(100)
   email     String?  @db.VarChar(254)
+  tipo      String   @default("preview") // "preview" | "livro"
   planJson  Json
   pdfBase64 String   @db.Text
   createdAt DateTime @default(now())

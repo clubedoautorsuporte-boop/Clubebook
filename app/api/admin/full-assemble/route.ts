@@ -45,6 +45,7 @@ export async function POST(req: Request) {
   const slug = await createDelivery({
     nomeAutor: autor,
     email: ADMIN_EMAIL,
+    tipo: 'livro',
     planJson,
     pdfBase64: pdfBuffer.toString('base64'),
     userId: session.user.id,
