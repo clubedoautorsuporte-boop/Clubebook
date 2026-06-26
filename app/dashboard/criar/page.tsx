@@ -3,8 +3,8 @@
 import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import {
-  ArrowRight, ArrowLeft, Lightbulb, CheckCircle2,
-  Loader2, Sparkles, X, Wand2, ChevronDown, Search,
+  ArrowRight, ArrowLeft, Lightbulb, CheckCircle2, Loader2,
+  Sparkles, X, Wand2, ChevronDown, Search, Plus, Link2, Tag,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -13,7 +13,7 @@ type InspPanel = 'list' | 'detalhe' | null
 
 const PASSOS = [
   { n: 1, label: 'O EBOOK' },
-  { n: 2, label: 'ENTREGA' },
+  { n: 2, label: 'MATERIAIS' },
   { n: 3, label: 'GERAR' },
 ]
 
@@ -36,24 +36,40 @@ const GENEROS = [
   'Saúde & Bem-Estar', 'Suspense', 'Técnico & Acadêmico', 'Terror', 'Thriller',
 ]
 
-function GeneroSelect({
-  value, onChange,
-}: { value: string; onChange: (v: string) => void }) {
+const PUBLICOS = [
+  'Iniciantes no assunto',
+  'Empreendedores',
+  'Pessoas buscando renda extra',
+  'Estudantes',
+  'Donas de casa',
+  'Profissionais liberais',
+  'Jovens adultos',
+  'Todos os públicos',
+]
+
+const TONS = [
+  { emoji: '🔥', label: 'Motivacional' },
+  { emoji: '📊', label: 'Técnico' },
+  { emoji: '😊', label: 'Casual' },
+  { emoji: '💼', label: 'Profissional' },
+  { emoji: '🎯', label: 'Direto' },
+  { emoji: '💡', label: 'Inspirador' },
+]
+
+function GeneroSelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   const [open, setOpen] = useState(false)
   const [busca, setBusca] = useState('')
   const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const handler = (e: MouseEvent) => {
+    const h = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
     }
-    document.addEventListener('mousedown', handler)
-    return () => document.removeEventListener('mousedown', handler)
+    document.addEventListener('mousedown', h)
+    return () => document.removeEventListener('mousedown', h)
   }, [])
 
-  const filtrados = GENEROS.filter(g =>
-    g.toLowerCase().includes(busca.toLowerCase()),
-  )
+  const filtrados = GENEROS.filter(g => g.toLowerCase().includes(busca.toLowerCase()))
 
   return (
     <div ref={ref} className="relative">
@@ -67,7 +83,6 @@ function GeneroSelect({
         </span>
         <ChevronDown className={cn('size-4 text-[#3a4a66] transition-transform', open && 'rotate-180')} />
       </button>
-
       {open && (
         <div className="absolute left-0 right-0 top-full z-50 mt-1 overflow-hidden rounded-xl border border-[#1c2438] bg-[#0b0f1c] shadow-xl">
           <div className="flex items-center gap-2 border-b border-[#1c2438] px-3 py-2.5">
@@ -112,22 +127,33 @@ export default function CriarPage() {
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
 
+  // Inspiration panel
   const [inspPanel, setInspPanel] = useState<InspPanel>(null)
   const [objetivoSelecionado, setObjetivoSelecionado] = useState('')
   const [detalheObjetivo, setDetalheObjetivo] = useState('')
   const [loadingTema, setLoadingTema] = useState(false)
   const [errorTema, setErrorTema] = useState('')
 
+  // Step 1
   const [form, setForm] = useState({
     tituloProvisorio: '',
     subtitulo: '',
     genero: '',
     nome: '',
-    telefone: '',
-    email: '',
   })
-
   const set = (k: keyof typeof form, v: string) => setForm(f => ({ ...f, [k]: v }))
+
+  // Step 2 — Materiais
+  const [publico, setPublico] = useState('')
+  const [tom, setTom] = useState('')
+  const [links, setLinks] = useState<string[]>([])
+  const [linkInput, setLinkInput] = useState('')
+  const [topicos, setTopicos] = useState<string[]>([])
+  const [topicoInput, setTopicoInput] = useState('')
+
+  // Step 3
+  const [telefone, setTelefone] = useState('')
+  const [email, setEmail] = useState('')
 
   const selecionarObjetivo = (label: string) => {
     setObjetivoSelecionado(label)
@@ -156,14 +182,33 @@ export default function CriarPage() {
     }
   }
 
+  const addLink = () => {
+    const url = linkInput.trim()
+    if (url && !links.includes(url)) setLinks(l => [...l, url])
+    setLinkInput('')
+  }
+
+  const addTopico = () => {
+    const t = topicoInput.trim()
+    if (t && !topicos.includes(t)) setTopicos(ts => [...ts, t])
+    setTopicoInput('')
+  }
+
   const canNext1 = form.tituloProvisorio.trim().length >= 3 && form.nome.trim().length >= 2
-  const canNext2 = form.telefone.replace(/\D/g, '').length >= 10
+  const canNext3 = telefone.replace(/\D/g, '').length >= 10
 
   async function gerar() {
     setLoading(true)
     setError('')
     try {
-      const tema = [form.tituloProvisorio, form.genero, objetivoSelecionado]
+      const contexto = [
+        publico ? `Público-alvo: ${publico}` : '',
+        tom ? `Tom de voz: ${tom}` : '',
+        topicos.length ? `Tópicos obrigatórios: ${topicos.join(', ')}` : '',
+        links.length ? `Links de referência: ${links.join(', ')}` : '',
+      ].filter(Boolean).join(' | ')
+
+      const tema = [form.tituloProvisorio, form.genero, objetivoSelecionado, contexto]
         .filter(Boolean).join(' — ')
 
       const planRes = await fetch('/api/ebook-plan', {
@@ -177,7 +222,7 @@ export default function CriarPage() {
       const sendRes = await fetch('/api/send-preview', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nome: form.nome, email: form.email, telefone: form.telefone, plan }),
+        body: JSON.stringify({ nome: form.nome, email, telefone, plan }),
       })
       if (!sendRes.ok) throw new Error('Falha ao enviar ebook')
       setSuccess(true)
@@ -201,11 +246,11 @@ export default function CriarPage() {
         <div className="mt-8 flex gap-3">
           <button
             onClick={() => {
-              setSuccess(false)
-              setStep(1)
-              setForm({ tituloProvisorio: '', subtitulo: '', genero: '', nome: '', telefone: '', email: '' })
-              setObjetivoSelecionado('')
-              setInspPanel(null)
+              setSuccess(false); setStep(1)
+              setForm({ tituloProvisorio: '', subtitulo: '', genero: '', nome: '' })
+              setObjetivoSelecionado(''); setInspPanel(null)
+              setPublico(''); setTom(''); setLinks([]); setTopicos([])
+              setTelefone(''); setEmail('')
             }}
             className="rounded-xl border border-[#1c2438] bg-[#0f1523] px-5 py-2.5 text-sm font-semibold text-white transition hover:border-[#4f7fff40]"
           >
@@ -224,7 +269,8 @@ export default function CriarPage() {
 
   return (
     <div className="mx-auto max-w-xl px-5 py-8 md:py-12">
-      {/* Progress steps */}
+
+      {/* Progress */}
       <div className="mb-10 flex items-center justify-center gap-0">
         {PASSOS.map((p, i) => (
           <div key={p.n} className="flex items-center">
@@ -239,10 +285,7 @@ export default function CriarPage() {
               )}>
                 {step > p.n ? '✓' : p.n}
               </div>
-              <span className={cn(
-                'mt-1.5 text-[9px] font-bold tracking-widest',
-                step === p.n ? 'text-[#00e5c3]' : 'text-[#2a3553]',
-              )}>
+              <span className={cn('mt-1.5 text-[9px] font-bold tracking-widest', step === p.n ? 'text-[#00e5c3]' : 'text-[#2a3553]')}>
                 {p.label}
               </span>
             </div>
@@ -253,7 +296,7 @@ export default function CriarPage() {
         ))}
       </div>
 
-      {/* ─── STEP 1 ─── */}
+      {/* ── STEP 1 — O Ebook ── */}
       {step === 1 && (
         <div>
           <h1 className="mb-2 text-center font-heading text-3xl font-extrabold text-white">
@@ -263,7 +306,6 @@ export default function CriarPage() {
             Conte o básico para a Aurora começar a criar com você.
           </p>
 
-          {/* Panel: lista de objetivos */}
           {inspPanel === 'list' && (
             <div className="mb-6 overflow-hidden rounded-2xl border border-[#1c2438] bg-[#0b0f1c]">
               <div className="flex flex-col items-center py-6 px-5">
@@ -273,9 +315,8 @@ export default function CriarPage() {
                 <h2 className="text-lg font-bold text-white">Qual o seu objetivo?</h2>
                 <p className="mt-1 text-sm text-[#6b7a99]">Escolha o que mais combina com você</p>
               </div>
-
               <div className="px-3 pb-3 space-y-1.5">
-                {OBJETIVOS.map((obj) => (
+                {OBJETIVOS.map(obj => (
                   <button
                     key={obj.label}
                     onClick={() => selecionarObjetivo(obj.label)}
@@ -287,20 +328,14 @@ export default function CriarPage() {
                   </button>
                 ))}
               </div>
-
               <div className="flex justify-center py-4">
-                <button
-                  onClick={() => setInspPanel(null)}
-                  className="flex items-center gap-1.5 text-sm text-[#3a4a66] transition hover:text-white"
-                >
-                  <X className="size-3.5" />
-                  Cancelar
+                <button onClick={() => setInspPanel(null)} className="flex items-center gap-1.5 text-sm text-[#3a4a66] transition hover:text-white">
+                  <X className="size-3.5" /> Cancelar
                 </button>
               </div>
             </div>
           )}
 
-          {/* Panel: "Quase lá!" */}
           {inspPanel === 'detalhe' && (
             <div className="mb-6 overflow-hidden rounded-2xl border border-[#1c2438] bg-[#0b0f1c]">
               <div className="flex flex-col items-center py-6 px-5">
@@ -309,16 +344,13 @@ export default function CriarPage() {
                 </div>
                 <h2 className="text-lg font-bold text-white">Quase lá!</h2>
                 <p className="mt-1 text-sm text-[#6b7a99]">
-                  Objetivo:{' '}
-                  <span className="font-semibold text-[#00e5c3]">{objetivoSelecionado}</span>
+                  Objetivo: <span className="font-semibold text-[#00e5c3]">{objetivoSelecionado}</span>
                 </p>
               </div>
-
               <div className="px-5 pb-5 space-y-4">
                 <div>
                   <label className="mb-1.5 block text-xs font-semibold text-[#6b7a99]">
-                    Quer adicionar algum detalhe?{' '}
-                    <span className="text-[#3a4a66]">(opcional)</span>
+                    Quer adicionar algum detalhe? <span className="text-[#3a4a66]">(opcional)</span>
                   </label>
                   <textarea
                     value={detalheObjetivo}
@@ -328,40 +360,25 @@ export default function CriarPage() {
                     className="w-full resize-none rounded-xl border border-[#1c2438] bg-[#0f1523] px-4 py-3 text-sm text-white placeholder:text-[#3a4a66] focus:border-[#00e5c330] focus:outline-none"
                   />
                 </div>
-
                 {errorTema && (
-                  <p className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-xs text-red-400">
-                    {errorTema}
-                  </p>
+                  <p className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-xs text-red-400">{errorTema}</p>
                 )}
-
                 <button
                   onClick={investigar}
                   disabled={loadingTema}
                   className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#00e5c3] py-4 text-sm font-bold text-[#040810] shadow-[0_0_24px_rgba(0,229,195,0.35)] transition hover:bg-[#00cfb0] disabled:cursor-not-allowed disabled:opacity-70"
                 >
-                  {loadingTema ? (
-                    <><Loader2 className="size-4 animate-spin" /> Investigando seu tema...</>
-                  ) : (
-                    <><Wand2 className="size-4" /> INVESTIGAR E PLANEJAR MEU EBOOK</>
-                  )}
+                  {loadingTema ? <><Loader2 className="size-4 animate-spin" /> Investigando seu tema...</> : <><Wand2 className="size-4" /> INVESTIGAR E PLANEJAR MEU EBOOK</>}
                 </button>
-
                 <div className="flex justify-center">
-                  <button
-                    onClick={() => setInspPanel('list')}
-                    disabled={loadingTema}
-                    className="flex items-center gap-1.5 text-sm text-[#3a4a66] transition hover:text-white disabled:opacity-40"
-                  >
-                    <ArrowLeft className="size-3.5" />
-                    Voltar para objetivos
+                  <button onClick={() => setInspPanel('list')} disabled={loadingTema} className="flex items-center gap-1.5 text-sm text-[#3a4a66] transition hover:text-white disabled:opacity-40">
+                    <ArrowLeft className="size-3.5" /> Voltar para objetivos
                   </button>
                 </div>
               </div>
             </div>
           )}
 
-          {/* Collapsed: botão de inspiração */}
           {inspPanel === null && (
             <button
               onClick={() => setInspPanel('list')}
@@ -371,23 +388,16 @@ export default function CriarPage() {
                 <Lightbulb className="size-5 text-[#00e5c3]" />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-bold uppercase tracking-wide text-[#00e5c3]">
-                  PRECISO DE INSPIRAÇÃO, NÃO TENHO IDEIA
-                </p>
-                <p className="text-xs text-[#6b7a99]">
-                  Clique para ver sugestões de temas lucrativos
-                </p>
+                <p className="text-sm font-bold uppercase tracking-wide text-[#00e5c3]">PRECISO DE INSPIRAÇÃO, NÃO TENHO IDEIA</p>
+                <p className="text-xs text-[#6b7a99]">Clique para ver sugestões de temas lucrativos</p>
               </div>
               <Sparkles className="size-4 shrink-0 text-[#00e5c350]" />
             </button>
           )}
 
-          {/* Form fields — estilo exato Sábhia */}
           <div className="space-y-4">
             <div>
-              <label className="mb-1.5 block text-xs font-semibold text-[#6b7a99]">
-                Título provisório
-              </label>
+              <label className="mb-1.5 block text-xs font-semibold text-[#6b7a99]">Título provisório</label>
               <input
                 type="text"
                 value={form.tituloProvisorio}
@@ -396,11 +406,8 @@ export default function CriarPage() {
                 className="w-full rounded-xl border border-[#1c2438] bg-[#0b0f1c] px-4 py-3 text-sm text-white placeholder:text-[#3a4a66] focus:border-[#4f7fff50] focus:outline-none"
               />
             </div>
-
             <div>
-              <label className="mb-1.5 block text-xs font-semibold text-[#6b7a99]">
-                Subtítulo <span className="text-[#3a4a66]">(opcional)</span>
-              </label>
+              <label className="mb-1.5 block text-xs font-semibold text-[#6b7a99]">Subtítulo <span className="text-[#3a4a66]">(opcional)</span></label>
               <input
                 type="text"
                 value={form.subtitulo}
@@ -409,15 +416,11 @@ export default function CriarPage() {
                 className="w-full rounded-xl border border-[#1c2438] bg-[#0b0f1c] px-4 py-3 text-sm text-white placeholder:text-[#3a4a66] focus:border-[#4f7fff50] focus:outline-none"
               />
             </div>
-
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="mb-1.5 block text-xs font-semibold text-[#6b7a99]">
-                  Gênero Literário
-                </label>
+                <label className="mb-1.5 block text-xs font-semibold text-[#6b7a99]">Gênero Literário</label>
                 <GeneroSelect value={form.genero} onChange={v => set('genero', v)} />
               </div>
-
               <div>
                 <label className="mb-1.5 block text-xs font-semibold text-[#6b7a99]">
                   Nome do Autor (Você) <span className="text-red-400">*</span>
@@ -438,115 +441,246 @@ export default function CriarPage() {
             disabled={!canNext1}
             className="mt-8 flex w-full items-center justify-center gap-2 rounded-xl bg-[#00e5c3] py-4 text-sm font-bold text-[#040810] shadow-[0_0_24px_rgba(0,229,195,0.35)] transition hover:bg-[#00cfb0] disabled:cursor-not-allowed disabled:opacity-40"
           >
-            Próximo Passo
-            <ArrowRight className="size-4" />
+            Próximo Passo <ArrowRight className="size-4" />
           </button>
         </div>
       )}
 
-      {/* ─── STEP 2 ─── */}
+      {/* ── STEP 2 — Base de Conteúdo ── */}
       {step === 2 && (
         <div>
           <h1 className="mb-2 text-center font-heading text-3xl font-extrabold text-white">
-            Onde você quer receber?
+            Base de Conteúdo
           </h1>
           <p className="mb-8 text-center text-sm text-[#6b7a99]">
-            Enviaremos o planejamento e o ebook completo pelo WhatsApp.
+            Adicione referências que a Aurora usará para criar seu ebook exclusivo.
+            Textos, links, públicos-alvo, tom de voz...
           </p>
 
-          <div className="space-y-4">
-            <div>
-              <label className="mb-1.5 block text-xs font-semibold text-[#6b7a99]">
-                WhatsApp com DDD <span className="text-red-400">*</span>
-              </label>
-              <input
-                type="tel"
-                value={form.telefone}
-                onChange={e => set('telefone', e.target.value)}
-                placeholder="(11) 99999-9999"
-                className="w-full rounded-xl border border-[#1c2438] bg-[#0b0f1c] px-4 py-3 text-sm text-white placeholder:text-[#3a4a66] focus:border-[#4f7fff50] focus:outline-none"
-              />
+          <div className="overflow-hidden rounded-2xl border border-[#1c2438] bg-[#0b0f1c]">
+
+            {/* Público-alvo */}
+            <div className="border-b border-[#1c2438] p-5">
+              <p className="mb-3 text-xs font-bold uppercase tracking-wider text-[#6b7a99]">
+                Para quem é este ebook?
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {PUBLICOS.map(p => (
+                  <button
+                    key={p}
+                    type="button"
+                    onClick={() => setPublico(prev => prev === p ? '' : p)}
+                    className={cn(
+                      'rounded-full border px-3 py-1.5 text-xs font-medium transition',
+                      publico === p
+                        ? 'border-[#00e5c3] bg-[#00e5c315] text-[#00e5c3]'
+                        : 'border-[#1c2438] bg-[#0f1523] text-[#6b7a99] hover:border-[#4f7fff40] hover:text-white',
+                    )}
+                  >
+                    {p}
+                  </button>
+                ))}
+              </div>
             </div>
 
-            <div>
-              <label className="mb-1.5 block text-xs font-semibold text-[#6b7a99]">
-                E-mail <span className="text-[#3a4a66]">(opcional)</span>
-              </label>
-              <input
-                type="email"
-                value={form.email}
-                onChange={e => set('email', e.target.value)}
-                placeholder="seu@email.com"
-                className="w-full rounded-xl border border-[#1c2438] bg-[#0b0f1c] px-4 py-3 text-sm text-white placeholder:text-[#3a4a66] focus:border-[#4f7fff50] focus:outline-none"
-              />
+            {/* Tom de voz */}
+            <div className="border-b border-[#1c2438] p-5">
+              <p className="mb-3 text-xs font-bold uppercase tracking-wider text-[#6b7a99]">
+                Tom de voz
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {TONS.map(t => (
+                  <button
+                    key={t.label}
+                    type="button"
+                    onClick={() => setTom(prev => prev === t.label ? '' : t.label)}
+                    className={cn(
+                      'flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition',
+                      tom === t.label
+                        ? 'border-[#4f7fff] bg-[#4f7fff15] text-[#4f7fff]'
+                        : 'border-[#1c2438] bg-[#0f1523] text-[#6b7a99] hover:border-[#4f7fff40] hover:text-white',
+                    )}
+                  >
+                    <span>{t.emoji}</span> {t.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
-            <div className="rounded-xl border border-[#00e5c318] bg-[#00e5c306] p-4">
-              <div className="flex items-start gap-2.5">
-                <span className="mt-0.5 text-sm">⚡</span>
-                <p className="text-xs leading-relaxed text-[#6b7a99]">
-                  <span className="font-semibold text-[#00e5c3]">Entrega em ~47 minutos:</span>{' '}
-                  planejamento completo em ~5 min + ebook PDF, DOCX e EPUB com direitos comerciais 100% seus.
+            {/* Links de referência */}
+            <div className="border-b border-[#1c2438] p-5">
+              <div className="mb-3 flex items-center gap-2">
+                <Link2 className="size-3.5 text-[#3a4a66]" />
+                <p className="text-xs font-bold uppercase tracking-wider text-[#6b7a99]">
+                  Links de referência <span className="text-[#3a4a66] normal-case font-normal">(opcional)</span>
                 </p>
+              </div>
+
+              {links.length === 0 && (
+                <div className="mb-3 flex flex-col items-center gap-2 rounded-xl border border-dashed border-[#1c2438] py-6 text-center">
+                  <Link2 className="size-6 text-[#2a3553]" />
+                  <p className="text-xs text-[#3a4a66]">
+                    Nenhuma fonte adicionada ainda. Você pode pular esta etapa
+                    <br />ou adicionar links de referência.
+                  </p>
+                </div>
+              )}
+
+              {links.length > 0 && (
+                <div className="mb-3 space-y-2">
+                  {links.map(l => (
+                    <div key={l} className="flex items-center gap-2 rounded-xl border border-[#1c2438] bg-[#0f1523] px-3 py-2">
+                      <Link2 className="size-3.5 shrink-0 text-[#4f7fff]" />
+                      <span className="flex-1 truncate text-xs text-[#c4d0e8]">{l}</span>
+                      <button onClick={() => setLinks(ls => ls.filter(x => x !== l))} className="text-[#3a4a66] hover:text-red-400">
+                        <X className="size-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className="flex gap-2">
+                <input
+                  type="url"
+                  value={linkInput}
+                  onChange={e => setLinkInput(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && addLink()}
+                  placeholder="https://artigo.com, youtube.com/..."
+                  className="flex-1 rounded-xl border border-dashed border-[#1c2438] bg-[#0b0f1c] px-3 py-2.5 text-xs text-white placeholder:text-[#3a4a66] focus:border-[#4f7fff50] focus:outline-none"
+                />
+                <button
+                  onClick={addLink}
+                  disabled={!linkInput.trim()}
+                  className="flex items-center gap-1 rounded-xl border border-[#1c2438] bg-[#0f1523] px-3 py-2.5 text-xs font-semibold text-[#6b7a99] transition hover:text-white disabled:opacity-40"
+                >
+                  <Plus className="size-3.5" /> Adicionar
+                </button>
+              </div>
+            </div>
+
+            {/* Tópicos obrigatórios */}
+            <div className="p-5">
+              <div className="mb-3 flex items-center gap-2">
+                <Tag className="size-3.5 text-[#3a4a66]" />
+                <p className="text-xs font-bold uppercase tracking-wider text-[#6b7a99]">
+                  Tópicos que não podem faltar <span className="text-[#3a4a66] normal-case font-normal">(opcional)</span>
+                </p>
+              </div>
+
+              {topicos.length > 0 && (
+                <div className="mb-3 flex flex-wrap gap-2">
+                  {topicos.map(t => (
+                    <span key={t} className="flex items-center gap-1.5 rounded-full border border-[#4f7fff30] bg-[#4f7fff10] px-3 py-1 text-xs text-[#4f7fff]">
+                      {t}
+                      <button onClick={() => setTopicos(ts => ts.filter(x => x !== t))} className="hover:text-red-400">
+                        <X className="size-3" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={topicoInput}
+                  onChange={e => setTopicoInput(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && addTopico()}
+                  placeholder="Ex: exercícios práticos, exemplos reais, cases..."
+                  className="flex-1 rounded-xl border border-dashed border-[#1c2438] bg-[#0b0f1c] px-3 py-2.5 text-xs text-white placeholder:text-[#3a4a66] focus:border-[#4f7fff50] focus:outline-none"
+                />
+                <button
+                  onClick={addTopico}
+                  disabled={!topicoInput.trim()}
+                  className="flex items-center gap-1 rounded-xl border border-[#1c2438] bg-[#0f1523] px-3 py-2.5 text-xs font-semibold text-[#6b7a99] transition hover:text-white disabled:opacity-40"
+                >
+                  <Plus className="size-3.5" /> Adicionar
+                </button>
               </div>
             </div>
           </div>
 
-          <div className="mt-8 flex gap-3">
+          <div className="mt-6 flex gap-3">
             <button
               onClick={() => setStep(1)}
               className="flex items-center gap-2 rounded-xl border border-[#1c2438] bg-[#0f1523] px-5 py-4 text-sm font-semibold text-[#6b7a99] transition hover:text-white"
             >
-              <ArrowLeft className="size-4" />
-              Voltar
+              <ArrowLeft className="size-4" /> Voltar
             </button>
             <button
               onClick={() => setStep(3)}
-              disabled={!canNext2}
-              className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#00e5c3] py-4 text-sm font-bold text-[#040810] shadow-[0_0_24px_rgba(0,229,195,0.35)] transition hover:bg-[#00cfb0] disabled:cursor-not-allowed disabled:opacity-40"
+              className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#00e5c3] py-4 text-sm font-bold text-[#040810] shadow-[0_0_24px_rgba(0,229,195,0.35)] transition hover:bg-[#00cfb0]"
             >
-              Próximo Passo
-              <ArrowRight className="size-4" />
+              Continuar <ArrowRight className="size-4" />
             </button>
           </div>
         </div>
       )}
 
-      {/* ─── STEP 3 ─── */}
+      {/* ── STEP 3 — Gerar ── */}
       {step === 3 && (
         <div>
           <h1 className="mb-2 text-center font-heading text-3xl font-extrabold text-white">
             Tudo pronto para criar!
           </h1>
           <p className="mb-8 text-center text-sm text-[#6b7a99]">
-            Confirme os dados e a Aurora começa a escrever agora.
+            Informe onde receber e a Aurora começa a escrever agora.
           </p>
 
+          {/* Resumo */}
           <div className="mb-6 overflow-hidden rounded-2xl border border-[#1c2438] bg-[#0f1523]">
             <div className="border-b border-[#1c2438] px-5 py-3">
-              <p className="text-xs font-bold uppercase tracking-wider text-[#3a4a66]">Resumo</p>
+              <p className="text-xs font-bold uppercase tracking-wider text-[#3a4a66]">Resumo do ebook</p>
             </div>
             {([
               { label: 'Título', value: form.tituloProvisorio },
               form.subtitulo ? { label: 'Subtítulo', value: form.subtitulo } : null,
               form.genero ? { label: 'Gênero', value: form.genero } : null,
               { label: 'Autor', value: form.nome },
-              { label: 'WhatsApp', value: form.telefone },
-              form.email ? { label: 'E-mail', value: form.email } : null,
+              publico ? { label: 'Público', value: publico } : null,
+              tom ? { label: 'Tom', value: tom } : null,
+              topicos.length ? { label: 'Tópicos', value: topicos.join(', ') } : null,
             ] as Array<{ label: string; value: string } | null>)
               .filter(Boolean)
               .map(item => (
-                <div key={item!.label} className="flex items-start gap-3 border-b border-[#1c2438] px-5 py-3 last:border-0">
+                <div key={item!.label} className="flex items-start gap-3 border-b border-[#1c2438] px-5 py-2.5 last:border-0">
                   <span className="w-20 shrink-0 text-xs text-[#3a4a66]">{item!.label}</span>
                   <span className="text-sm font-medium text-white">{item!.value}</span>
                 </div>
               ))}
           </div>
 
-          {error && (
-            <div className="mb-4 rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-400">
-              {error}
+          {/* Entrega */}
+          <div className="mb-6 space-y-3">
+            <div>
+              <label className="mb-1.5 block text-xs font-semibold text-[#6b7a99]">
+                WhatsApp com DDD <span className="text-red-400">*</span>
+              </label>
+              <input
+                type="tel"
+                value={telefone}
+                onChange={e => setTelefone(e.target.value)}
+                placeholder="(11) 99999-9999"
+                className="w-full rounded-xl border border-[#1c2438] bg-[#0b0f1c] px-4 py-3 text-sm text-white placeholder:text-[#3a4a66] focus:border-[#4f7fff50] focus:outline-none"
+              />
             </div>
+            <div>
+              <label className="mb-1.5 block text-xs font-semibold text-[#6b7a99]">
+                E-mail <span className="text-[#3a4a66]">(opcional)</span>
+              </label>
+              <input
+                type="email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                placeholder="seu@email.com"
+                className="w-full rounded-xl border border-[#1c2438] bg-[#0b0f1c] px-4 py-3 text-sm text-white placeholder:text-[#3a4a66] focus:border-[#4f7fff50] focus:outline-none"
+              />
+            </div>
+          </div>
+
+          {error && (
+            <div className="mb-4 rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-400">{error}</div>
           )}
 
           <div className="flex gap-3">
@@ -555,19 +689,14 @@ export default function CriarPage() {
               disabled={loading}
               className="flex items-center gap-2 rounded-xl border border-[#1c2438] bg-[#0f1523] px-5 py-4 text-sm font-semibold text-[#6b7a99] transition hover:text-white disabled:opacity-40"
             >
-              <ArrowLeft className="size-4" />
-              Voltar
+              <ArrowLeft className="size-4" /> Voltar
             </button>
             <button
               onClick={gerar}
-              disabled={loading}
+              disabled={loading || !canNext3}
               className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#4f7fff] to-[#2554e0] py-4 text-sm font-bold text-white shadow-[0_0_24px_rgba(79,127,255,0.4)] transition hover:shadow-[0_0_36px_rgba(79,127,255,0.6)] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {loading ? (
-                <><Loader2 className="size-4 animate-spin" /> Gerando seu ebook...</>
-              ) : (
-                <><Sparkles className="size-4" /> Gerar meu ebook agora</>
-              )}
+              {loading ? <><Loader2 className="size-4 animate-spin" /> Gerando seu ebook...</> : <><Sparkles className="size-4" /> Gerar meu ebook agora</>}
             </button>
           </div>
 
