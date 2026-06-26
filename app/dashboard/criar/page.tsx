@@ -813,7 +813,6 @@ export default function CriarPage() {
 
           {error && <div className="mb-4 rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-400">
             <p className="font-semibold">❌ {error}</p>
-            <p className="mt-1 text-xs">Verifique seu telefone e tente novamente.</p>
           </div>}
 
           <div className="flex gap-3">

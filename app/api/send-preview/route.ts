@@ -9,8 +9,8 @@ import { createGoogleDoc } from '@/lib/create-google-doc'
 export const maxDuration = 60
 
 const capituloSchema = z.object({
-  numero: z.number(),
-  titulo: z.string(),
+  numero: z.coerce.number().optional().default(0),
+  titulo: z.string().optional().default(''),
   descricao: z.string().optional().default(''),
   blocos: z.array(z.string()).optional().default([]),
 })
@@ -18,11 +18,11 @@ const capituloSchema = z.object({
 const bodySchema = z.object({
   nome: z.string().max(100).optional().default(''),
   email: z.string().max(254).optional().default(''),
-  telefone: z.string().min(10).max(20),
+  telefone: z.string().min(8).max(30),
   plan: z.object({
-    titulo: z.string(),
+    titulo: z.string().optional().default(''),
     subtitulo: z.string().optional().default(''),
-    capitulos: z.array(capituloSchema),
+    capitulos: z.array(capituloSchema).optional().default([]),
     promessa: z.string().optional().default(''),
     mensagem_final: z.string().optional().default(''),
   }),
@@ -130,7 +130,8 @@ export async function POST(req: Request) {
 
   const parsed = bodySchema.safeParse(rawBody)
   if (!parsed.success) {
-    return Response.json({ error: 'Dados inválidos', details: parsed.error.flatten() }, { status: 400 })
+    console.error('[send-preview] zod error:', JSON.stringify(parsed.error.flatten()))
+    return Response.json({ error: 'Dados inválidos: ' + JSON.stringify(parsed.error.flatten().fieldErrors) }, { status: 400 })
   }
 
   const { nome, email, telefone, plan } = parsed.data
