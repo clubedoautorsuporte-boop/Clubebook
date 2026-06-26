@@ -138,6 +138,9 @@ export default function CriarPage() {
   const [topicos, setTopicos] = useState<string[]>([])
   const [topicoInput, setTopicoInput] = useState('')
   const [estrategia, setEstrategia] = useState<'completa' | 'fiel' | ''>('')
+  const [fonteFileLoading, setFonteFileLoading] = useState(false)
+  const [audioRecording, setAudioRecording] = useState(false)
+  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null)
 
   // Step 3
   const [telefone, setTelefone] = useState('')
@@ -180,7 +183,64 @@ export default function CriarPage() {
   const canNext1 = form.tituloProvisorio.trim().length >= 3 && form.nome.trim().length >= 2
   const canNext3 = telefone.replace(/\D/g, '').length >= 10
 
-  const tabDisabled = (id: FonteTipo) => id === 'arquivo' || id === 'audio'
+  const tabDisabled = (id: FonteTipo) => false
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.currentTarget.files?.[0]
+    if (!file) return
+
+    if (fonteTab === 'arquivo' && file.size > 10 * 1024 * 1024) {
+      alert('Arquivo muito grande. Máximo 10MB.')
+      return
+    }
+
+    setFonteFileLoading(true)
+    try {
+      const reader = new FileReader()
+      reader.onload = () => {
+        const base64 = reader.result as string
+        setFonteInput(base64)
+        setFonteFileLoading(false)
+      }
+      reader.readAsDataURL(file)
+    } catch (err) {
+      alert('Erro ao ler arquivo')
+      setFonteFileLoading(false)
+    }
+  }
+
+  const startAudioRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      const rec = new MediaRecorder(stream)
+      const chunks: BlobPart[] = []
+
+      rec.ondataavailable = e => chunks.push(e.data)
+      rec.onstop = async () => {
+        const blob = new Blob(chunks, { type: 'audio/mp3' })
+        const reader = new FileReader()
+        reader.onload = () => {
+          setFonteInput(reader.result as string)
+          setAudioRecording(false)
+        }
+        reader.readAsDataURL(blob)
+        stream.getTracks().forEach(t => t.stop())
+      }
+
+      rec.start()
+      setMediaRecorder(rec)
+      setAudioRecording(true)
+    } catch (err) {
+      alert('Permissão de microfone negada')
+    }
+  }
+
+  const stopAudioRecording = () => {
+    if (mediaRecorder) {
+      mediaRecorder.stop()
+      setMediaRecorder(null)
+    }
+  }
 
   async function gerar() {
     setLoading(true); setError('')
@@ -441,7 +501,7 @@ export default function CriarPage() {
 
                   {/* Input area */}
                   <div className="p-4">
-                    {fonteTab === 'texto' ? (
+                    {fonteTab === 'texto' && (
                       <textarea
                         autoFocus
                         value={fonteInput}
@@ -450,11 +510,9 @@ export default function CriarPage() {
                         placeholder="Cole ou digite o texto aqui..."
                         className="w-full resize-none rounded-xl border border-[#1c2438] bg-[#0b0f1c] px-4 py-3 text-sm text-white placeholder:text-[#3a4a66] focus:border-[#4f7fff50] focus:outline-none"
                       />
-                    ) : tabDisabled(fonteTab) ? (
-                      <div className="flex flex-col items-center gap-2 py-6 text-center">
-                        <p className="text-xs text-[#3a4a66]">Esta funcionalidade estará disponível em breve.</p>
-                      </div>
-                    ) : (
+                    )}
+
+                    {(fonteTab === 'youtube' || fonteTab === 'website') && (
                       <input
                         autoFocus
                         type="url"
@@ -466,9 +524,72 @@ export default function CriarPage() {
                       />
                     )}
 
+                    {fonteTab === 'arquivo' && (
+                      <div className="space-y-3">
+                        <label className="flex flex-col items-center gap-3 cursor-pointer rounded-xl border-2 border-dashed border-[#1c2438] p-6 text-center transition hover:border-[#4f7fff40]">
+                          <Upload className="size-6 text-[#4f7fff]" />
+                          <div>
+                            <p className="text-sm font-semibold text-white">Clique ou arraste um PDF/DOCX</p>
+                            <p className="text-xs text-[#3a4a66]">Máximo 10MB</p>
+                          </div>
+                          <input
+                            type="file"
+                            accept=".pdf,.doc,.docx"
+                            onChange={handleFileUpload}
+                            disabled={fonteFileLoading}
+                            className="hidden"
+                          />
+                        </label>
+                        {fonteFileLoading && <p className="text-xs text-[#6b7a99] text-center">Carregando arquivo...</p>}
+                        {fonteInput && <p className="text-xs text-[#00e5c3] text-center">✓ Arquivo carregado</p>}
+                      </div>
+                    )}
+
+                    {fonteTab === 'audio' && (
+                      <div className="space-y-3">
+                        <div className="flex gap-2">
+                          {!audioRecording ? (
+                            <button
+                              onClick={startAudioRecording}
+                              className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-[#4f7fff] py-3 text-sm font-bold text-white transition hover:bg-[#3d63ff]"
+                            >
+                              <Mic className="size-4" /> Gravar Áudio
+                            </button>
+                          ) : (
+                            <button
+                              onClick={stopAudioRecording}
+                              className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-red-500 py-3 text-sm font-bold text-white transition hover:bg-red-600"
+                            >
+                              ⏹ Parar Gravação
+                            </button>
+                          )}
+                        </div>
+
+                        <div className="relative">
+                          <label className="flex flex-col items-center gap-3 cursor-pointer rounded-xl border-2 border-dashed border-[#1c2438] p-6 text-center transition hover:border-[#4f7fff40]">
+                            <Upload className="size-6 text-[#4f7fff]" />
+                            <div>
+                              <p className="text-sm font-semibold text-white">Ou selecione um arquivo MP3</p>
+                              <p className="text-xs text-[#3a4a66]">Clique ou arraste um MP3</p>
+                            </div>
+                            <input
+                              type="file"
+                              accept="audio/mp3,.mp3"
+                              onChange={handleFileUpload}
+                              disabled={fonteFileLoading}
+                              className="hidden"
+                            />
+                          </label>
+                        </div>
+
+                        {fonteFileLoading && <p className="text-xs text-[#6b7a99] text-center">Carregando áudio...</p>}
+                        {fonteInput && <p className="text-xs text-[#00e5c3] text-center">✓ Áudio carregado</p>}
+                      </div>
+                    )}
+
                     <button
                       onClick={addFonte}
-                      disabled={!fonteInput.trim() || tabDisabled(fonteTab)}
+                      disabled={!fonteInput.trim() || fonteFileLoading || audioRecording}
                       className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-[#00e5c3] py-3 text-sm font-bold text-[#040810] transition hover:bg-[#00cfb0] disabled:cursor-not-allowed disabled:opacity-40"
                     >
                       Adicionar
