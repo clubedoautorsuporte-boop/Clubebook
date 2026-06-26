@@ -1,5 +1,6 @@
 import NextAuth from 'next-auth'
 import Google from 'next-auth/providers/google'
+import { prisma } from '@/lib/prisma'
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   session: { strategy: 'jwt' },
@@ -14,23 +15,36 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     error: '/auth/error',
   },
   callbacks: {
-    jwt({ token, user }) {
-      if (user) token.id = user.id
+    async jwt({ token, user, account }) {
+      // No primeiro login, salva/atualiza o usuário no banco e usa o ID do banco
+      if (account && user?.email) {
+        try {
+          const dbUser = await prisma.user.upsert({
+            where: { email: user.email },
+            update: { name: user.name, image: user.image },
+            create: {
+              email: user.email,
+              name: user.name,
+              image: user.image,
+              credits: 1000,
+            },
+          })
+          token.id = dbUser.id
+          // Vincula deliveries com mesmo email ao usuário
+          await prisma.delivery.updateMany({
+            where: { email: user.email, userId: null },
+            data: { userId: dbUser.id },
+          })
+        } catch (e) {
+          console.error('[auth] upsert user error:', e)
+          token.id = user.id
+        }
+      }
       return token
     },
     session({ session, token }) {
       if (session.user && token.id) session.user.id = token.id as string
       return session
-    },
-  },
-  events: {
-    async signIn({ user }) {
-      if (!user?.id || !user?.email) return
-      // Vincula deliveries gerados com o mesmo email antes do cadastro
-      await prisma.delivery.updateMany({
-        where: { email: user.email, userId: null },
-        data: { userId: user.id },
-      }).catch(() => {/* não bloquear o login se falhar */})
     },
   },
 })
