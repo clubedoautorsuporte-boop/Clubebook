@@ -85,7 +85,7 @@ export default function NichosPage() {
             <div className="mt-auto flex items-center justify-between">
               <span className="text-xs font-semibold text-[#00e5c3]">{preco}</span>
               <Link
-                href="/"
+                href="/dashboard/criar"
                 className="flex items-center gap-1 rounded-lg bg-[#4f7fff15] px-2.5 py-1.5 text-[11px] font-semibold text-[#4f7fff] opacity-0 transition-all group-hover:opacity-100"
               >
                 Criar

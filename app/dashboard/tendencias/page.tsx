@@ -106,7 +106,7 @@ export default function TendenciasPage() {
                 <span className="text-xs text-[#6b7a99]">{preco}</span>
               </div>
               <Link
-                href="/"
+                href="/dashboard/criar"
                 className="flex items-center gap-1 rounded-lg bg-[#4f7fff15] px-3 py-1.5 text-xs font-semibold text-[#4f7fff] opacity-0 transition-all group-hover:opacity-100"
               >
                 Criar

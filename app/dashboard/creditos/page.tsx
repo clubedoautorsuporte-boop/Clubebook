@@ -2,6 +2,7 @@ import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import { Zap, Check, Gift } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { ComprarButton } from './comprar-button'
 
 export default async function CreditosPage() {
   const session = await auth()
@@ -147,16 +148,7 @@ export default async function CreditosPage() {
                 </span>
               </div>
 
-              <button
-                className={cn(
-                  'mt-auto w-full rounded-xl py-3 text-sm font-bold transition',
-                  pkg.popular
-                    ? 'bg-[#00e5c3] text-[#040810] hover:bg-[#00cfb0]'
-                    : 'border border-[#1c2438] text-white hover:bg-[#0f1523]',
-                )}
-              >
-                Comprar
-              </button>
+              <ComprarButton popular={pkg.popular} credits={pkg.credits} price={pkg.price} />
             </div>
           ))}
         </div>

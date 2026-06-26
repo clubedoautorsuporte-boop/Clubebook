@@ -145,7 +145,7 @@ export default function CalculadoraPage() {
           </div>
 
           <Link
-            href="/"
+            href="/dashboard/criar"
             className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#4f7fff] to-[#2554e0] py-3.5 text-sm font-bold text-white shadow-[0_0_20px_rgba(79,127,255,0.3)] transition hover:shadow-[0_0_32px_rgba(79,127,255,0.5)]"
           >
             Criar meu ebook agora

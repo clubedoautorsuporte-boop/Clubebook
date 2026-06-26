@@ -151,7 +151,7 @@ export default function BibliotecaPage() {
             </div>
 
             <Link
-              href="/"
+              href="/dashboard/criar"
               className="mt-auto flex items-center justify-center gap-1.5 rounded-xl bg-[#4f7fff15] py-2.5 text-xs font-semibold text-[#4f7fff] transition hover:bg-[#4f7fff25]"
             >
               Usar este template
