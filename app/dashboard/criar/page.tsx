@@ -2,10 +2,11 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowRight, ArrowLeft, Lightbulb, CheckCircle2, Loader2, Sparkles, X } from 'lucide-react'
+import { ArrowRight, ArrowLeft, Lightbulb, CheckCircle2, Loader2, Sparkles, X, Wand2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 type Step = 1 | 2 | 3
+type InspPanel = 'list' | 'detalhe' | null
 
 const PASSOS = [
   { n: 1, label: 'O EBOOK' },
@@ -14,44 +15,12 @@ const PASSOS = [
 ]
 
 const OBJETIVOS = [
-  {
-    icone: '💰',
-    cor: 'bg-emerald-500/15 text-emerald-400',
-    label: 'Revender e lucrar com meu ebook',
-    tema: 'Como criar renda extra vendendo ebooks digitais todos os dias',
-  },
-  {
-    icone: '📖',
-    cor: 'bg-blue-500/15 text-blue-400',
-    label: 'Ensinar algo que eu sei fazer',
-    tema: '',
-    placeholder: 'Ex: Como fazer bolos gourmet, Como investir na bolsa...',
-  },
-  {
-    icone: '🏆',
-    cor: 'bg-amber-500/15 text-amber-400',
-    label: 'Construir minha autoridade online',
-    tema: 'Guia definitivo para se tornar referência no seu nicho em 90 dias',
-  },
-  {
-    icone: '🎯',
-    cor: 'bg-purple-500/15 text-purple-400',
-    label: 'Captar clientes para meu negócio',
-    tema: 'Como atrair clientes qualificados com conteúdo digital gratuito',
-  },
-  {
-    icone: '💝',
-    cor: 'bg-pink-500/15 text-pink-400',
-    label: 'Deixar um legado de conhecimento',
-    tema: 'Lições de vida e experiências que transformam quem lê',
-  },
-  {
-    icone: '✨',
-    cor: 'bg-[#4f7fff15] text-[#4f7fff]',
-    label: 'Outro objetivo',
-    tema: '',
-    placeholder: 'Descreva seu tema livremente...',
-  },
+  { icone: '💰', label: 'Ganhar dinheiro com meu ebook' },
+  { icone: '💬', label: 'Contar uma história pessoal' },
+  { icone: '📚', label: 'Escrever um romance ou ficção' },
+  { icone: '🎓', label: 'Ensinar algo que eu sei' },
+  { icone: '👨‍👩‍👧', label: 'Deixar um legado para minha família' },
+  { icone: '✨', label: 'Outro objetivo' },
 ]
 
 export default function CriarPage() {
@@ -60,8 +29,13 @@ export default function CriarPage() {
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
-  const [showObjetivos, setShowObjetivos] = useState(false)
-  const [objetivoPlaceholder, setObjetivoPlaceholder] = useState('')
+
+  // Inspiration panel state machine: null → 'list' → 'detalhe'
+  const [inspPanel, setInspPanel] = useState<InspPanel>(null)
+  const [objetivoSelecionado, setObjetivoSelecionado] = useState('')
+  const [detalheObjetivo, setDetalheObjetivo] = useState('')
+  const [loadingTema, setLoadingTema] = useState(false)
+  const [errorTema, setErrorTema] = useState('')
 
   const [form, setForm] = useState({
     tema: '',
@@ -73,10 +47,31 @@ export default function CriarPage() {
 
   const set = (k: keyof typeof form, v: string) => setForm(f => ({ ...f, [k]: v }))
 
-  const handleObjetivo = (obj: typeof OBJETIVOS[0]) => {
-    set('tema', obj.tema)
-    setObjetivoPlaceholder(obj.placeholder ?? '')
-    setShowObjetivos(false)
+  const selecionarObjetivo = (label: string) => {
+    setObjetivoSelecionado(label)
+    setDetalheObjetivo('')
+    setErrorTema('')
+    setInspPanel('detalhe')
+  }
+
+  const investigar = async () => {
+    setLoadingTema(true)
+    setErrorTema('')
+    try {
+      const res = await fetch('/api/sugerir-tema', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ objetivo: objetivoSelecionado, detalhes: detalheObjetivo }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? 'Erro ao sugerir tema')
+      set('tema', data.tema)
+      setInspPanel(null)
+    } catch (e: unknown) {
+      setErrorTema(e instanceof Error ? e.message : 'Erro inesperado')
+    } finally {
+      setLoadingTema(false)
+    }
   }
 
   const canNext1 = form.tema.trim().length >= 3 && form.nome.trim().length >= 2
@@ -120,7 +115,11 @@ export default function CriarPage() {
         </p>
         <div className="mt-8 flex gap-3">
           <button
-            onClick={() => { setSuccess(false); setStep(1); setForm({ tema: '', tituloProvisorio: '', nome: '', telefone: '', email: '' }) }}
+            onClick={() => {
+              setSuccess(false)
+              setStep(1)
+              setForm({ tema: '', tituloProvisorio: '', nome: '', telefone: '', email: '' })
+            }}
             className="rounded-xl border border-[#1c2438] bg-[#0f1523] px-5 py-2.5 text-sm font-semibold text-white transition hover:border-[#4f7fff40]"
           >
             Criar outro ebook
@@ -153,7 +152,10 @@ export default function CriarPage() {
               )}>
                 {step > p.n ? '✓' : p.n}
               </div>
-              <span className={cn('mt-1.5 text-[9px] font-bold tracking-widest', step === p.n ? 'text-[#00e5c3]' : 'text-[#2a3553]')}>
+              <span className={cn(
+                'mt-1.5 text-[9px] font-bold tracking-widest',
+                step === p.n ? 'text-[#00e5c3]' : 'text-[#2a3553]',
+              )}>
                 {p.label}
               </span>
             </div>
@@ -174,10 +176,9 @@ export default function CriarPage() {
             Conte o básico para a Aurora começar a criar com você.
           </p>
 
-          {/* Objetivo selection overlay */}
-          {showObjetivos ? (
+          {/* Panel: lista de objetivos */}
+          {inspPanel === 'list' && (
             <div className="mb-6 overflow-hidden rounded-2xl border border-[#1c2438] bg-[#0b0f1c]">
-              {/* Header */}
               <div className="flex flex-col items-center py-6 px-5">
                 <div className="mb-3 grid h-10 w-10 place-items-center rounded-xl bg-[#00e5c315]">
                   <Lightbulb className="size-5 text-[#00e5c3]" />
@@ -186,27 +187,23 @@ export default function CriarPage() {
                 <p className="mt-1 text-sm text-[#6b7a99]">Escolha o que mais combina com você</p>
               </div>
 
-              {/* Options */}
               <div className="px-3 pb-3 space-y-1.5">
                 {OBJETIVOS.map((obj) => (
                   <button
                     key={obj.label}
-                    onClick={() => handleObjetivo(obj)}
+                    onClick={() => selecionarObjetivo(obj.label)}
                     className="flex w-full items-center gap-3 rounded-xl border border-[#1c2438] bg-[#0f1523] px-4 py-3.5 text-left transition hover:border-[#4f7fff40] hover:bg-[#111827]"
                   >
-                    <div className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl text-lg ${obj.cor}`}>
-                      {obj.icone}
-                    </div>
+                    <span className="text-lg">{obj.icone}</span>
                     <span className="flex-1 text-sm font-medium text-white">{obj.label}</span>
                     <ArrowRight className="size-4 shrink-0 text-[#3a4a66]" />
                   </button>
                 ))}
               </div>
 
-              {/* Cancel */}
               <div className="flex justify-center py-4">
                 <button
-                  onClick={() => setShowObjetivos(false)}
+                  onClick={() => setInspPanel(null)}
                   className="flex items-center gap-1.5 text-sm text-[#3a4a66] transition hover:text-white"
                 >
                   <X className="size-3.5" />
@@ -214,10 +211,73 @@ export default function CriarPage() {
                 </button>
               </div>
             </div>
-          ) : (
-            /* Collapsed inspiration card */
+          )}
+
+          {/* Panel: "Quase lá!" — detalhe do objetivo selecionado */}
+          {inspPanel === 'detalhe' && (
+            <div className="mb-6 overflow-hidden rounded-2xl border border-[#1c2438] bg-[#0b0f1c]">
+              <div className="flex flex-col items-center py-6 px-5">
+                <div className="mb-3 grid h-10 w-10 place-items-center rounded-xl bg-[#00e5c315]">
+                  <Wand2 className="size-5 text-[#00e5c3]" />
+                </div>
+                <h2 className="text-lg font-bold text-white">Quase lá!</h2>
+                <p className="mt-1 text-sm text-[#6b7a99]">
+                  Objetivo:{' '}
+                  <span className="font-semibold text-[#00e5c3]">{objetivoSelecionado}</span>
+                </p>
+              </div>
+
+              <div className="px-5 pb-5 space-y-4">
+                <div>
+                  <label className="mb-1.5 block text-xs font-semibold text-[#6b7a99]">
+                    Quer adicionar algum detalhe?{' '}
+                    <span className="text-[#3a4a66]">(opcional)</span>
+                  </label>
+                  <textarea
+                    value={detalheObjetivo}
+                    onChange={e => setDetalheObjetivo(e.target.value)}
+                    rows={3}
+                    placeholder={`Escreva aqui qualquer coisa que quiser para o objetivo "${objetivoSelecionado}", ou deixe em branco e clique no botão abaixo...`}
+                    className="w-full resize-none rounded-xl border border-[#1c2438] bg-[#0f1523] px-4 py-3 text-sm text-white placeholder:text-[#3a4a66] focus:border-[#00e5c330] focus:outline-none"
+                  />
+                </div>
+
+                {errorTema && (
+                  <p className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-xs text-red-400">
+                    {errorTema}
+                  </p>
+                )}
+
+                <button
+                  onClick={investigar}
+                  disabled={loadingTema}
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#00e5c3] py-4 text-sm font-bold text-[#040810] shadow-[0_0_24px_rgba(0,229,195,0.35)] transition hover:bg-[#00cfb0] disabled:cursor-not-allowed disabled:opacity-70"
+                >
+                  {loadingTema ? (
+                    <><Loader2 className="size-4 animate-spin" /> Investigando seu tema...</>
+                  ) : (
+                    <><Wand2 className="size-4" /> INVESTIGAR E PLANEJAR MEU EBOOK</>
+                  )}
+                </button>
+
+                <div className="flex justify-center">
+                  <button
+                    onClick={() => setInspPanel('list')}
+                    disabled={loadingTema}
+                    className="flex items-center gap-1.5 text-sm text-[#3a4a66] transition hover:text-white disabled:opacity-40"
+                  >
+                    <ArrowLeft className="size-3.5" />
+                    Voltar para objetivos
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Collapsed: botão de inspiração */}
+          {inspPanel === null && (
             <button
-              onClick={() => setShowObjetivos(true)}
+              onClick={() => setInspPanel('list')}
               className="mb-6 flex w-full items-center gap-3 rounded-2xl border border-dashed border-[#00e5c340] bg-[#00e5c306] p-4 text-left transition hover:border-[#00e5c360] hover:bg-[#00e5c30a]"
             >
               <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#00e5c320]">
@@ -227,7 +287,9 @@ export default function CriarPage() {
                 <p className="text-sm font-bold uppercase tracking-wide text-[#00e5c3]">
                   PRECISO DE INSPIRAÇÃO, NÃO TENHO IDEIA
                 </p>
-                <p className="text-xs text-[#6b7a99]">Clique para escolher seu objetivo e receber sugestão de tema</p>
+                <p className="text-xs text-[#6b7a99]">
+                  Clique para ver sugestões de temas lucrativos
+                </p>
               </div>
               <Sparkles className="size-4 shrink-0 text-[#00e5c350]" />
             </button>
@@ -243,7 +305,7 @@ export default function CriarPage() {
                 type="text"
                 value={form.tema}
                 onChange={e => set('tema', e.target.value)}
-                placeholder={objetivoPlaceholder || 'Ex: Finanças pessoais para iniciantes, Emagrecimento...'}
+                placeholder="Ex: Finanças pessoais para iniciantes, Emagrecimento..."
                 className="w-full rounded-xl border border-[#1c2438] bg-[#0b0f1c] px-4 py-3 text-sm text-white placeholder:text-[#3a4a66] focus:border-[#4f7fff50] focus:outline-none"
               />
             </div>
@@ -327,14 +389,18 @@ export default function CriarPage() {
               <div className="flex items-start gap-2.5">
                 <span className="mt-0.5 text-sm">⚡</span>
                 <p className="text-xs leading-relaxed text-[#6b7a99]">
-                  <span className="font-semibold text-[#00e5c3]">Entrega em ~47 minutos:</span> planejamento completo em ~5 min + ebook PDF, DOCX e EPUB com direitos comerciais 100% seus.
+                  <span className="font-semibold text-[#00e5c3]">Entrega em ~47 minutos:</span>{' '}
+                  planejamento completo em ~5 min + ebook PDF, DOCX e EPUB com direitos comerciais 100% seus.
                 </p>
               </div>
             </div>
           </div>
 
           <div className="mt-8 flex gap-3">
-            <button onClick={() => setStep(1)} className="flex items-center gap-2 rounded-xl border border-[#1c2438] bg-[#0f1523] px-5 py-4 text-sm font-semibold text-[#6b7a99] transition hover:text-white">
+            <button
+              onClick={() => setStep(1)}
+              className="flex items-center gap-2 rounded-xl border border-[#1c2438] bg-[#0f1523] px-5 py-4 text-sm font-semibold text-[#6b7a99] transition hover:text-white"
+            >
               <ArrowLeft className="size-4" />
               Voltar
             </button>
@@ -364,17 +430,19 @@ export default function CriarPage() {
             <div className="border-b border-[#1c2438] px-5 py-3">
               <p className="text-xs font-bold uppercase tracking-wider text-[#3a4a66]">Resumo</p>
             </div>
-            {[
+            {([
               { label: 'Tema', value: form.tema },
               { label: 'Autor', value: form.nome },
               { label: 'WhatsApp', value: form.telefone },
               form.email ? { label: 'E-mail', value: form.email } : null,
-            ].filter(Boolean).map(item => (
-              <div key={item!.label} className="flex items-start gap-3 border-b border-[#1c2438] px-5 py-3 last:border-0">
-                <span className="w-20 shrink-0 text-xs text-[#3a4a66]">{item!.label}</span>
-                <span className="text-sm font-medium text-white">{item!.value}</span>
-              </div>
-            ))}
+            ] as Array<{ label: string; value: string } | null>)
+              .filter(Boolean)
+              .map(item => (
+                <div key={item!.label} className="flex items-start gap-3 border-b border-[#1c2438] px-5 py-3 last:border-0">
+                  <span className="w-20 shrink-0 text-xs text-[#3a4a66]">{item!.label}</span>
+                  <span className="text-sm font-medium text-white">{item!.value}</span>
+                </div>
+              ))}
           </div>
 
           {error && (
@@ -384,7 +452,11 @@ export default function CriarPage() {
           )}
 
           <div className="flex gap-3">
-            <button onClick={() => setStep(2)} disabled={loading} className="flex items-center gap-2 rounded-xl border border-[#1c2438] bg-[#0f1523] px-5 py-4 text-sm font-semibold text-[#6b7a99] transition hover:text-white disabled:opacity-40">
+            <button
+              onClick={() => setStep(2)}
+              disabled={loading}
+              className="flex items-center gap-2 rounded-xl border border-[#1c2438] bg-[#0f1523] px-5 py-4 text-sm font-semibold text-[#6b7a99] transition hover:text-white disabled:opacity-40"
+            >
               <ArrowLeft className="size-4" />
               Voltar
             </button>
