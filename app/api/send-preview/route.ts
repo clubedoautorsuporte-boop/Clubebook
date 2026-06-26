@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { auth } from '@/auth'
+import { prisma } from '@/lib/prisma'
 import { rateLimitSendPreview } from '@/lib/rate-limit'
 import { sanitizeField, validateEmail } from '@/lib/sanitize'
 import { generateEbookPdf, type BriefingPlan } from '@/lib/generate-pdf'
@@ -166,16 +167,29 @@ export async function POST(req: Request) {
 
   if (pdfBuffer) {
     try {
+      // Garante que o userId existe no banco antes de vincular
+      let validUserId: string | undefined
+      if (loggedUserId) {
+        const dbUser = await prisma.user.findUnique({ where: { id: loggedUserId } }).catch(() => null)
+        if (dbUser) {
+          validUserId = dbUser.id
+        } else if (emailValido) {
+          // userId veio de sessão antiga (Google OAuth ID) — usa o email para encontrar o usuário no banco
+          const userByEmail = await prisma.user.findUnique({ where: { email } }).catch(() => null)
+          if (userByEmail) validUserId = userByEmail.id
+        }
+      }
+
       const slug = await createDelivery({
         nomeAutor,
         planJson: briefing,
         pdfBase64: pdfBuffer.toString('base64'),
         ...(emailValido ? { email } : {}),
-        ...(loggedUserId ? { userId: loggedUserId } : {}),
+        ...(validUserId ? { userId: validUserId } : {}),
       })
       deliveryUrl = `${siteUrl}/receiver/${slug}`
       pdfDownloadUrl = `${siteUrl}/api/pdf/${slug}`
-      console.log('[send-preview] delivery criado:', deliveryUrl)
+      console.log('[send-preview] delivery criado:', deliveryUrl, 'userId:', validUserId)
     } catch (err) {
       console.error('[send-preview] delivery store error:', err)
     }

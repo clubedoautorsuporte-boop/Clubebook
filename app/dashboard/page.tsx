@@ -22,24 +22,35 @@ export default async function DashboardPage() {
   }
 
   let rows: DeliveryRow[] = []
+  const userEmail = session?.user?.email
 
-  if (userId) {
-    const deliveries = await prisma.delivery.findMany({
-      where: { userId },
-      orderBy: { createdAt: 'desc' },
-      select: { id: true, slug: true, planJson: true, createdAt: true, expiresAt: true },
-    })
-    rows = deliveries.map((d: { id: string; slug: string; planJson: unknown; createdAt: Date; expiresAt: Date }) => {
-      const plan = d.planJson as BriefingPlan
-      return {
-        slug: d.slug,
-        titulo: plan.titulo ?? 'Sem título',
-        subtitulo: plan.subtitulo ?? '',
-        capitulosCount: Array.isArray(plan.capitulos) ? plan.capitulos.length : 0,
-        createdAt: d.createdAt.toISOString(),
-        expired: d.expiresAt < new Date(),
-      }
-    })
+  if (userId || userEmail) {
+    try {
+      // Busca por userId OU por email (fallback para ebooks criados antes de ter conta vinculada)
+      const deliveries = await prisma.delivery.findMany({
+        where: {
+          OR: [
+            ...(userId ? [{ userId }] : []),
+            ...(userEmail ? [{ email: userEmail, userId: null }] : []),
+          ],
+        },
+        orderBy: { createdAt: 'desc' },
+        select: { id: true, slug: true, planJson: true, createdAt: true, expiresAt: true },
+      })
+      rows = deliveries.map((d: { id: string; slug: string; planJson: unknown; createdAt: Date; expiresAt: Date }) => {
+        const plan = d.planJson as BriefingPlan
+        return {
+          slug: d.slug,
+          titulo: plan.titulo ?? 'Sem título',
+          subtitulo: plan.subtitulo ?? '',
+          capitulosCount: Array.isArray(plan.capitulos) ? plan.capitulos.length : 0,
+          createdAt: d.createdAt.toISOString(),
+          expired: d.expiresAt < new Date(),
+        }
+      })
+    } catch (err) {
+      console.error('[dashboard] erro ao buscar ebooks:', err)
+    }
   }
 
   const total = rows.length

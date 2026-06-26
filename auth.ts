@@ -16,28 +16,47 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
   callbacks: {
     async jwt({ token, user, account }) {
-      // No primeiro login, salva/atualiza o usuário no banco e usa o ID do banco
+      // Primeiro login: cria/atualiza usuário no banco
       if (account && user?.email) {
         try {
           const dbUser = await prisma.user.upsert({
             where: { email: user.email },
             update: { name: user.name, image: user.image },
-            create: {
-              email: user.email,
-              name: user.name,
-              image: user.image,
-              credits: 1000,
-            },
+            create: { email: user.email, name: user.name, image: user.image, credits: 1000 },
           })
           token.id = dbUser.id
-          // Vincula deliveries com mesmo email ao usuário
+          token.dbSynced = true
+          // Vincula deliveries orphãos pelo email
           await prisma.delivery.updateMany({
             where: { email: user.email, userId: null },
             data: { userId: dbUser.id },
-          })
+          }).catch(() => {})
         } catch (e) {
           console.error('[auth] upsert user error:', e)
-          token.id = user.id
+        }
+      }
+      // Sessões existentes com ID antigo (Google OAuth ID): sincroniza com o banco pelo email
+      if (!token.dbSynced && token.email) {
+        try {
+          const dbUser = await prisma.user.findUnique({ where: { email: token.email as string } })
+          if (dbUser) {
+            token.id = dbUser.id
+            token.dbSynced = true
+            // Vincula deliveries sem userId pelo email
+            await prisma.delivery.updateMany({
+              where: { email: token.email as string, userId: null },
+              data: { userId: dbUser.id },
+            }).catch(() => {})
+          } else {
+            // Usuário não existe no banco ainda, cria agora
+            const newUser = await prisma.user.create({
+              data: { email: token.email as string, name: token.name as string, image: token.picture as string, credits: 1000 },
+            })
+            token.id = newUser.id
+            token.dbSynced = true
+          }
+        } catch (e) {
+          console.error('[auth] sync user error:', e)
         }
       }
       return token
