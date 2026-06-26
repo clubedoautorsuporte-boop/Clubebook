@@ -9,7 +9,9 @@ import {
   useRef,
   useState,
 } from "react"
-import { motion, DynamicAnimationOptions } from "framer-motion"
+import { motion } from "framer-motion"
+import type { AnimationOptions } from "framer-motion"
+type DynamicAnimationOptions = AnimationOptions
 import { cn } from "@/lib/utils"
 
 interface TextProps {

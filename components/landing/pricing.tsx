@@ -70,7 +70,7 @@ export function Pricing() {
         {/* Pricing card */}
         <TimelineContent animationNum={2} className="relative">
           <div className="relative">
-            <BorderBeam colorFrom="#4f7fff" colorTo="#00e5c3" duration={7} size={300} />
+            <BorderBeam colorFrom="#4f7fff" colorTo="#00e5c3" duration={7} />
             <PricingCard
               icon={<BookOpen className="size-7" />}
               name="Clube do Autor IA"
