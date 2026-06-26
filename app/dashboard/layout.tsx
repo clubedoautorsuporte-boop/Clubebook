@@ -17,6 +17,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const credits = (session.user as { credits?: number })?.credits ?? 1000
   const firstName = session.user?.name?.split(' ')[0] ?? 'Autor'
   const userId = session.user?.id
+  const isAdmin = session.user?.email === 'clubedoautor.suporte@gmail.com'
 
   return (
     <div className="flex min-h-screen bg-[#080b14]">
@@ -28,6 +29,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           userEmail={session.user?.email}
           credits={credits}
           userId={userId}
+          isAdmin={isAdmin}
         />
       </div>
 

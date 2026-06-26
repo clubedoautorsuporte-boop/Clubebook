@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Settings, HelpCircle, LogOut, Plus, TrendingUp,
   Gift, Copy, Check, Gem, Library, Flame,
   ShoppingCart, Globe2, Calculator, Store, GraduationCap, Trophy,
-  CalendarDays,
+  CalendarDays, FlaskConical,
 } from 'lucide-react'
 import { signOut } from 'next-auth/react'
 import { cn } from '@/lib/utils'
@@ -20,6 +20,7 @@ type SidebarProps = {
   userEmail?: string | null
   credits?: number
   userId?: string | null
+  isAdmin?: boolean
 }
 
 const NAV_MAIN = [
@@ -80,7 +81,7 @@ function ReferralWidget({ userId }: { userId?: string | null }) {
   )
 }
 
-export function Sidebar({ userName, userImage, userEmail, credits = 1000, userId }: SidebarProps) {
+export function Sidebar({ userName, userImage, userEmail, credits = 1000, userId, isAdmin }: SidebarProps) {
   const pathname = usePathname()
 
   const navItem = (href: string, Icon: React.ElementType, label: string, external = false) => {
@@ -155,6 +156,20 @@ export function Sidebar({ userName, userImage, userEmail, credits = 1000, userId
         <div className="flex flex-col gap-0.5">
           {navItem('/dashboard/configuracoes', Settings, 'Configurações')}
           {navItem('mailto:clubedoautor.suporte@gmail.com', HelpCircle, 'Suporte', true)}
+          {isAdmin && (
+            <Link
+              href="/dashboard/admin"
+              className={cn(
+                'flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-semibold transition',
+                pathname === '/dashboard/admin'
+                  ? 'bg-amber-500/15 text-amber-400'
+                  : 'text-amber-600/70 hover:bg-amber-500/10 hover:text-amber-400',
+              )}
+            >
+              <FlaskConical className="size-4 shrink-0" />
+              Gerador Teste
+            </Link>
+          )}
         </div>
       </nav>
 
