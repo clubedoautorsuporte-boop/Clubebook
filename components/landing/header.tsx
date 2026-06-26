@@ -38,9 +38,16 @@ function UserAvatar({ name, image }: { name?: string | null; image?: string | nu
 
 function Logo() {
   return (
-    <a href="#inicio" className="flex items-center gap-2.5">
-      <Image src="/logo.png" alt="Clube do Autor IA" width={108} height={108} className="object-contain" style={{ width: 108, height: 'auto' }} />
-      <span className="font-heading text-base font-extrabold leading-none text-foreground">
+    <a href="#inicio" className="flex items-center gap-2">
+      <Image
+        src="/logo.png"
+        alt="Clube do Autor IA"
+        width={36}
+        height={36}
+        className="shrink-0 object-contain"
+        style={{ width: 36, height: 36 }}
+      />
+      <span className="whitespace-nowrap font-heading text-sm font-extrabold leading-none text-foreground md:text-base">
         Clube do Autor <span className="text-brand">IA</span>
       </span>
     </a>
@@ -133,22 +140,22 @@ export function Header({ isLoggedIn = false, userName, userImage }: HeaderProps)
         </div>
 
         {/* Mobile */}
-        <div className="flex items-center gap-2 lg:hidden">
+        <div className="flex items-center gap-1.5 lg:hidden">
           {isLoggedIn ? (
             <Link
               href="/dashboard"
-              className="flex items-center gap-1.5 rounded-lg border border-[#4f7fff40] bg-[#4f7fff10] px-3 py-2 text-xs font-semibold text-[#4f7fff]"
+              className="flex items-center gap-1.5 rounded-lg border border-[#4f7fff40] bg-[#4f7fff10] px-2.5 py-1.5 text-xs font-semibold text-[#4f7fff]"
             >
               <UserAvatar name={userName} image={userImage} />
-              Área
+              <span className="hidden xs:inline">Área</span>
             </Link>
           ) : (
             <>
-              <Link href="/auth/login" className="flex items-center gap-1 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs font-medium text-white/70 transition hover:bg-white/10 hover:text-white">
+              <Link href="/auth/login" className="flex items-center gap-1 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs font-medium text-white/70">
                 <LogIn className="size-3.5" />
                 Entrar
               </Link>
-              <Link href="/auth/register" className="flex items-center gap-1 rounded-lg bg-teal-500 px-3 py-2 text-xs font-semibold text-black transition hover:bg-teal-400">
+              <Link href="/auth/register" className="flex items-center gap-1 rounded-lg bg-teal-500 px-2.5 py-1.5 text-xs font-semibold text-black">
                 <UserPlus className="size-3.5" />
                 Conta
               </Link>
@@ -156,7 +163,7 @@ export function Header({ isLoggedIn = false, userName, userImage }: HeaderProps)
           )}
           <button
             onClick={() => setMenuOpen((p) => !p)}
-            className="flex size-9 items-center justify-center rounded-xl border border-line text-foreground"
+            className="flex size-8 items-center justify-center rounded-lg border border-line text-foreground"
             aria-label="Abrir menu"
           >
             {menuOpen ? <X className="size-4" /> : <Menu className="size-4" />}
