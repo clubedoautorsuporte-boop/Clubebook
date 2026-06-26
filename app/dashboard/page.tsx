@@ -22,22 +22,15 @@ export default async function DashboardPage() {
   }
 
   let rows: DeliveryRow[] = []
-  const userEmail = session?.user?.email
 
-  if (userId || userEmail) {
+  if (userId) {
     try {
-      // Busca por userId OU por email (fallback para ebooks criados antes de ter conta vinculada)
       const deliveries = await prisma.delivery.findMany({
-        where: {
-          OR: [
-            ...(userId ? [{ userId }] : []),
-            ...(userEmail ? [{ email: userEmail, userId: null }] : []),
-          ],
-        },
+        where: { userId },
         orderBy: { createdAt: 'desc' },
-        select: { id: true, slug: true, planJson: true, createdAt: true, expiresAt: true },
+        select: { slug: true, planJson: true, createdAt: true, expiresAt: true },
       })
-      rows = deliveries.map((d: { id: string; slug: string; planJson: unknown; createdAt: Date; expiresAt: Date }) => {
+      rows = deliveries.map((d: { slug: string; planJson: unknown; createdAt: Date; expiresAt: Date }) => {
         const plan = d.planJson as BriefingPlan
         return {
           slug: d.slug,
