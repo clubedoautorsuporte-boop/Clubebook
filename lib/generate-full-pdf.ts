@@ -13,226 +13,275 @@ export type FullBook = {
   capitulos: FullChapter[]
 }
 
-const MARGIN = { top: 80, bottom: 80, left: 90, right: 72 }
-const PAGE_W = 595.28 // A4
-const TEXT_W = PAGE_W - MARGIN.left - MARGIN.right
+// Medidas A4
+const PAGE_W = 595.28
+const PAGE_H = 841.89
+const ML = 80   // margem esquerda
+const MR = 80   // margem direita
+const MT = 80   // margem topo
+const MB = 80   // margem rodapé
+const TW = PAGE_W - ML - MR  // largura útil do texto
+
+// Cores
+const BLACK  = '#000000'
+const DARK   = '#1a1a1a'
+const GRAY   = '#555555'
+const LGRAY  = '#888888'
+const LINE   = '#cccccc'
+
+// ── Fontes ────────────────────────────────────────────────────────
+const F_BODY   = 'Times-Roman'
+const F_BOLD   = 'Times-Bold'
+const F_ITALIC = 'Times-Italic'
+const F_HEAD   = 'Helvetica-Bold'
+const F_SANS   = 'Helvetica'
 
 export async function generateFullBookPdf(book: FullBook): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     const doc = new PDFDocument({
       size: 'A4',
-      margins: MARGIN,
+      margins: { top: MT, bottom: MB, left: ML, right: MR },
       info: {
-        Title: book.titulo,
-        Author: book.autor,
-        Subject: book.subtitulo,
-        Creator: 'Clube do Autor IA',
-        Producer: 'Clube do Autor IA',
+        Title:    book.titulo,
+        Author:   book.autor,
+        Subject:  book.subtitulo,
+        Creator:  'Clube do Autor IA',
+        Producer: 'Aurora IA',
       },
     })
 
     const chunks: Buffer[] = []
     doc.on('data', (c: Buffer) => chunks.push(c))
-    doc.on('end', () => resolve(Buffer.concat(chunks)))
+    doc.on('end',  () => resolve(Buffer.concat(chunks)))
     doc.on('error', reject)
 
-    const pageNum = { n: 0 }
+    let pageNumber = 0
 
-    // ── CAPA ───────────────────────────────────────────────────────────
-    doc.rect(0, 0, PAGE_W, doc.page.height).fill('#0a0f1e')
-
-    // Gradiente simulado com retângulos
-    for (let i = 0; i < 60; i++) {
-      const alpha = (i / 60) * 0.35
-      doc.rect(0, doc.page.height * 0.4 + i * 4, PAGE_W, 4)
-         .fill(`#1a3a6b`)
-         .fillOpacity(alpha)
+    function newPage() {
+      doc.addPage()
+      pageNumber++
     }
-    doc.fillOpacity(1)
+
+    function pageFooter(label?: string) {
+      const y = PAGE_H - 50
+      doc.font(F_SANS).fontSize(8).fillColor(LGRAY)
+      if (label) {
+        doc.text(label, ML, y, { width: TW / 2, align: 'left' })
+      }
+      doc.text(String(pageNumber), ML, y, { width: TW, align: 'right' })
+    }
+
+    // ── CAPA ──────────────────────────────────────────────────────
+    // Fundo branco, conteúdo centralizado verticalmente
+    doc.fillColor(BLACK)
+
+    const coverY = PAGE_H * 0.28
 
     // Linha decorativa topo
-    doc.rect(MARGIN.left, 60, 80, 3).fill('#00e5c3')
+    doc.rect(ML, 60, TW, 2).fill(DARK)
 
-    // Título
-    doc.font('Helvetica-Bold').fontSize(32).fill('#ffffff')
-       .text(book.titulo, MARGIN.left, 100, { width: TEXT_W, lineGap: 6 })
+    // Título principal
+    doc.font(F_HEAD).fontSize(32).fillColor(BLACK)
+       .text(book.titulo, ML, coverY, { width: TW, align: 'center', lineGap: 6 })
+
+    // Linha separadora
+    const afterTitle = doc.y + 20
+    doc.rect(ML + TW * 0.25, afterTitle, TW * 0.5, 1).fill(DARK)
 
     // Subtítulo
     if (book.subtitulo) {
-      doc.font('Helvetica').fontSize(14).fill('#7fb3d3')
-         .text(book.subtitulo, MARGIN.left, doc.y + 16, { width: TEXT_W })
+      doc.font(F_ITALIC).fontSize(14).fillColor(DARK)
+         .text(book.subtitulo, ML, afterTitle + 18, { width: TW, align: 'center' })
     }
 
-    // Linha divisória
-    const yLine = doc.y + 32
-    doc.rect(MARGIN.left, yLine, TEXT_W, 1).fill('#1c3a5e')
-
     // Autor
-    doc.font('Helvetica').fontSize(12).fill('#a0c4d8')
-       .text(`Por ${book.autor}`, MARGIN.left, yLine + 20)
+    doc.font(F_SANS).fontSize(12).fillColor(GRAY)
+       .text(`por: ${book.autor}`, ML, doc.y + 24, { width: TW, align: 'center' })
 
-    // Badge bottom
-    doc.font('Helvetica').fontSize(9).fill('#00e5c3')
-       .text('CLUBE DO AUTOR IA', MARGIN.left, doc.page.height - 60)
+    // Linha rodapé da capa
+    doc.rect(ML, PAGE_H - 62, TW, 2).fill(DARK)
+    doc.font(F_SANS).fontSize(8).fillColor(LGRAY)
+       .text('Clube do Autor IA  ·  Aurora IA', ML, PAGE_H - 48, { width: TW, align: 'center' })
 
-    doc.font('Helvetica').fontSize(9).fill('#3a5a7a')
-       .text(`${book.capitulos.length} capítulos · Gerado com Aurora IA`, MARGIN.left, doc.page.height - 46)
+    // ── SUMÁRIO ───────────────────────────────────────────────────
+    newPage()
+    pageNumber = 1
 
-    // ── SUMÁRIO ────────────────────────────────────────────────────────
-    doc.addPage()
-    pageNum.n = 1
+    doc.font(F_HEAD).fontSize(22).fillColor(BLACK)
+       .text('Sumário', ML, MT)
 
-    doc.rect(0, 0, PAGE_W, doc.page.height).fill('#080c18')
-    doc.fillOpacity(1)
+    doc.rect(ML, MT + 32, TW, 1.5).fill(DARK)
 
-    doc.font('Helvetica-Bold').fontSize(22).fill('#ffffff')
-       .text('Sumário', MARGIN.left, MARGIN.top)
+    let tocY = MT + 52
 
-    doc.rect(MARGIN.left, MARGIN.top + 34, 50, 2).fill('#00e5c3')
-
-    let y = MARGIN.top + 60
     book.capitulos.forEach((cap) => {
-      doc.font('Helvetica').fontSize(11).fill('#6b8fa8')
-         .text(`${cap.numero}.`, MARGIN.left, y, { continued: false, width: 24 })
-      doc.font('Helvetica-Bold').fontSize(11).fill('#d0e4f0')
-         .text(cap.titulo, MARGIN.left + 28, y, { width: TEXT_W - 28 - 40 })
-      y = doc.y + 10
-      if (y > doc.page.height - MARGIN.bottom) {
-        doc.addPage()
-        doc.rect(0, 0, PAGE_W, doc.page.height).fill('#080c18')
-        y = MARGIN.top
+      // Garante espaço na página
+      if (tocY > PAGE_H - MB - 60) {
+        pageFooter()
+        newPage()
+        tocY = MT
       }
+
+      // Número + título
+      doc.font(F_BOLD).fontSize(11).fillColor(DARK)
+         .text(`${cap.numero}.`, ML, tocY, { width: 24, continued: false })
+      doc.font(F_BOLD).fontSize(11).fillColor(DARK)
+         .text(cap.titulo, ML + 28, tocY, { width: TW - 28 })
+
+      tocY = doc.y + 4
+
+      // Preview do conteúdo (primeiras 120 chars)
+      const preview = cap.content.replace(/\n/g, ' ').replace(/#+\s*/g, '').replace(/\*\*/g, '').slice(0, 140).trim()
+      doc.font(F_ITALIC).fontSize(9).fillColor(LGRAY)
+         .text(preview + '…', ML + 28, tocY, { width: TW - 28 })
+
+      tocY = doc.y + 14
+
+      // Linha separadora leve
+      doc.rect(ML + 28, tocY - 6, TW - 28, 0.5).fill(LINE)
     })
 
-    // ── CAPÍTULOS ─────────────────────────────────────────────────────
+    pageFooter()
+
+    // ── CAPÍTULOS ─────────────────────────────────────────────────
     book.capitulos.forEach((cap) => {
-      // Página de abertura do capítulo
-      doc.addPage()
-      doc.rect(0, 0, PAGE_W, doc.page.height).fill('#080c18')
-      doc.fillOpacity(1)
+      newPage()
 
-      // Número do capítulo
-      doc.font('Helvetica').fontSize(11).fill('#00e5c3')
-         .text(`Capítulo ${cap.numero}`, MARGIN.left, MARGIN.top)
+      // Número do capítulo (menor, acima do título)
+      doc.font(F_SANS).fontSize(10).fillColor(LGRAY)
+         .text(`Capítulo ${cap.numero}`, ML, MT)
 
-      doc.rect(MARGIN.left, MARGIN.top + 22, 60, 2).fill('#00e5c3')
+      // Linha decorativa
+      doc.rect(ML, MT + 18, 40, 1.5).fill(DARK)
 
       // Título do capítulo
-      doc.font('Helvetica-Bold').fontSize(24).fill('#ffffff')
-         .text(cap.titulo, MARGIN.left, MARGIN.top + 40, { width: TEXT_W, lineGap: 4 })
+      doc.font(F_HEAD).fontSize(22).fillColor(BLACK)
+         .text(cap.titulo, ML, MT + 30, { width: TW, lineGap: 4 })
 
-      // Conteúdo do capítulo
+      // Linha separadora abaixo do título
+      doc.rect(ML, doc.y + 14, TW, 1).fill(LINE)
+
+      let yPos = doc.y + 28
+
       const lines = cap.content.split('\n')
-      let inParagraph = false
-      let yPos = doc.y + 40
-
-      const ensureSpace = (needed = 60) => {
-        if (yPos > doc.page.height - MARGIN.bottom - needed) {
-          doc.addPage()
-          doc.rect(0, 0, PAGE_W, doc.page.height).fill('#080c18')
-          // Número de página discreto no rodapé
-          doc.font('Helvetica').fontSize(8).fill('#2a3a50')
-             .text(`${book.titulo}  ·  Capítulo ${cap.numero}`, MARGIN.left, doc.page.height - 50, { width: TEXT_W })
-          yPos = MARGIN.top
-        }
-      }
 
       for (const rawLine of lines) {
         const line = rawLine.trim()
 
+        // Verifica se precisa de nova página
+        if (yPos > PAGE_H - MB - 40) {
+          pageFooter(book.titulo)
+          newPage()
+          yPos = MT
+        }
+
         if (!line) {
-          yPos += inParagraph ? 10 : 0
-          inParagraph = false
+          yPos += 8
           continue
         }
 
-        // Subtítulo ## Heading
+        // ## Seção principal
         if (line.startsWith('## ')) {
-          ensureSpace(80)
-          yPos += 20
-          doc.font('Helvetica-Bold').fontSize(14).fill('#4f9fff')
-             .text(line.replace(/^## /, ''), MARGIN.left, yPos, { width: TEXT_W })
-          yPos = doc.y + 12
-          inParagraph = false
+          if (yPos > PAGE_H - MB - 80) {
+            pageFooter(book.titulo)
+            newPage()
+            yPos = MT
+          }
+          yPos += 16
+          doc.font(F_HEAD).fontSize(14).fillColor(BLACK)
+             .text(line.replace(/^## /, ''), ML, yPos, { width: TW })
+          yPos = doc.y + 10
+          // Linha fina sob a seção
+          doc.rect(ML, yPos - 4, TW * 0.4, 0.75).fill(LINE)
+          yPos += 4
           continue
         }
 
-        // Subtítulo ### Sub-heading
+        // ### Sub-seção
         if (line.startsWith('### ')) {
-          ensureSpace(60)
-          yPos += 14
-          doc.font('Helvetica-Bold').fontSize(12).fill('#00e5c3')
-             .text(line.replace(/^### /, ''), MARGIN.left, yPos, { width: TEXT_W })
-          yPos = doc.y + 8
-          inParagraph = false
+          yPos += 10
+          doc.font(F_BOLD).fontSize(12).fillColor(DARK)
+             .text(line.replace(/^### /, ''), ML, yPos, { width: TW })
+          yPos = doc.y + 6
           continue
         }
 
-        // Lista
-        if (line.startsWith('- ') || line.startsWith('* ')) {
-          ensureSpace(40)
-          const bullet = line.replace(/^[-*] /, '')
-          // Processa negrito inline
-          renderInline(doc, `• ${bullet}`, MARGIN.left + 12, yPos, TEXT_W - 12, '#c8d8e8', 10.5)
+        // Lista com marcador
+        if (/^[-*•]\s/.test(line)) {
+          const item = line.replace(/^[-*•]\s+/, '')
+          renderTextInline(doc, `•  ${item}`, ML + 16, yPos, TW - 16, DARK, 12, F_BODY, F_BOLD, 5)
           yPos = doc.y + 5
-          inParagraph = false
           continue
         }
 
-        // Numeração
+        // Lista numerada
         if (/^\d+\.\s/.test(line)) {
-          ensureSpace(40)
-          renderInline(doc, line, MARGIN.left + 12, yPos, TEXT_W - 12, '#c8d8e8', 10.5)
+          renderTextInline(doc, line, ML + 8, yPos, TW - 8, DARK, 12, F_BODY, F_BOLD, 5)
           yPos = doc.y + 5
-          inParagraph = false
           continue
         }
 
-        // Parágrafo normal
-        ensureSpace(50)
-        if (!inParagraph) yPos += 6
-        renderInline(doc, line, MARGIN.left, yPos, TEXT_W, '#c8d8e8', 11)
+        // Bloco de citação (> texto)
+        if (line.startsWith('> ')) {
+          const quote = line.replace(/^> /, '')
+          yPos += 6
+          doc.rect(ML, yPos, 3, 20).fill(LGRAY)
+          doc.font(F_ITALIC).fontSize(11).fillColor(GRAY)
+             .text(quote, ML + 14, yPos, { width: TW - 14, lineGap: 4 })
+          yPos = doc.y + 10
+          continue
+        }
+
+        // Parágrafo normal — recuo de parágrafo clássico
+        renderTextInline(doc, line, ML, yPos, TW, BLACK, 12, F_BODY, F_BOLD, 5)
         yPos = doc.y + 8
-        inParagraph = true
       }
+
+      pageFooter(book.titulo)
     })
 
     doc.end()
   })
 }
 
-// Renderiza texto com **negrito** inline
-function renderInline(
+// ── Renderiza texto com **negrito** e _itálico_ inline ─────────────
+function renderTextInline(
   doc: PDFKit.PDFDocument,
   text: string,
   x: number, y: number,
   width: number,
   color: string,
   fontSize: number,
+  fontNormal: string,
+  fontBold: string,
+  lineGap: number,
 ) {
-  // Substituição simples: quebra em partes normal/bold
-  const parts = text.split(/(\*\*[^*]+\*\*)/)
+  // Divide em segmentos: normal | **bold** | _italic_
+  const parts = text.split(/(\*\*[^*]+\*\*|_[^_]+_)/)
+
   if (parts.length === 1) {
-    // Sem negrito — renderiza direto com quebra de linha automática
-    doc.font('Helvetica').fontSize(fontSize).fill(color)
-       .text(text, x, y, { width, lineGap: 3 })
+    doc.font(fontNormal).fontSize(fontSize).fillColor(color)
+       .text(text, x, y, { width, lineGap, align: 'justify' })
     return
   }
 
-  // Tem negrito — usa continued para renderizar inline
-  let first = true
+  let firstPart = true
   for (const part of parts) {
     if (!part) continue
     if (part.startsWith('**') && part.endsWith('**')) {
-      const bold = part.slice(2, -2)
-      doc.font('Helvetica-Bold').fontSize(fontSize).fill(color)
-         .text(bold, first ? x : undefined, first ? y : undefined, { width, continued: true, lineGap: 3 })
+      doc.font(fontBold).fontSize(fontSize).fillColor(color)
+         .text(part.slice(2, -2), firstPart ? x : undefined, firstPart ? y : undefined,
+               { width, lineGap, continued: true, align: 'justify' })
+    } else if (part.startsWith('_') && part.endsWith('_')) {
+      doc.font('Times-Italic').fontSize(fontSize).fillColor(color)
+         .text(part.slice(1, -1), firstPart ? x : undefined, firstPart ? y : undefined,
+               { width, lineGap, continued: true, align: 'justify' })
     } else {
-      doc.font('Helvetica').fontSize(fontSize).fill(color)
-         .text(part, first ? x : undefined, first ? y : undefined, { width, continued: true, lineGap: 3 })
+      doc.font(fontNormal).fontSize(fontSize).fillColor(color)
+         .text(part, firstPart ? x : undefined, firstPart ? y : undefined,
+               { width, lineGap, continued: true, align: 'justify' })
     }
-    first = false
+    firstPart = false
   }
-  // Termina o continued
   doc.text('', { continued: false })
 }

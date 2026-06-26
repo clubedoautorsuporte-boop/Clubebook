@@ -29,7 +29,7 @@ OBJETIVO: ${capitulo.objetivo}
 SUBTÓPICOS A COBRIR: ${capitulo.subtopicos.join(', ')}
 
 INSTRUÇÕES DE ESCRITA:
-- Escreva entre 2.500 e 3.500 palavras de conteúdo REAL e ÚTIL
+- Escreva entre 4.000 e 6.000 palavras de conteúdo REAL e ÚTIL
 - Comece com uma abertura envolvente (2-3 parágrafos) que conecta o leitor
 - Desenvolva cada subtópico com profundidade real: exemplos práticos, dados, histórias
 - Use ## para subtítulos principais (um por subtópico)
