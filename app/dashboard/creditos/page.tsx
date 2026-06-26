@@ -13,20 +13,34 @@ export default async function CreditosPage() {
   const creditsUsed = 0
 
   const creditPackages = [
-    { id: 1, credits: 20000, price: 179.99, popular: false, discount: 8 },
-    { id: 2, credits: 50000, price: 439.99, popular: true, discount: 12 },
-    { id: 3, credits: 100000, price: 849.99, popular: false, discount: 9 },
+    { id: 1, credits: 20000, price: 179.99, popular: false, discount: 10, realValue: 200 },
+    { id: 2, credits: 50000, price: 439.99, popular: true, discount: 12, realValue: 500 },
+    { id: 3, credits: 100000, price: 849.99, popular: false, discount: 15, realValue: 1000 },
   ]
 
   const services = [
-    { name: 'Ebook do Livro (página completa)', cost: 'R$ 60,00', credits: '-50 créditos' },
-    { name: 'Edição Profissional (& categorias)', cost: 'R$ 80,00', credits: '-60 créditos' },
-    { name: 'Ajuste de Capa', cost: 'R$ 30,00', credits: '-10 créditos' },
-    { name: 'Audiobook Premium', cost: 'R$ 100,00', credits: '-80 créditos' },
-    { name: 'Preparação para Publicação', cost: 'R$ 25,00', credits: '-25 créditos' },
-    { name: 'Manual de Marketing (por página)', cost: 'R$ 15,00', credits: '-5/20 créditos' },
-    { name: 'Tradução (por página)', cost: 'R$ 25,00', credits: '-20 créditos' },
-    { name: 'Subtítulos (por imagem)', cost: 'R$ 5,00', credits: '-5/30-14,000' },
+    { category: 'Serviços Principais (pagamento direto em R$)', items: [
+      { name: 'Escrita do Livro (geração completa)', cost: 'R$ 49,99' },
+      { name: 'Capa Profissional (4 variações)', cost: 'R$ 99,99' },
+      { name: 'Ajuste de Capa', cost: 'R$ 19,99' },
+      { name: 'Audiobook Premium', cost: 'R$ 499,99' },
+      { name: 'Preparação para Publicação', cost: 'R$ 29,99' },
+      { name: 'Material de Marketing (por peça)', cost: 'R$ 7,99–19,99' },
+      { name: 'Tradução (por idioma)', cost: 'R$ 29,99' },
+      { name: 'Ilustrações (por imagem)', cost: 'R$ 9,99–14,99' },
+    ] },
+    { category: 'Edições com Créditos (SÁBHIA Builder)', subtext: 'Use créditos para editar seu livro após a geração', items: [
+      { name: 'Criar novo capítulo', credits: '~480 créditos' },
+      { name: 'Reescrever capítulo inteiro', credits: '~735 créditos' },
+      { name: 'Reescrever seção', credits: '~490 créditos' },
+      { name: 'Reescrever parágrafo', credits: '~240 créditos' },
+      { name: 'Corrigir texto do capítulo', credits: '~110 créditos' },
+      { name: 'Análise editorial do capítulo', credits: '~65 créditos' },
+      { name: 'Editar texto da capa', credits: '~490 créditos' },
+      { name: 'Editar estilo da capa', credits: '~720 créditos' },
+      { name: 'Gerar metadados de publicação', credits: '~260 créditos' },
+      { name: 'Buscar e substituir (todo livro)', credits: '~30 créditos' },
+    ] },
   ]
 
   const transactions = [
@@ -47,7 +61,7 @@ export default async function CreditosPage() {
         <div className="lg:col-span-1 rounded-2xl border border-[#1c2438] bg-gradient-to-br from-[#0a5e55] to-[#051a15] p-6">
           <p className="text-sm text-[#6b7a99] mb-2">Saldo disponível</p>
           <p className="text-5xl font-bold text-[#00e5c3] mb-1">{credits.toLocaleString()}</p>
-          <p className="text-xs text-[#6b7a99]">Equivalente a R$ 0,00</p>
+          <p className="text-xs text-[#6b7a99]">Equivalente a R$ {(credits / 100).toFixed(2)}</p>
         </div>
 
         {/* Total comprado */}
@@ -94,7 +108,10 @@ export default async function CreditosPage() {
                 R$ {pkg.price.toFixed(2)}
               </p>
 
-              <p className="text-xs text-[#00e5c3] mb-6">Economiza de {pkg.discount}%</p>
+              <div className="mb-6">
+                <p className="text-xs text-[#00e5c3]">Economia de {pkg.discount}%</p>
+                <p className="text-xs text-[#6b7a99]">Valor real: R$ {pkg.realValue.toFixed(2)}</p>
+              </div>
 
               <button
                 className={cn(
@@ -115,28 +132,26 @@ export default async function CreditosPage() {
       <div className="mb-8">
         <h3 className="text-lg font-bold text-white mb-4">Tabela de Custos por Serviço</h3>
         <div className="rounded-2xl border border-[#1c2438] bg-[#0f1523] overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="border-b border-[#1c2438] bg-[#080b14]">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-bold uppercase text-[#6b7a99]">Serviço</th>
-                  <th className="px-6 py-3 text-right text-xs font-bold uppercase text-[#6b7a99]">Preço</th>
-                  <th className="px-6 py-3 text-right text-xs font-bold uppercase text-[#6b7a99]">Créditos</th>
-                </tr>
-              </thead>
-              <tbody>
-                {services.map((service, i) => (
-                  <tr key={i} className={cn('border-b border-[#1c2438]', i % 2 === 0 ? 'bg-[#0a0e17]' : 'bg-[#0f1523]')}>
-                    <td className="px-6 py-3 text-[#c4d0e8]">{service.name}</td>
-                    <td className="px-6 py-3 text-right text-white">{service.cost}</td>
-                    <td className="px-6 py-3 text-right text-[#00e5c3] font-semibold">{service.credits}</td>
-                  </tr>
+          {services.map((section, sectionIdx) => (
+            <div key={sectionIdx} className={sectionIdx > 0 ? 'border-t border-[#1c2438]' : ''}>
+              <div className="bg-[#080b14] px-6 py-3 border-b border-[#1c2438]">
+                <p className="text-sm font-bold text-white">{section.category}</p>
+                {section.subtext && <p className="text-xs text-[#6b7a99] mt-0.5">{section.subtext}</p>}
+              </div>
+              <div className="divide-y divide-[#1c2438]">
+                {section.items.map((item, itemIdx) => (
+                  <div key={itemIdx} className={cn('flex justify-between px-6 py-3', itemIdx % 2 === 0 ? 'bg-[#0a0e17]' : 'bg-[#0f1523]')}>
+                    <span className="text-sm text-[#c4d0e8]">{item.name}</span>
+                    <span className="text-sm text-[#00e5c3] font-semibold text-right">
+                      {item.cost || item.credits}
+                    </span>
+                  </div>
                 ))}
-              </tbody>
-            </table>
-          </div>
-          <p className="text-[10px] text-[#3a4a66] px-6 py-2 bg-[#080b14]">
-            Os custos listados são uma referência. O valor exato de uma transação pode variar. Lembre-se de que todos têm uma forma de organização. O crédito é em R$ 1 em um serviço.
+              </div>
+            </div>
+          ))}
+          <p className="text-[10px] text-[#3a4a66] px-6 py-3 bg-[#080b14]">
+            Os custos incluem uma taxa base + tempo de processamento da SÁBHIA. O valor final pode variar conforme a complexidade da tarefa. 100 créditos = R$ 1,00.
           </p>
         </div>
       </div>
