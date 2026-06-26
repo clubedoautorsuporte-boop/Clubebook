@@ -141,6 +141,7 @@ export default function CriarPage() {
   const [fonteFileLoading, setFonteFileLoading] = useState(false)
   const [audioRecording, setAudioRecording] = useState(false)
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null)
+  const [geracaoEtapa, setGeracaoEtapa] = useState<string | null>(null)
 
   // Step 3
   const [telefone, setTelefone] = useState('')
@@ -243,7 +244,7 @@ export default function CriarPage() {
   }
 
   async function gerar() {
-    setLoading(true); setError('')
+    setLoading(true); setError(''); setGeracaoEtapa('Criando título...')
     try {
       const contexto = [
         publico ? `Público-alvo: ${publico}` : '',
@@ -254,22 +255,44 @@ export default function CriarPage() {
 
       const tema = [form.tituloProvisorio, form.genero, objetivoSelecionado, contexto].filter(Boolean).join(' — ')
 
+      setGeracaoEtapa('Gerando planejamento...')
       const planRes = await fetch('/api/ebook-plan', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ tema, nome: form.nome }),
       })
-      if (!planRes.ok) throw new Error('Falha ao gerar planejamento')
+      if (!planRes.ok) {
+        const errData = await planRes.json()
+        throw new Error(errData.error || 'Falha ao gerar planejamento')
+      }
       const { plan } = await planRes.json()
 
+      setGeracaoEtapa('Criando sumário...')
+      await new Promise(r => setTimeout(r, 500))
+
+      setGeracaoEtapa('Gerando introdução...')
+      await new Promise(r => setTimeout(r, 500))
+
+      setGeracaoEtapa('Criando capítulos...')
+      await new Promise(r => setTimeout(r, 500))
+
+      setGeracaoEtapa('Formatando ebook...')
       const sendRes = await fetch('/api/send-preview', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ nome: form.nome, email, telefone, plan }),
       })
-      if (!sendRes.ok) throw new Error('Falha ao enviar ebook')
+      if (!sendRes.ok) {
+        const errData = await sendRes.json()
+        throw new Error(errData.error || 'Falha ao enviar ebook')
+      }
+
+      setGeracaoEtapa('Enviando via WhatsApp...')
       setSuccess(true)
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Erro inesperado.')
-    } finally { setLoading(false) }
+    } finally {
+      setLoading(false)
+      setGeracaoEtapa(null)
+    }
   }
 
   if (success) {
@@ -788,7 +811,10 @@ export default function CriarPage() {
             </div>
           </div>
 
-          {error && <div className="mb-4 rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-400">{error}</div>}
+          {error && <div className="mb-4 rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-400">
+            <p className="font-semibold">❌ {error}</p>
+            <p className="mt-1 text-xs">Verifique seu telefone e tente novamente.</p>
+          </div>}
 
           <div className="flex gap-3">
             <button onClick={() => setStep(2)} disabled={loading}
@@ -797,11 +823,38 @@ export default function CriarPage() {
             </button>
             <button onClick={gerar} disabled={loading || !canNext3}
               className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#4f7fff] to-[#2554e0] py-4 text-sm font-bold text-white shadow-[0_0_24px_rgba(79,127,255,0.4)] transition hover:shadow-[0_0_36px_rgba(79,127,255,0.6)] disabled:cursor-not-allowed disabled:opacity-60">
-              {loading ? <><Loader2 className="size-4 animate-spin" /> Gerando seu ebook...</> : <><Sparkles className="size-4" /> Gerar meu ebook agora</>}
+              {loading ? <><Loader2 className="size-4 animate-spin" /> {geracaoEtapa || 'Gerando...'}</> : <><Sparkles className="size-4" /> Gerar meu ebook agora</>}
             </button>
           </div>
 
-          {loading && <p className="mt-4 text-center text-xs text-[#3a4a66]">A Aurora está planejando seu ebook... isso leva até 60 segundos.</p>}
+          {loading && (
+            <div className="mt-6 space-y-3 rounded-xl border border-[#1c2438] bg-[#0f1523] p-4">
+              <p className="text-xs font-semibold text-[#6b7a99]">PROGRESSO DA GERAÇÃO</p>
+              <div className="space-y-2 text-xs">
+                <div className={cn('flex items-center gap-2', geracaoEtapa?.includes('título') ? 'text-[#00e5c3]' : 'text-[#3a4a66]')}>
+                  {geracaoEtapa?.includes('título') ? '⏳' : '✓'} Criando título...
+                </div>
+                <div className={cn('flex items-center gap-2', geracaoEtapa?.includes('planejamento') ? 'text-[#00e5c3]' : 'text-[#3a4a66]')}>
+                  {geracaoEtapa?.includes('planejamento') ? '⏳' : geracaoEtapa?.includes('sumário') ? '✓' : '-'} Gerando planejamento...
+                </div>
+                <div className={cn('flex items-center gap-2', geracaoEtapa?.includes('sumário') ? 'text-[#00e5c3]' : 'text-[#3a4a66]')}>
+                  {geracaoEtapa?.includes('sumário') ? '⏳' : geracaoEtapa?.includes('introdução') ? '✓' : '-'} Criando sumário...
+                </div>
+                <div className={cn('flex items-center gap-2', geracaoEtapa?.includes('introdução') ? 'text-[#00e5c3]' : 'text-[#3a4a66]')}>
+                  {geracaoEtapa?.includes('introdução') ? '⏳' : geracaoEtapa?.includes('capítulos') ? '✓' : '-'} Gerando introdução...
+                </div>
+                <div className={cn('flex items-center gap-2', geracaoEtapa?.includes('capítulos') ? 'text-[#00e5c3]' : 'text-[#3a4a66]')}>
+                  {geracaoEtapa?.includes('capítulos') ? '⏳' : geracaoEtapa?.includes('formatando') ? '✓' : '-'} Criando capítulos...
+                </div>
+                <div className={cn('flex items-center gap-2', geracaoEtapa?.includes('formatando') ? 'text-[#00e5c3]' : 'text-[#3a4a66]')}>
+                  {geracaoEtapa?.includes('formatando') ? '⏳' : geracaoEtapa?.includes('WhatsApp') ? '✓' : '-'} Formatando ebook...
+                </div>
+                <div className={cn('flex items-center gap-2', geracaoEtapa?.includes('WhatsApp') ? 'text-[#00e5c3]' : 'text-[#3a4a66]')}>
+                  {geracaoEtapa?.includes('WhatsApp') ? '⏳' : '-'} Enviando via WhatsApp...
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
