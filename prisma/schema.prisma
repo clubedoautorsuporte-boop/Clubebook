@@ -43,6 +43,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   deliveries    Delivery[]
+  drafts        Draft[]
   createdAt     DateTime   @default(now())
 }
 
@@ -52,6 +53,25 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model Draft {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  step      Int      @default(1)
+  titulo    String   @db.VarChar(200)
+  subtitulo String?  @db.VarChar(200)
+  genero    String?  @db.VarChar(100)
+  nomeAutor String   @db.VarChar(100)
+  publico   String?  @db.VarChar(100)
+  tom       String?  @db.VarChar(50)
+  topicos   Json     @default("[]")
+  estrategia String? @db.VarChar(20)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
 }
 
 model Delivery {

@@ -1,6 +1,7 @@
 import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
 import { EbookCard } from '@/components/dashboard/ebook-card'
+import { DraftCard } from '@/components/dashboard/draft-card'
 import { EmptyState } from '@/components/dashboard/empty-state'
 import { QuickCreate } from '@/components/dashboard/quick-create'
 import { DismissableBanner } from '@/components/dashboard/dismissable-banner'
@@ -21,15 +22,28 @@ export default async function DashboardPage() {
     expired: boolean
   }
 
+  type DraftRow = {
+    id: string; titulo: string; genero: string; nomeAutor: string; step: number; updatedAt: string
+  }
+
   let rows: DeliveryRow[] = []
+  let drafts: DraftRow[] = []
 
   if (userId) {
     try {
-      const deliveries = await prisma.delivery.findMany({
-        where: { userId },
-        orderBy: { createdAt: 'desc' },
-        select: { slug: true, planJson: true, createdAt: true, expiresAt: true },
-      })
+      const [deliveries, draftList] = await Promise.all([
+        prisma.delivery.findMany({
+          where: { userId },
+          orderBy: { createdAt: 'desc' },
+          select: { slug: true, planJson: true, createdAt: true, expiresAt: true },
+        }),
+        prisma.draft.findMany({
+          where: { userId },
+          orderBy: { updatedAt: 'desc' },
+          select: { id: true, titulo: true, genero: true, nomeAutor: true, step: true, updatedAt: true },
+        }),
+      ])
+
       rows = deliveries.map((d: { slug: string; planJson: unknown; createdAt: Date; expiresAt: Date }) => {
         const plan = d.planJson as BriefingPlan
         return {
@@ -41,12 +55,21 @@ export default async function DashboardPage() {
           expired: d.expiresAt < new Date(),
         }
       })
+
+      drafts = draftList.map((d: { id: string; titulo: string; genero: string | null; nomeAutor: string; step: number; updatedAt: Date }) => ({
+        id: d.id,
+        titulo: d.titulo,
+        genero: d.genero ?? '',
+        nomeAutor: d.nomeAutor,
+        step: d.step,
+        updatedAt: d.updatedAt.toISOString(),
+      }))
     } catch (err) {
       console.error('[dashboard] erro ao buscar ebooks:', err)
     }
   }
 
-  const total = rows.length
+  const total = rows.length + drafts.length
 
   return (
     <div className="px-5 pt-6 md:px-8">
@@ -77,11 +100,32 @@ export default async function DashboardPage() {
           <div className="mb-6">
             <QuickCreate />
           </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {rows.map(r => (
-              <EbookCard key={r.slug} {...r} />
-            ))}
-          </div>
+
+          {/* Rascunhos em andamento */}
+          {drafts.length > 0 && (
+            <div className="mb-8">
+              <p className="mb-3 text-xs font-bold uppercase tracking-widest text-[#4f7fff]">
+                ✏ Em andamento ({drafts.length})
+              </p>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {drafts.map(d => <DraftCard key={d.id} {...d} />)}
+              </div>
+            </div>
+          )}
+
+          {/* Ebooks concluídos */}
+          {rows.length > 0 && (
+            <div>
+              {drafts.length > 0 && (
+                <p className="mb-3 text-xs font-bold uppercase tracking-widest text-[#00e5c3]">
+                  ✓ Concluídos ({rows.length})
+                </p>
+              )}
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {rows.map(r => <EbookCard key={r.slug} {...r} />)}
+              </div>
+            </div>
+          )}
         </>
       )}
     </div>

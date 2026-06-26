@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useRef, useEffect, useCallback } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import {
   ArrowRight, ArrowLeft, Lightbulb, CheckCircle2, Loader2,
   Sparkles, X, Wand2, ChevronDown, Search, Plus, Tag,
@@ -112,10 +112,13 @@ function GeneroSelect({ value, onChange }: { value: string; onChange: (v: string
 
 export default function CriarPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [step, setStep] = useState<Step>(1)
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
+  const [draftId, setDraftId] = useState<string | null>(null)
+  const [savingDraft, setSavingDraft] = useState(false)
 
   // Inspiration
   const [inspPanel, setInspPanel] = useState<InspPanel>(null)
@@ -146,6 +149,55 @@ export default function CriarPage() {
   // Step 3
   const [telefone, setTelefone] = useState('')
   const [email, setEmail] = useState('')
+
+  // Carregar rascunho existente via ?draft=id
+  useEffect(() => {
+    const id = searchParams.get('draft')
+    if (!id) return
+    setDraftId(id)
+    fetch(`/api/draft/${id}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (!data) return
+        setForm({ tituloProvisorio: data.titulo ?? '', subtitulo: data.subtitulo ?? '', genero: data.genero ?? '', nome: data.nomeAutor ?? '' })
+        setPublico(data.publico ?? '')
+        setTom(data.tom ?? '')
+        setTopicos(data.topicos ?? [])
+        setEstrategia(data.estrategia ?? '')
+        setStep(Math.min(data.step, 2) as Step) // vai até o step salvo (max 2 para não pular campos)
+      })
+      .catch(() => {})
+  }, [searchParams])
+
+  // Salva rascunho no banco
+  const saveDraft = useCallback(async (currentStep: number) => {
+    if (!form.tituloProvisorio.trim() || !form.nome.trim()) return
+    setSavingDraft(true)
+    try {
+      const res = await fetch('/api/draft', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          draftId: draftId ?? undefined,
+          step: currentStep,
+          titulo: form.tituloProvisorio,
+          subtitulo: form.subtitulo,
+          genero: form.genero,
+          nomeAutor: form.nome,
+          publico,
+          tom,
+          topicos,
+          estrategia,
+        }),
+      })
+      if (res.ok) {
+        const data = await res.json()
+        if (!draftId) setDraftId(data.draftId)
+      }
+    } catch { /* silencioso */ } finally {
+      setSavingDraft(false)
+    }
+  }, [draftId, form, publico, tom, topicos, estrategia])
 
   const selecionarObjetivo = (label: string) => {
     setObjetivoSelecionado(label); setDetalheObjetivo(''); setErrorTema(''); setInspPanel('detalhe')
@@ -183,6 +235,16 @@ export default function CriarPage() {
 
   const canNext1 = form.tituloProvisorio.trim().length >= 3 && form.nome.trim().length >= 2
   const canNext3 = telefone.replace(/\D/g, '').length >= 10
+
+  const goToStep2 = async () => {
+    await saveDraft(2)
+    setStep(2)
+  }
+
+  const goToStep3 = async () => {
+    await saveDraft(3)
+    setStep(3)
+  }
 
   const tabDisabled = (id: FonteTipo) => false
 
@@ -286,6 +348,12 @@ export default function CriarPage() {
       }
 
       setGeracaoEtapa('Enviando via WhatsApp...')
+
+      // Remove o rascunho após geração bem-sucedida
+      if (draftId) {
+        fetch(`/api/draft?id=${draftId}`, { method: 'DELETE' }).catch(() => {})
+      }
+
       setSuccess(true)
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Erro inesperado.')
@@ -430,9 +498,9 @@ export default function CriarPage() {
             </div>
           </div>
 
-          <button onClick={() => setStep(2)} disabled={!canNext1}
+          <button onClick={goToStep2} disabled={!canNext1 || savingDraft}
             className="mt-8 flex w-full items-center justify-center gap-2 rounded-xl bg-[#00e5c3] py-4 text-sm font-bold text-[#040810] shadow-[0_0_24px_rgba(0,229,195,0.35)] transition hover:bg-[#00cfb0] disabled:cursor-not-allowed disabled:opacity-40">
-            Próximo Passo <ArrowRight className="size-4" />
+            {savingDraft ? <><Loader2 className="size-4 animate-spin" /> Salvando...</> : <>Próximo Passo <ArrowRight className="size-4" /></>}
           </button>
         </div>
       )}
@@ -761,9 +829,9 @@ export default function CriarPage() {
               className="flex items-center gap-2 rounded-xl border border-[#1c2438] bg-[#0f1523] px-5 py-4 text-sm font-semibold text-[#6b7a99] transition hover:text-white">
               <ArrowLeft className="size-4" /> Voltar
             </button>
-            <button onClick={() => setStep(3)}
-              className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#00e5c3] py-4 text-sm font-bold text-[#040810] shadow-[0_0_24px_rgba(0,229,195,0.35)] transition hover:bg-[#00cfb0]">
-              Continuar <ArrowRight className="size-4" />
+            <button onClick={goToStep3} disabled={savingDraft}
+              className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#00e5c3] py-4 text-sm font-bold text-[#040810] shadow-[0_0_24px_rgba(0,229,195,0.35)] transition hover:bg-[#00cfb0] disabled:opacity-60">
+              {savingDraft ? <><Loader2 className="size-4 animate-spin" /> Salvando...</> : <>Continuar <ArrowRight className="size-4" /></>}
             </button>
           </div>
         </div>
