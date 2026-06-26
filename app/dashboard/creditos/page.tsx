@@ -29,7 +29,7 @@ export default async function CreditosPage() {
       { name: 'Tradução (por idioma)', cost: 'R$ 29,99' },
       { name: 'Ilustrações (por imagem)', cost: 'R$ 9,99–14,99' },
     ] },
-    { category: 'Edições com Créditos (SÁBHIA Builder)', subtext: 'Use créditos para editar seu livro após a geração', items: [
+    { category: 'Edições com Créditos (Aurora Builder)', subtext: 'Use créditos para editar seu livro após a geração', items: [
       { name: 'Criar novo capítulo', credits: '~480 créditos' },
       { name: 'Reescrever capítulo inteiro', credits: '~735 créditos' },
       { name: 'Reescrever seção', credits: '~490 créditos' },
@@ -151,7 +151,7 @@ export default async function CreditosPage() {
             </div>
           ))}
           <p className="text-[10px] text-[#3a4a66] px-6 py-3 bg-[#080b14]">
-            Os custos incluem uma taxa base + tempo de processamento da SÁBHIA. O valor final pode variar conforme a complexidade da tarefa. 100 créditos = R$ 1,00.
+            Os custos incluem uma taxa base + tempo de processamento da Aurora. O valor final pode variar conforme a complexidade da tarefa. 100 créditos = R$ 1,00.
           </p>
         </div>
       </div>
