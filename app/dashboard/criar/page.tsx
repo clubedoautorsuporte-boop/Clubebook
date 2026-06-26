@@ -1,8 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowRight, ArrowLeft, Lightbulb, CheckCircle2, Loader2, Sparkles, X, Wand2 } from 'lucide-react'
+import {
+  ArrowRight, ArrowLeft, Lightbulb, CheckCircle2,
+  Loader2, Sparkles, X, Wand2, ChevronDown, Search,
+} from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 type Step = 1 | 2 | 3
@@ -23,6 +26,85 @@ const OBJETIVOS = [
   { icone: '✨', label: 'Outro objetivo' },
 ]
 
+const GENEROS = [
+  'Autoajuda', 'Aventura', 'Biografia', 'Ciência & Tecnologia',
+  'Culinária', 'Desenvolvimento Pessoal', 'Drama', 'Educação',
+  'Esportes', 'Fantasia', 'Ficção', 'Ficção Científica',
+  'Ficção Histórica', 'Filosofia', 'Finanças', 'História',
+  'Humor', 'Infantil', 'Juvenil', 'Mistério', 'Negócios',
+  'Poesia', 'Psicologia', 'Religião & Espiritualidade', 'Romance',
+  'Saúde & Bem-Estar', 'Suspense', 'Técnico & Acadêmico', 'Terror', 'Thriller',
+]
+
+function GeneroSelect({
+  value, onChange,
+}: { value: string; onChange: (v: string) => void }) {
+  const [open, setOpen] = useState(false)
+  const [busca, setBusca] = useState('')
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
+
+  const filtrados = GENEROS.filter(g =>
+    g.toLowerCase().includes(busca.toLowerCase()),
+  )
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onClick={() => { setOpen(o => !o); setBusca('') }}
+        className="flex w-full items-center justify-between rounded-xl border border-[#1c2438] bg-[#0b0f1c] px-4 py-3 text-sm transition focus:border-[#4f7fff50] focus:outline-none"
+      >
+        <span className={value ? 'text-white' : 'text-[#3a4a66]'}>
+          {value || 'Selecione o gênero...'}
+        </span>
+        <ChevronDown className={cn('size-4 text-[#3a4a66] transition-transform', open && 'rotate-180')} />
+      </button>
+
+      {open && (
+        <div className="absolute left-0 right-0 top-full z-50 mt-1 overflow-hidden rounded-xl border border-[#1c2438] bg-[#0b0f1c] shadow-xl">
+          <div className="flex items-center gap-2 border-b border-[#1c2438] px-3 py-2.5">
+            <Search className="size-3.5 shrink-0 text-[#3a4a66]" />
+            <input
+              autoFocus
+              type="text"
+              value={busca}
+              onChange={e => setBusca(e.target.value)}
+              placeholder="Pesquisar gênero..."
+              className="flex-1 bg-transparent text-sm text-white placeholder:text-[#3a4a66] focus:outline-none"
+            />
+          </div>
+          <div className="max-h-52 overflow-y-auto">
+            {filtrados.map(g => (
+              <button
+                key={g}
+                type="button"
+                onClick={() => { onChange(g); setOpen(false) }}
+                className={cn(
+                  'flex w-full items-center px-4 py-2.5 text-left text-sm transition hover:bg-[#0f1523]',
+                  value === g ? 'text-[#00e5c3]' : 'text-[#c4d0e8]',
+                )}
+              >
+                {g}
+              </button>
+            ))}
+            {filtrados.length === 0 && (
+              <p className="px-4 py-3 text-sm text-[#3a4a66]">Nenhum gênero encontrado</p>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function CriarPage() {
   const router = useRouter()
   const [step, setStep] = useState<Step>(1)
@@ -30,7 +112,6 @@ export default function CriarPage() {
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
 
-  // Inspiration panel state machine: null → 'list' → 'detalhe'
   const [inspPanel, setInspPanel] = useState<InspPanel>(null)
   const [objetivoSelecionado, setObjetivoSelecionado] = useState('')
   const [detalheObjetivo, setDetalheObjetivo] = useState('')
@@ -38,8 +119,9 @@ export default function CriarPage() {
   const [errorTema, setErrorTema] = useState('')
 
   const [form, setForm] = useState({
-    tema: '',
     tituloProvisorio: '',
+    subtitulo: '',
+    genero: '',
     nome: '',
     telefone: '',
     email: '',
@@ -65,7 +147,7 @@ export default function CriarPage() {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Erro ao sugerir tema')
-      set('tema', data.tema)
+      set('tituloProvisorio', data.tema)
       setInspPanel(null)
     } catch (e: unknown) {
       setErrorTema(e instanceof Error ? e.message : 'Erro inesperado')
@@ -74,17 +156,20 @@ export default function CriarPage() {
     }
   }
 
-  const canNext1 = form.tema.trim().length >= 3 && form.nome.trim().length >= 2
+  const canNext1 = form.tituloProvisorio.trim().length >= 3 && form.nome.trim().length >= 2
   const canNext2 = form.telefone.replace(/\D/g, '').length >= 10
 
   async function gerar() {
     setLoading(true)
     setError('')
     try {
+      const tema = [form.tituloProvisorio, form.genero, objetivoSelecionado]
+        .filter(Boolean).join(' — ')
+
       const planRes = await fetch('/api/ebook-plan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tema: form.tema, nome: form.nome }),
+        body: JSON.stringify({ tema, nome: form.nome }),
       })
       if (!planRes.ok) throw new Error('Falha ao gerar planejamento')
       const { plan } = await planRes.json()
@@ -118,7 +203,9 @@ export default function CriarPage() {
             onClick={() => {
               setSuccess(false)
               setStep(1)
-              setForm({ tema: '', tituloProvisorio: '', nome: '', telefone: '', email: '' })
+              setForm({ tituloProvisorio: '', subtitulo: '', genero: '', nome: '', telefone: '', email: '' })
+              setObjetivoSelecionado('')
+              setInspPanel(null)
             }}
             className="rounded-xl border border-[#1c2438] bg-[#0f1523] px-5 py-2.5 text-sm font-semibold text-white transition hover:border-[#4f7fff40]"
           >
@@ -213,7 +300,7 @@ export default function CriarPage() {
             </div>
           )}
 
-          {/* Panel: "Quase lá!" — detalhe do objetivo selecionado */}
+          {/* Panel: "Quase lá!" */}
           {inspPanel === 'detalhe' && (
             <div className="mb-6 overflow-hidden rounded-2xl border border-[#1c2438] bg-[#0b0f1c]">
               <div className="flex flex-col items-center py-6 px-5">
@@ -295,45 +382,54 @@ export default function CriarPage() {
             </button>
           )}
 
-          {/* Form fields */}
+          {/* Form fields — estilo exato Sábhia */}
           <div className="space-y-4">
             <div>
               <label className="mb-1.5 block text-xs font-semibold text-[#6b7a99]">
-                Tema do ebook <span className="text-red-400">*</span>
-              </label>
-              <input
-                type="text"
-                value={form.tema}
-                onChange={e => set('tema', e.target.value)}
-                placeholder="Ex: Finanças pessoais para iniciantes, Emagrecimento..."
-                className="w-full rounded-xl border border-[#1c2438] bg-[#0b0f1c] px-4 py-3 text-sm text-white placeholder:text-[#3a4a66] focus:border-[#4f7fff50] focus:outline-none"
-              />
-            </div>
-
-            <div>
-              <label className="mb-1.5 block text-xs font-semibold text-[#6b7a99]">
-                Título provisório <span className="text-[#3a4a66]">(opcional)</span>
+                Título provisório
               </label>
               <input
                 type="text"
                 value={form.tituloProvisorio}
                 onChange={e => set('tituloProvisorio', e.target.value)}
-                placeholder="Ex: Minhas Finanças, O Guia do Futuro..."
+                placeholder="Ex: Minhas Memórias, O Guia do Futuro..."
                 className="w-full rounded-xl border border-[#1c2438] bg-[#0b0f1c] px-4 py-3 text-sm text-white placeholder:text-[#3a4a66] focus:border-[#4f7fff50] focus:outline-none"
               />
             </div>
 
             <div>
               <label className="mb-1.5 block text-xs font-semibold text-[#6b7a99]">
-                Nome do Autor (você) <span className="text-red-400">*</span>
+                Subtítulo <span className="text-[#3a4a66]">(opcional)</span>
               </label>
               <input
                 type="text"
-                value={form.nome}
-                onChange={e => set('nome', e.target.value)}
-                placeholder="Como quer ser chamado?"
+                value={form.subtitulo}
+                onChange={e => set('subtitulo', e.target.value)}
+                placeholder="Ex: Um guia completo para iniciantes..."
                 className="w-full rounded-xl border border-[#1c2438] bg-[#0b0f1c] px-4 py-3 text-sm text-white placeholder:text-[#3a4a66] focus:border-[#4f7fff50] focus:outline-none"
               />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="mb-1.5 block text-xs font-semibold text-[#6b7a99]">
+                  Gênero Literário
+                </label>
+                <GeneroSelect value={form.genero} onChange={v => set('genero', v)} />
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-xs font-semibold text-[#6b7a99]">
+                  Nome do Autor (Você) <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={form.nome}
+                  onChange={e => set('nome', e.target.value)}
+                  placeholder="Como quer ser chamado?"
+                  className="w-full rounded-xl border border-[#1c2438] bg-[#0b0f1c] px-4 py-3 text-sm text-white placeholder:text-[#3a4a66] focus:border-[#4f7fff50] focus:outline-none"
+                />
+              </div>
             </div>
           </div>
 
@@ -431,7 +527,9 @@ export default function CriarPage() {
               <p className="text-xs font-bold uppercase tracking-wider text-[#3a4a66]">Resumo</p>
             </div>
             {([
-              { label: 'Tema', value: form.tema },
+              { label: 'Título', value: form.tituloProvisorio },
+              form.subtitulo ? { label: 'Subtítulo', value: form.subtitulo } : null,
+              form.genero ? { label: 'Gênero', value: form.genero } : null,
               { label: 'Autor', value: form.nome },
               { label: 'WhatsApp', value: form.telefone },
               form.email ? { label: 'E-mail', value: form.email } : null,
