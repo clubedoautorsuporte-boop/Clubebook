@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Settings, HelpCircle, LogOut, Plus, TrendingUp,
   Gift, Copy, Check, Gem, Library, Flame,
   ShoppingCart, Globe2, Calculator, Store, GraduationCap, Trophy,
-  CalendarDays, FlaskConical,
+  CalendarDays, FlaskConical, Wrench,
 } from 'lucide-react'
 import { signOut } from 'next-auth/react'
 import { cn } from '@/lib/utils'
@@ -32,6 +32,7 @@ const NAV_MAIN = [
 ]
 
 const NAV_EXTRA = [
+  { href: '/dashboard/kit-ferramentas', icon: Wrench, label: 'Kit Ferramentas' },
   { href: '/dashboard/nichos', icon: Flame, label: 'Nichos Lucrativos' },
   { href: '/dashboard/tendencias', icon: CalendarDays, label: 'Tendências' },
   { href: '/dashboard/kit-vendas', icon: ShoppingCart, label: 'Kit de Vendas' },
