@@ -1,6 +1,6 @@
 import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
-import { Zap, Check, Gift } from 'lucide-react'
+import { Zap, Check, Gift, Gem, TrendingUp, ArrowDownCircle, History } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { ComprarButton } from './comprar-button'
 
@@ -12,6 +12,9 @@ export default async function CreditosPage() {
   const creditsBought = 0
   const creditsUsed = 0
 
+  const userEmail = session.user?.email ?? ''
+  const userName = session.user?.name ?? ''
+
   const packages = [
     { credits: 20000,  price: 179.99, discount: 10, realValue: 200,  popular: false },
     { credits: 50000,  price: 439.99, discount: 12, realValue: 500,  popular: true  },
@@ -20,7 +23,9 @@ export default async function CreditosPage() {
 
   const services = [
     {
-      title: 'Serviços Principais (pagamento direto em R$)',
+      title: 'Serviços Principais',
+      subtitle: 'Pagamento direto em R$',
+      color: '#4f7fff',
       items: [
         { name: 'Escrita do Livro (geração completa)',   value: 'R$ 49,99'       },
         { name: 'Capa Profissional (4 variações)',        value: 'R$ 99,99'       },
@@ -33,11 +38,12 @@ export default async function CreditosPage() {
       ],
     },
     {
-      title: 'Edições com Créditos (Aurora Builder)',
-      subtitle: 'Use créditos para editar seu livro após a geração',
+      title: 'Edições com Créditos',
+      subtitle: 'Aurora Builder — edite seu livro após a geração',
+      color: '#00e5c3',
       items: [
-        { name: 'Criar novo capítulo',                value: '-488 créditos'  },
-        { name: 'Reescrever capítulo inteiro',         value: '-735 créditos'  },
+        { name: 'Criar novo capítulo',               value: '-488 créditos'  },
+        { name: 'Reescrever capítulo inteiro',        value: '-735 créditos'  },
         { name: 'Reescrever seção',                   value: '-499 créditos'  },
         { name: 'Reescrever parágrafo',               value: '-348 créditos'  },
         { name: 'Corrigir texto do capítulo',         value: '-116 créditos'  },
@@ -61,64 +67,68 @@ export default async function CreditosPage() {
     },
   ]
 
-  return (
-    <div className="px-5 pt-6 pb-12 md:px-8">
+  const STATS = [
+    { label: 'Saldo disponível', value: credits.toLocaleString('pt-BR'), unit: 'créditos', icon: Gem, color: '#00e5c3', bg: '#00e5c318' },
+    { label: 'Total comprado', value: creditsBought.toLocaleString('pt-BR'), unit: 'créditos', icon: TrendingUp, color: '#4f7fff', bg: '#4f7fff18' },
+    { label: 'Total utilizado', value: creditsUsed.toLocaleString('pt-BR'), unit: 'créditos', icon: ArrowDownCircle, color: '#f97316', bg: '#f9731618' },
+    { label: 'Equivale a', value: `R$ ${(credits / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, unit: 'em reais', icon: Zap, color: '#8b5cf6', bg: '#8b5cf618' },
+  ]
 
-      {/* Header */}
-      <div className="mb-7">
-        <h1 className="text-2xl font-bold text-white">Meus Créditos</h1>
-        <p className="mt-0.5 text-sm text-[#6b7a99]">Compre créditos e use em qualquer serviço da plataforma</p>
+  return (
+    <div className="px-5 pt-6 pb-16 md:px-8">
+
+      {/* ── Saldo em destaque ── */}
+      <div className="mb-6 overflow-hidden rounded-2xl border border-[#00e5c325] bg-gradient-to-br from-[#071e1a] via-[#040e0c] to-[#080b14] p-6">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-widest text-[#00e5c3]/60 mb-2">Saldo disponível</p>
+            <p className="text-5xl font-extrabold leading-none text-[#00e5c3]">
+              {credits.toLocaleString('pt-BR')}
+              <span className="ml-2 text-xl font-semibold text-[#00e5c3]/50">créditos</span>
+            </p>
+            <p className="mt-2 text-sm text-[#3a4a66]">
+              = R$ {(credits / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })} em serviços
+            </p>
+          </div>
+          <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-[#00e5c318]">
+            <Gem className="size-7 text-[#00e5c3]" />
+          </div>
+        </div>
       </div>
 
-      {/* ── Saldo + Stats ── */}
-      <div className="mb-8 grid grid-cols-1 gap-3 sm:grid-cols-3">
-        {/* Saldo disponível */}
-        <div className="rounded-2xl border border-[#00e5c320] bg-gradient-to-br from-[#071e1a] to-[#040e0c] p-5">
-          <p className="mb-3 text-xs text-[#6b7a99]">Saldo disponível</p>
-          <p className="text-4xl font-extrabold leading-none text-[#00e5c3]">
-            {credits.toLocaleString('pt-BR')}
-            <span className="ml-1.5 text-base font-semibold text-[#00e5c3]/60">créditos</span>
-          </p>
-          <p className="mt-2 text-xs text-[#3a4a66]">
-            Equivalente a R$ {(credits / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-          </p>
-        </div>
-
-        {/* Total comprado */}
-        <div className="rounded-2xl border border-[#1c2438] bg-[#0b0f1c] p-5">
-          <p className="mb-3 text-xs text-[#6b7a99]">Total comprado</p>
-          <p className="text-4xl font-extrabold leading-none text-white">
-            {creditsBought.toLocaleString('pt-BR')}
-          </p>
-        </div>
-
-        {/* Total utilizado */}
-        <div className="rounded-2xl border border-[#1c2438] bg-[#0b0f1c] p-5">
-          <p className="mb-3 text-xs text-[#6b7a99]">Total utilizado</p>
-          <p className="text-4xl font-extrabold leading-none text-white">
-            {creditsUsed.toLocaleString('pt-BR')}
-          </p>
-        </div>
+      {/* ── Stats ── */}
+      <div className="mb-8 grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+        {STATS.map(({ label, value, unit, icon: Icon, color, bg }) => (
+          <div key={label} className="rounded-2xl border border-[#1c2438] bg-[#0b0f1c] p-4">
+            <div className="mb-3 flex items-center justify-between">
+              <p className="text-[11px] text-[#6b7a99]">{label}</p>
+              <div className="grid h-7 w-7 place-items-center rounded-lg" style={{ background: bg }}>
+                <Icon className="size-3.5" style={{ color }} />
+              </div>
+            </div>
+            <p className="text-xl font-extrabold text-white tabular-nums leading-tight">{value}</p>
+            <p className="mt-0.5 text-[10px] text-[#3a4a66]">{unit}</p>
+          </div>
+        ))}
       </div>
 
       {/* ── Comprar Créditos ── */}
       <div className="mb-8">
         <div className="mb-5 flex items-center gap-2">
-          <Zap className="size-4 text-[#4f7fff]" />
+          <div className="grid h-8 w-8 place-items-center rounded-xl bg-[#4f7fff18]">
+            <Zap className="size-4 text-[#4f7fff]" />
+          </div>
           <h2 className="text-base font-bold text-white">Comprar Créditos</h2>
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           {packages.map((pkg, i) => (
-            <div
-              key={i}
-              className={cn(
-                'relative flex flex-col rounded-2xl border-2 p-6 transition',
-                pkg.popular
-                  ? 'border-[#00e5c3] bg-[#00e5c30a]'
-                  : 'border-[#1c2438] bg-[#0b0f1c] hover:border-[#1c2438]/80',
-              )}
-            >
+            <div key={i} className={cn(
+              'relative flex flex-col rounded-2xl border-2 p-6 transition',
+              pkg.popular
+                ? 'border-[#00e5c3] bg-[#00e5c30a]'
+                : 'border-[#1c2438] bg-[#0b0f1c] hover:border-[#2a3553]',
+            )}>
               {pkg.popular && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                   <span className="rounded-full bg-[#00e5c3] px-3 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-[#040810]">
@@ -126,19 +136,11 @@ export default async function CreditosPage() {
                   </span>
                 </div>
               )}
-
-              {/* Credits */}
-              <p className="text-4xl font-extrabold text-white">
-                {pkg.credits.toLocaleString('pt-BR')}
-              </p>
+              <p className="text-4xl font-extrabold text-white">{pkg.credits.toLocaleString('pt-BR')}</p>
               <p className="mb-4 text-sm text-[#6b7a99]">créditos</p>
-
-              {/* Price */}
               <p className={cn('mb-3 text-2xl font-bold', pkg.popular ? 'text-[#00e5c3]' : 'text-white')}>
                 R$ {pkg.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
               </p>
-
-              {/* Discount */}
               <div className="mb-6 flex flex-col gap-0.5">
                 <span className="flex items-center gap-1 text-xs text-[#00e5c3]">
                   <Check className="size-3" /> Economia de {pkg.discount}%
@@ -147,8 +149,7 @@ export default async function CreditosPage() {
                   Valor real R$ {pkg.realValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                 </span>
               </div>
-
-              <ComprarButton popular={pkg.popular} credits={pkg.credits} price={pkg.price} />
+              <ComprarButton popular={pkg.popular} credits={pkg.credits} price={pkg.price} userEmail={userEmail} userName={userName} />
             </div>
           ))}
         </div>
@@ -156,51 +157,51 @@ export default async function CreditosPage() {
 
       {/* ── Tabela de Custos ── */}
       <div className="mb-8">
-        <h2 className="mb-4 text-base font-bold text-white">Tabela de Custos por Serviço</h2>
+        <div className="mb-4 flex items-center gap-2">
+          <div className="grid h-8 w-8 place-items-center rounded-xl bg-[#8b5cf618]">
+            <Zap className="size-4 text-[#8b5cf6]" />
+          </div>
+          <h2 className="text-base font-bold text-white">Tabela de Custos por Serviço</h2>
+        </div>
 
-        <div className="overflow-hidden rounded-2xl border border-[#1c2438]">
+        <div className="space-y-3">
           {services.map((section, si) => (
-            <div key={si}>
-              {/* Section header */}
-              <div className={cn('border-b border-[#1c2438] bg-[#080b14] px-5 py-3', si > 0 && 'border-t border-[#1c2438]')}>
-                <p className="text-[13px] font-semibold text-white">{section.title}</p>
-                {section.subtitle && (
-                  <p className="mt-0.5 text-[11px] text-[#3a4a66]">{section.subtitle}</p>
-                )}
+            <div key={si} className="overflow-hidden rounded-2xl border border-[#1c2438]">
+              <div className="flex items-center gap-3 border-b border-[#1c2438] bg-[#0b0f1c] px-5 py-3.5">
+                <div className="h-1.5 w-1.5 rounded-full" style={{ background: section.color }} />
+                <div>
+                  <p className="text-[13px] font-bold text-white">{section.title}</p>
+                  <p className="text-[11px] text-[#3a4a66]">{section.subtitle}</p>
+                </div>
               </div>
-
-              {/* Rows */}
               {section.items.map((item, ii) => (
-                <div
-                  key={ii}
-                  className={cn(
-                    'flex items-center justify-between px-5 py-3',
-                    ii % 2 === 0 ? 'bg-[#080b14]' : 'bg-[#0b0f1c]',
-                  )}
-                >
+                <div key={ii} className={cn(
+                  'flex items-center justify-between px-5 py-3',
+                  ii % 2 === 0 ? 'bg-[#080b14]' : 'bg-[#0b0f1c]',
+                )}>
                   <span className="text-sm text-[#b0bdd4]">{item.name}</span>
                   <span className={cn(
-                    'text-sm font-semibold tabular-nums',
+                    'text-sm font-bold tabular-nums',
                     item.value.startsWith('-') ? 'text-[#4f7fff]' : 'text-[#00e5c3]',
-                  )}>
-                    {item.value}
-                  </span>
+                  )}>{item.value}</span>
                 </div>
               ))}
             </div>
           ))}
-
-          {/* Footer note */}
-          <p className="border-t border-[#1c2438] bg-[#080b14] px-5 py-3 text-[10px] leading-relaxed text-[#3a4a66]">
-            Os custos incluem uma taxa base + tempo de processamento da Aurora.
-            O valor final pode variar conforme a complexidade da tarefa. 100 créditos = R$ 1,00.
-          </p>
         </div>
+        <p className="mt-3 text-[10px] leading-relaxed text-[#3a4a66] text-center">
+          100 créditos = R$ 1,00 · Custos incluem taxa base + tempo de processamento da Aurora
+        </p>
       </div>
 
-      {/* ── Histórico de Transações ── */}
+      {/* ── Histórico ── */}
       <div>
-        <h2 className="mb-4 text-base font-bold text-white">Histórico de Transações</h2>
+        <div className="mb-4 flex items-center gap-2">
+          <div className="grid h-8 w-8 place-items-center rounded-xl bg-[#4f7fff18]">
+            <History className="size-4 text-[#4f7fff]" />
+          </div>
+          <h2 className="text-base font-bold text-white">Histórico de Transações</h2>
+        </div>
 
         <div className="overflow-hidden rounded-2xl border border-[#1c2438]">
           {transactions.length === 0 ? (
@@ -208,13 +209,10 @@ export default async function CreditosPage() {
           ) : (
             <div className="divide-y divide-[#1c2438]">
               {transactions.map((tx, i) => (
-                <div key={i} className="flex items-center gap-4 px-5 py-4 hover:bg-[#080b14] transition">
-                  {/* Icon */}
+                <div key={i} className="flex items-center gap-4 px-5 py-4 hover:bg-[#0b0f1c] transition">
                   <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#4f7fff15]">
                     <Gift className="size-5 text-[#4f7fff]" />
                   </div>
-
-                  {/* Description */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-0.5">
                       <span className={cn('rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider', tx.badgeColor)}>
@@ -223,8 +221,6 @@ export default async function CreditosPage() {
                     </div>
                     <p className="truncate text-sm text-[#c4d0e8]">{tx.description}</p>
                   </div>
-
-                  {/* Amount + date */}
                   <div className="shrink-0 text-right">
                     <p className="text-sm font-bold text-[#00e5c3]">{tx.amount}</p>
                     <p className="text-[10px] text-[#3a4a66]">Saldo: {tx.balance}</p>

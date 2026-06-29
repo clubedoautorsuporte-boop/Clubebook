@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Library, ArrowRight } from 'lucide-react'
+import { Library, ArrowRight, BookOpen, Layers, Tag } from 'lucide-react'
 
 const TEMPLATES = [
   {
@@ -100,65 +100,107 @@ const TEMPLATES = [
   },
 ]
 
-const COR_CATEGORIA: Record<string, string> = {
-  Finanças: 'bg-amber-500/20 text-amber-400',
-  Saúde: 'bg-[#00e5c320] text-[#00e5c3]',
-  Marketing: 'bg-purple-500/20 text-purple-400',
-  'IA e Tech': 'bg-[#4f7fff20] text-[#4f7fff]',
-  Desenvolvimento: 'bg-blue-500/20 text-blue-400',
-  Negócios: 'bg-orange-500/20 text-orange-400',
+const COR_CATEGORIA: Record<string, { badge: string; color: string; icon: string }> = {
+  Finanças:     { badge: 'bg-amber-500/15 text-amber-400',    color: '#f59e0b', icon: '💰' },
+  Saúde:        { badge: 'bg-[#00e5c315] text-[#00e5c3]',    color: '#00e5c3', icon: '🏃' },
+  Marketing:    { badge: 'bg-purple-500/15 text-purple-400',  color: '#a78bfa', icon: '📣' },
+  'IA e Tech':  { badge: 'bg-[#4f7fff15] text-[#4f7fff]',    color: '#4f7fff', icon: '🤖' },
+  Desenvolvimento: { badge: 'bg-blue-500/15 text-blue-400',   color: '#60a5fa', icon: '🚀' },
+  Negócios:     { badge: 'bg-orange-500/15 text-orange-400',  color: '#fb923c', icon: '💼' },
 }
+
+const CATEGORIAS = [...new Set(TEMPLATES.map(t => t.categoria))]
+
+const STATS = [
+  { label: 'Templates disponíveis', value: TEMPLATES.length, icon: Layers, color: '#4f7fff', bg: '#4f7fff18' },
+  { label: 'Categorias', value: CATEGORIAS.length, icon: Tag, color: '#00e5c3', bg: '#00e5c318' },
+  { label: 'Capítulos inclusos', value: TEMPLATES.reduce((acc, t) => acc + t.capitulos.length, 0), icon: BookOpen, color: '#8b5cf6', bg: '#8b5cf618' },
+]
 
 export default function BibliotecaPage() {
   return (
-    <div className="px-5 py-6 md:px-8">
-      <div className="mb-6 flex items-center gap-3">
-        <div className="grid h-10 w-10 place-items-center rounded-xl bg-[#4f7fff15]">
-          <Library className="size-5 text-[#4f7fff]" />
-        </div>
-        <div>
-          <h1 className="text-xl font-bold text-white">Biblioteca de Templates</h1>
-          <p className="text-sm text-[#6b7a99]">Estruturas prontas dos ebooks mais vendidos — clique para criar</p>
+    <div className="px-5 py-6 pb-16 md:px-8">
+
+      {/* ── Header ── */}
+      <div className="mb-6 flex items-start justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="grid h-11 w-11 place-items-center rounded-xl bg-[#4f7fff18]">
+            <Library className="size-6 text-[#4f7fff]" />
+          </div>
+          <div>
+            <h1 className="text-xl font-bold text-white">Biblioteca de Templates</h1>
+            <p className="text-sm text-[#6b7a99]">Estruturas dos ebooks mais vendidos — clique para criar</p>
+          </div>
         </div>
       </div>
 
-      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {TEMPLATES.map(({ categoria, titulo, publicoAlvo, preco, capitulos }) => (
-          <div
-            key={titulo}
-            className="group flex flex-col rounded-2xl border border-[#1c2438] bg-[#0f1523] p-5 transition-all hover:border-[#4f7fff40]"
-          >
-            <div className="mb-3 flex items-start justify-between gap-2">
-              <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold ${COR_CATEGORIA[categoria]}`}>
-                {categoria}
-              </span>
-              <span className="text-xs font-semibold text-[#00e5c3]">{preco}</span>
+      {/* ── Stats ── */}
+      <div className="mb-6 grid grid-cols-3 gap-2.5">
+        {STATS.map(({ label, value, icon: Icon, color, bg }) => (
+          <div key={label} className="rounded-2xl border border-[#1c2438] bg-[#0b0f1c] p-4">
+            <div className="mb-3 flex items-center justify-between">
+              <p className="text-[11px] text-[#6b7a99]">{label}</p>
+              <div className="grid h-7 w-7 place-items-center rounded-lg" style={{ background: bg }}>
+                <Icon className="size-3.5" style={{ color }} />
+              </div>
             </div>
-
-            <h3 className="mb-1.5 font-bold leading-tight text-white">{titulo}</h3>
-            <p className="mb-4 text-xs leading-relaxed text-[#6b7a99]">Público: {publicoAlvo}</p>
-
-            <div className="mb-5 space-y-1.5">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-[#3a4a66]">Sumário ({capitulos.length} capítulos)</p>
-              {capitulos.slice(0, 4).map((cap, i) => (
-                <p key={i} className="text-xs text-[#6b7a99]">
-                  <span className="text-[#2a3553]">{i + 1}.</span> {cap}
-                </p>
-              ))}
-              {capitulos.length > 4 && (
-                <p className="text-[10px] text-[#2a3553]">+ {capitulos.length - 4} capítulos...</p>
-              )}
-            </div>
-
-            <Link
-              href="/dashboard/criar"
-              className="mt-auto flex items-center justify-center gap-1.5 rounded-xl bg-[#4f7fff15] py-2.5 text-xs font-semibold text-[#4f7fff] transition hover:bg-[#4f7fff25]"
-            >
-              Usar este template
-              <ArrowRight className="size-3.5" />
-            </Link>
+            <p className="text-2xl font-extrabold text-white tabular-nums">{value}</p>
           </div>
         ))}
+      </div>
+
+      {/* ── Filtro categorias ── */}
+      <div className="mb-6 flex flex-wrap gap-2">
+        {CATEGORIAS.map(cat => {
+          const { badge, icon } = COR_CATEGORIA[cat]
+          return (
+            <span key={cat} className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${badge}`}>
+              <span>{icon}</span> {cat}
+            </span>
+          )
+        })}
+      </div>
+
+      {/* ── Grid de templates ── */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {TEMPLATES.map(({ categoria, titulo, publicoAlvo, preco, capitulos }) => {
+          const { badge, color } = COR_CATEGORIA[categoria]
+          return (
+            <div key={titulo}
+              className="group flex flex-col rounded-2xl border border-[#1c2438] bg-[#0b0f1c] p-5 transition-all hover:border-[#4f7fff30] hover:-translate-y-0.5 hover:shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
+              <div className="mb-3 flex items-start justify-between gap-2">
+                <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold ${badge}`}>{categoria}</span>
+                <span className="text-xs font-bold text-[#00e5c3]">{preco}</span>
+              </div>
+
+              <h3 className="mb-1.5 font-bold leading-snug text-white">{titulo}</h3>
+              <p className="mb-4 text-xs leading-relaxed text-[#6b7a99]">Público: {publicoAlvo}</p>
+
+              <div className="mb-5 rounded-xl bg-[#080b14] border border-[#1c2438] p-3">
+                <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-[#3a4a66]">
+                  Sumário · {capitulos.length} capítulos
+                </p>
+                <div className="space-y-1.5">
+                  {capitulos.slice(0, 4).map((cap, i) => (
+                    <div key={i} className="flex items-start gap-2">
+                      <span className="mt-0.5 text-[10px] font-bold tabular-nums" style={{ color }}>{i + 1}.</span>
+                      <p className="text-xs text-[#6b7a99] leading-tight">{cap}</p>
+                    </div>
+                  ))}
+                  {capitulos.length > 4 && (
+                    <p className="text-[10px] text-[#2a3553] pl-4">+ {capitulos.length - 4} capítulos...</p>
+                  )}
+                </div>
+              </div>
+
+              <Link href="/dashboard/criar"
+                className="mt-auto flex items-center justify-center gap-1.5 rounded-xl bg-[#4f7fff15] py-2.5 text-xs font-semibold text-[#4f7fff] transition hover:bg-[#4f7fff25]">
+                Usar este template
+                <ArrowRight className="size-3.5" />
+              </Link>
+            </div>
+          )
+        })}
       </div>
     </div>
   )

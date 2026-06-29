@@ -3,7 +3,11 @@
     "allow": [
       "Bash(npm --version)",
       "Bash(npm install *)",
-      "Bash(not exist *)"
+      "Bash(not exist *)",
+      "Bash(npx vercel *)",
+      "Bash(npx vercel@latest deploy --prod --scope team_p9LPqHxtFf8DhBJ1rywQd1jE)",
+      "mcp__Claude_Preview__preview_start",
+      "WebFetch(domain:docs.pepper.com.br)"
     ]
   }
 }
