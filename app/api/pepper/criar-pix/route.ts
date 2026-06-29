@@ -63,13 +63,15 @@ export async function POST(req: NextRequest) {
   })
 
   const data = await res.json() as {
-    success: boolean
+    hash?: string
+    payment_status?: string
+    pix?: { pix_url?: string; pix_qr_code?: string; qr_code_base64?: string }
     message?: string
     errors?: string[]
-    data?: { transaction_hash: string; payment_url: string; qr_code: string }
   }
 
-  if (!data.success || !data.data) {
+  const pixCode = data.pix?.pix_qr_code ?? ''
+  if (!data.hash || !pixCode) {
     console.error('[pepper-pix] erro:', data)
     return NextResponse.json(
       { error: data.message ?? 'Erro ao criar transação', details: data.errors },
@@ -78,9 +80,9 @@ export async function POST(req: NextRequest) {
   }
 
   return NextResponse.json({
-    hash: data.data.transaction_hash,
-    qr_code: data.data.qr_code,
-    payment_url: data.data.payment_url,
+    hash: data.hash,
+    qr_code: pixCode,
+    payment_url: data.pix?.pix_url ?? '',
     credits: pkg.credits,
   })
 }
