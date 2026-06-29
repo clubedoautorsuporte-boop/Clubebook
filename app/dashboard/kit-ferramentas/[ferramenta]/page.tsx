@@ -12,7 +12,9 @@ import {
 import Link from 'next/link'
 import type { EbookOption } from '@/app/api/kit-ferramentas/ebooks/route'
 
-// ─── Field types ─────────────────────────────────────────────────────────────
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+type Chapter = { numero: number; titulo: string; texto: string }
 
 type Field =
   | { type: 'text'; key: string; label: string; placeholder: string; required?: boolean }
@@ -33,11 +35,10 @@ type ToolConfig = {
   fields: Field[]
   buildPrompt: (values: Record<string, string>) => string
   outputLabel: string
-  // Map field keys that can be auto-filled from ebook data
-  autoFill?: Partial<Record<string, keyof EbookOption | 'capitulo_titulo' | 'capitulo_texto'>>
+  autoFill?: Partial<Record<string, keyof EbookOption>>
 }
 
-type SavedWork = { resultado: string; timestamp: string; ebookTitulo?: string; formValues?: Record<string, string> }
+type SavedWork = { resultado: string; timestamp: string; ebookTitulo?: string; chapterTitulo?: string }
 
 // ─── Tool configs ─────────────────────────────────────────────────────────────
 
@@ -92,14 +93,14 @@ const TOOLS: Record<string, ToolConfig> = {
   'audiobook': {
     titulo: 'Audiobook Premium', subtitulo: 'Roteiro narrado profissional',
     icon: Headphones, cor: '#f97316', preco: 'R$ 409,99', tipo: 'pago',
-    descricaoFerramenta: 'Cole o texto do capítulo e receba o roteiro adaptado para narração com marcações profissionais de pausa, ênfase e ritmo.',
-    autoFill: { titulo: 'titulo', tituloCapitulo: 'capitulo_titulo', texto: 'capitulo_texto' },
+    descricaoFerramenta: 'Selecione seu livro, escolha um capítulo e receba o roteiro adaptado para narração com marcações profissionais de pausa, ênfase e ritmo.',
+    autoFill: { titulo: 'titulo' },
     fields: [
       { type: 'text', key: 'titulo', label: 'Título do livro', placeholder: 'Ex: A Jornada do Herói' },
-      { type: 'text', key: 'tituloCapitulo', label: 'Título do capítulo', placeholder: 'Ex: Capítulo 1 — O Início da Jornada', required: true },
+      { type: 'text', key: 'tituloCapitulo', label: 'Título do capítulo', placeholder: 'Preenchido ao selecionar capítulo acima', required: true },
       { type: 'radio', key: 'narrador', label: 'Estilo do narrador', options: [{ label: 'Calmo e reflexivo', value: 'calmo' }, { label: 'Dramático e intenso', value: 'dramatico' }, { label: 'Animado e enérgico', value: 'animado' }, { label: 'Neutro e profissional', value: 'neutro' }] },
       { type: 'select', key: 'ritmo', label: 'Ritmo da narração', options: ['Lento e pausado', 'Moderado', 'Dinâmico', 'Variado conforme emoção'] },
-      { type: 'textarea', key: 'texto', label: 'Texto do capítulo', placeholder: 'Cole aqui o texto que deseja adaptar para audiobook...', rows: 8, required: true },
+      { type: 'textarea', key: 'texto', label: 'Texto do capítulo', placeholder: 'Selecione um capítulo acima ou cole o texto aqui...', rows: 8, required: true },
     ],
     buildPrompt: (v) => `Adapte o texto para roteiro de audiobook profissional:\n\nLIVRO: ${v.titulo || 'Não informado'}\nCAPÍTULO: ${v.tituloCapitulo}\nNARRADOR: ${v.narrador || 'calmo'}\nRITMO: ${v.ritmo || 'Moderado'}\n\nTEXTO:\n${v.texto}\n\nEntregue o texto com marcações: [PAUSA CURTA], [PAUSA LONGA], [ÊNFASE]...[/ÊNFASE], [RITMO LENTO]...[/RITMO LENTO], [EMOCIONAL]...[/EMOCIONAL]\nApós o roteiro: FICHA TÉCNICA com tempo estimado e instruções para o locutor.`,
     outputLabel: 'Roteiro de audiobook',
@@ -139,14 +140,14 @@ const TOOLS: Record<string, ToolConfig> = {
   'traducao': {
     titulo: 'Tradução', subtitulo: 'Tradução literária fiel ao estilo',
     icon: Globe, cor: '#06b6d4', preco: 'R$ 29,99 / idioma', tipo: 'pago',
-    descricaoFerramenta: 'Cole o texto e selecione o idioma. A IA preserva o estilo, tom e voz do autor.',
-    autoFill: { tituloLivro: 'titulo', texto: 'capitulo_texto' },
+    descricaoFerramenta: 'Selecione seu livro, escolha um capítulo e traduza preservando o estilo, tom e voz do autor.',
+    autoFill: { tituloLivro: 'titulo' },
     fields: [
       { type: 'text', key: 'tituloLivro', label: 'Título do livro', placeholder: 'Ex: Segredos do Sucesso' },
       { type: 'select', key: 'idiomaOrigem', label: 'Idioma de origem', options: ['Português (BR)', 'Português (PT)', 'Inglês', 'Espanhol', 'Francês', 'Italiano', 'Alemão'] },
       { type: 'select', key: 'idiomaDestino', label: 'Idioma de destino', options: ['Inglês (US)', 'Inglês (UK)', 'Espanhol (ES)', 'Espanhol (LATAM)', 'Francês', 'Italiano', 'Alemão', 'Japonês', 'Mandarim', 'Árabe'], required: true },
       { type: 'radio', key: 'estilo', label: 'Prioridade', options: [{ label: 'Fidelidade literal', value: 'literal' }, { label: 'Fluência natural', value: 'fluente' }, { label: 'Adaptação cultural', value: 'cultural' }] },
-      { type: 'textarea', key: 'texto', label: 'Texto para traduzir', placeholder: 'Cole aqui o trecho a traduzir...', rows: 8, required: true },
+      { type: 'textarea', key: 'texto', label: 'Texto para traduzir', placeholder: 'Selecione um capítulo acima ou cole o texto aqui...', rows: 8, required: true },
     ],
     buildPrompt: (v) => `Traduza com qualidade literária:\n\nLIVRO: ${v.tituloLivro || 'Não informado'}\nDE: ${v.idiomaOrigem || 'Português (BR)'}\nPARA: ${v.idiomaDestino}\nPRIORIDADE: ${v.estilo || 'fluente'}\n\nTEXTO:\n${v.texto}\n\n1. TRADUÇÃO COMPLETA\n2. NOTAS DO TRADUTOR (adaptações culturais e escolhas)\n3. GLOSSÁRIO (termos sem equivalente direto)`,
     outputLabel: 'Tradução profissional',
@@ -173,10 +174,10 @@ const TOOLS: Record<string, ToolConfig> = {
     descricaoFerramenta: 'Informe o contexto e a Aurora IA escreverá um capítulo completo com abertura, desenvolvimento e gancho.',
     autoFill: { tituloLivro: 'titulo', genero: 'genero' },
     fields: [
-      { type: 'text', key: 'tituloCapitulo', label: 'Título do capítulo', placeholder: 'Ex: Capítulo 3 — A Grande Virada', required: true },
+      { type: 'text', key: 'tituloCapitulo', label: 'Título do novo capítulo', placeholder: 'Ex: Capítulo 3 — A Grande Virada', required: true },
       { type: 'text', key: 'tituloLivro', label: 'Título do livro', placeholder: 'Ex: O Caminho do Sucesso' },
       { type: 'select', key: 'genero', label: 'Gênero', options: ['Autoajuda', 'Ficção', 'Romance', 'Thriller', 'Fantasia', 'Negócios', 'Educação', 'Biografia', 'Outro'] },
-      { type: 'textarea', key: 'contexto', label: 'O que aconteceu até aqui?', placeholder: 'Resuma o que ocorreu nos capítulos anteriores...', rows: 3 },
+      { type: 'textarea', key: 'contexto', label: 'O que aconteceu até aqui?', placeholder: 'Selecione um capítulo anterior acima para usar como contexto, ou escreva o resumo...', rows: 3 },
       { type: 'textarea', key: 'objetivo', label: 'Objetivo deste capítulo', placeholder: 'O que deve revelar, ensinar ou fazer o leitor sentir?', rows: 2, required: true },
       { type: 'radio', key: 'extensao', label: 'Extensão', options: [{ label: 'Curto (~500 palavras)', value: 'curto' }, { label: 'Médio (~1000 palavras)', value: 'medio' }, { label: 'Longo (~1500 palavras)', value: 'longo' }] },
     ],
@@ -186,14 +187,14 @@ const TOOLS: Record<string, ToolConfig> = {
   'reescrever-capitulo': {
     titulo: 'Reescrever capítulo inteiro', subtitulo: 'Versão melhorada completa',
     icon: RefreshCw, cor: '#8b5cf6', creditos: '735 créditos', tipo: 'credito',
-    descricaoFerramenta: 'Cole o capítulo atual, indique o problema e receba uma versão completamente reescrita.',
-    autoFill: { tituloCapitulo: 'capitulo_titulo', texto: 'capitulo_texto' },
+    descricaoFerramenta: 'Selecione seu livro e um capítulo. A IA recebe o texto completo e entrega uma versão melhorada.',
+    autoFill: { tituloCapitulo: 'titulo' },
     fields: [
-      { type: 'text', key: 'tituloCapitulo', label: 'Título do capítulo', placeholder: 'Ex: Capítulo 2 — O Encontro' },
+      { type: 'text', key: 'tituloCapitulo', label: 'Título do capítulo', placeholder: 'Preenchido ao selecionar capítulo acima' },
       { type: 'tags', key: 'problema', label: 'O que não está funcionando?', options: ['Ritmo lento', 'Diálogos artificiais', 'Falta profundidade', 'Tom inadequado', 'Falta coesão', 'Muito longo', 'Muito superficial', 'Estrutura fraca'] },
       { type: 'radio', key: 'foco', label: 'Foco', options: [{ label: 'Manter conteúdo, melhorar forma', value: 'forma' }, { label: 'Aprofundar conteúdo', value: 'conteudo' }, { label: 'Reformulação completa', value: 'completo' }] },
       { type: 'textarea', key: 'instrucoes', label: 'Instruções específicas (opcional)', placeholder: 'Ex: Mais emocional, com detalhes sensoriais...' },
-      { type: 'textarea', key: 'texto', label: 'Capítulo atual', placeholder: 'Cole o capítulo aqui...', rows: 8, required: true },
+      { type: 'textarea', key: 'texto', label: 'Texto do capítulo', placeholder: 'Selecione um capítulo acima — o texto será carregado automaticamente', rows: 8, required: true },
     ],
     buildPrompt: (v) => `Reescreva o capítulo com melhorias substanciais:\n\nCAPÍTULO: ${v.tituloCapitulo || 'Sem título'}\nPROBLEMAS: ${v.problema || 'Geral'}\nFOCO: ${v.foco || 'forma'}\nINSTRUÇÕES: ${v.instrucoes || 'Nenhuma'}\n\nTEXTO:\n${v.texto}\n\nReescreva completo. Após: seção "O QUE FOI MELHORADO" com principais mudanças.`,
     outputLabel: 'Capítulo reescrito',
@@ -201,13 +202,12 @@ const TOOLS: Record<string, ToolConfig> = {
   'reescrever-secao': {
     titulo: 'Reescrever seção', subtitulo: 'Melhoria de trecho específico',
     icon: Scissors, cor: '#ec4899', creditos: '499 créditos', tipo: 'credito',
-    descricaoFerramenta: 'Cole a seção e indique o objetivo. Receba a versão melhorada com explicação das mudanças.',
-    autoFill: { texto: 'capitulo_texto' },
+    descricaoFerramenta: 'Selecione um capítulo do seu livro, ajuste o trecho desejado e receba a versão melhorada.',
     fields: [
       { type: 'radio', key: 'objetivo', label: 'Objetivo da melhoria', options: [{ label: 'Mais fluidez', value: 'fluidade' }, { label: 'Mais impacto emocional', value: 'emocional' }, { label: 'Mais clareza', value: 'clareza' }, { label: 'Mais detalhes', value: 'detalhes' }] },
       { type: 'select', key: 'tom', label: 'Tom desejado', options: ['Manter o original', 'Mais formal', 'Mais casual', 'Mais poético', 'Mais direto', 'Mais dramático', 'Mais técnico'] },
       { type: 'textarea', key: 'instrucoes', label: 'Instruções adicionais (opcional)', placeholder: 'Ex: Adicione mais detalhes sensoriais, evite repetição...' },
-      { type: 'textarea', key: 'texto', label: 'Seção a melhorar', placeholder: 'Cole aqui a seção...', rows: 7, required: true },
+      { type: 'textarea', key: 'texto', label: 'Seção a melhorar', placeholder: 'Selecione um capítulo acima e edite o trecho desejado, ou cole aqui...', rows: 7, required: true },
     ],
     buildPrompt: (v) => `Reescreva a seção:\n\nOBJETIVO: ${v.objetivo || 'fluidade'}\nTOM: ${v.tom || 'Manter o original'}\nINSTRUÇÕES: ${v.instrucoes || 'Nenhuma'}\n\nTEXTO:\n${v.texto}\n\n1. VERSÃO MELHORADA (completa)\n2. O QUE MUDOU (lista das alterações)`,
     outputLabel: 'Seção reescrita',
@@ -226,12 +226,11 @@ const TOOLS: Record<string, ToolConfig> = {
   'corrigir-capitulo': {
     titulo: 'Corrigir texto do capítulo', subtitulo: 'Revisão ortográfica e gramatical',
     icon: Wrench, cor: '#00e5c3', creditos: '116 créditos', tipo: 'credito',
-    descricaoFerramenta: 'Cole o texto e receba a versão corrigida com relatório detalhado de todas as correções feitas.',
-    autoFill: { texto: 'capitulo_texto' },
+    descricaoFerramenta: 'Selecione seu livro e um capítulo. Receba a versão corrigida com relatório detalhado de correções.',
     fields: [
       { type: 'tags', key: 'foco', label: 'Foco da revisão', options: ['Ortografia', 'Gramática', 'Pontuação', 'Concordância', 'Coesão', 'Repetição de palavras', 'Estilo', 'Todos'] },
       { type: 'select', key: 'norma', label: 'Norma', options: ['Português Brasileiro (BR)', 'Português Europeu (PT)'] },
-      { type: 'textarea', key: 'texto', label: 'Texto para corrigir', placeholder: 'Cole o texto aqui...', rows: 8, required: true },
+      { type: 'textarea', key: 'texto', label: 'Texto para corrigir', placeholder: 'Selecione um capítulo acima — o texto será carregado automaticamente', rows: 8, required: true },
     ],
     buildPrompt: (v) => `Revisão completa do texto:\n\nFOCO: ${v.foco || 'Todos'}\nNORMA: ${v.norma || 'Português Brasileiro (BR)'}\n\nTEXTO:\n${v.texto}\n\n1. TEXTO CORRIGIDO (versão final limpa)\n2. RELATÓRIO (cada erro → correção → regra)\n3. ESTATÍSTICAS por categoria\n4. DICAS RECORRENTES para o autor`,
     outputLabel: 'Texto corrigido + relatório',
@@ -239,13 +238,12 @@ const TOOLS: Record<string, ToolConfig> = {
   'analise-editorial': {
     titulo: 'Análise editorial', subtitulo: 'Relatório editorial profissional',
     icon: BarChart2, cor: '#facc15', creditos: '65 créditos', tipo: 'credito',
-    descricaoFerramenta: 'Cole o capítulo e receba análise com scores, pontos fortes, fracos e sugestões concretas.',
-    autoFill: { tituloCapitulo: 'capitulo_titulo', texto: 'capitulo_texto' },
+    descricaoFerramenta: 'Selecione seu livro e um capítulo. Receba análise com scores, pontos fortes, fracos e sugestões concretas.',
     fields: [
-      { type: 'text', key: 'tituloCapitulo', label: 'Título do capítulo', placeholder: 'Ex: Capítulo 1 — O Despertar' },
+      { type: 'text', key: 'tituloCapitulo', label: 'Título do capítulo', placeholder: 'Preenchido ao selecionar capítulo acima' },
       { type: 'select', key: 'genero', label: 'Gênero', options: ['Ficção literária', 'Ficção popular', 'Romance', 'Thriller', 'Fantasia', 'Autoajuda', 'Negócios', 'Biografia', 'Educativo', 'Infantojuvenil'] },
       { type: 'radio', key: 'nivel', label: 'Nível de crítica', options: [{ label: 'Construtivo e gentil', value: 'gentil' }, { label: 'Equilibrado', value: 'equilibrado' }, { label: 'Crítico e exigente', value: 'critico' }] },
-      { type: 'textarea', key: 'texto', label: 'Capítulo para análise', placeholder: 'Cole o capítulo aqui...', rows: 8, required: true },
+      { type: 'textarea', key: 'texto', label: 'Capítulo para análise', placeholder: 'Selecione um capítulo acima — o texto será carregado automaticamente', rows: 8, required: true },
     ],
     buildPrompt: (v) => `Análise editorial profissional:\n\nCAPÍTULO: ${v.tituloCapitulo || 'Não informado'}\nGÊNERO: ${v.genero || 'Ficção'}\nCRÍTICA: ${v.nivel || 'equilibrado'}\n\nTEXTO:\n${v.texto}\n\n📊 SCORES (0-10): estrutura, ritmo, personagens, diálogos, descrições, originalidade, engajamento, NOTA GERAL\n✅ PONTOS FORTES\n⚠️ PONTOS DE MELHORIA\n💡 SUGESTÕES CONCRETAS\n🎯 PRÓXIMOS PASSOS`,
     outputLabel: 'Relatório editorial',
@@ -298,33 +296,34 @@ const TOOLS: Record<string, ToolConfig> = {
   'buscar-substituir': {
     titulo: 'Buscar e substituir', subtitulo: 'Consistência em todo o manuscrito',
     icon: Search, cor: '#fb7185', creditos: '30 créditos', tipo: 'credito',
-    descricaoFerramenta: 'Cole o texto, defina as substituições e receba o manuscrito corrigido com relatório completo.',
-    autoFill: { texto: 'capitulo_texto' },
+    descricaoFerramenta: 'Selecione um capítulo, defina as substituições e receba o texto corrigido com relatório completo.',
     fields: [
       { type: 'textarea', key: 'substituicoes', label: 'O que substituir? (um por linha: ORIGINAL → NOVO)', placeholder: 'João → João Silva\ncastelo → palácio\nfeiticeira → maga', rows: 4, required: true },
       { type: 'radio', key: 'caseSensitive', label: 'Sensibilidade', options: [{ label: 'Ignorar maiúsculas', value: 'ignorar' }, { label: 'Manter exato', value: 'exato' }] },
-      { type: 'textarea', key: 'texto', label: 'Texto do manuscrito', placeholder: 'Cole o texto aqui...', rows: 8, required: true },
+      { type: 'textarea', key: 'texto', label: 'Texto do manuscrito', placeholder: 'Selecione um capítulo acima — o texto será carregado automaticamente', rows: 8, required: true },
     ],
     buildPrompt: (v) => `Aplique as substituições:\n\nSUBSTITUIÇÕES:\n${v.substituicoes}\nSENSIBILIDADE: ${v.caseSensitive || 'ignorar'}\n\nTEXTO:\n${v.texto}\n\n1. TEXTO ATUALIZADO\n2. RELATÓRIO (quantas vezes cada termo foi substituído)\n3. ALERTAS (inconsistências geradas)\n4. SUGESTÕES ADICIONAIS`,
     outputLabel: 'Texto atualizado + relatório',
   },
 }
 
-// ─── Ebook Selector ───────────────────────────────────────────────────────────
+// ─── BookPanel: livro + capítulos em destaque ─────────────────────────────────
 
-function EbookSelector({
+function BookPanel({
   cor,
-  onSelect,
-  selectedId,
+  onSelectBook,
+  onSelectChapter,
+  selectedEbook,
+  selectedChapterNum,
 }: {
   cor: string
-  onSelect: (ebook: EbookOption | null) => void
-  selectedId: string | null
+  onSelectBook: (ebook: EbookOption | null) => void
+  onSelectChapter: (chapter: Chapter) => void
+  selectedEbook: EbookOption | null
+  selectedChapterNum: number | null
 }) {
   const [ebooks, setEbooks] = useState<EbookOption[]>([])
-  const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
-  const selectedEbook = ebooks.find(e => e.id === selectedId)
 
   useEffect(() => {
     setLoading(true)
@@ -337,113 +336,141 @@ function EbookSelector({
 
   if (ebooks.length === 0 && !loading) return null
 
+  const capitulos = selectedEbook?.capitulos ?? []
+
   return (
-    <div className="rounded-2xl border border-[#1c2438] bg-[#0b0f1c] p-4">
-      <div className="flex items-center justify-between mb-3">
+    <div className="rounded-2xl border border-[#1c2438] bg-[#0b0f1c] overflow-hidden">
+      {/* Cabeçalho */}
+      <div className="flex items-center justify-between px-4 py-3 border-b border-[#1c2438]">
         <div className="flex items-center gap-2">
           <Library className="size-4" style={{ color: cor }} />
-          <span className="text-sm font-semibold text-white">Trabalhar com um livro existente</span>
-          <span className="text-xs text-[#3a4a66]">(opcional)</span>
+          <span className="text-sm font-semibold text-white">
+            {selectedEbook ? 'Livro selecionado' : 'Selecionar livro'}
+          </span>
+          {!loading && !selectedEbook && (
+            <span className="rounded-full px-2 py-0.5 text-[10px] font-bold bg-[#1c2438] text-[#6b7a99]">{ebooks.length}</span>
+          )}
         </div>
         {selectedEbook && (
-          <button onClick={() => onSelect(null)} className="text-[#3a4a66] hover:text-white transition">
-            <X className="size-3.5" />
+          <button
+            onClick={() => onSelectBook(null)}
+            className="flex items-center gap-1 rounded-lg px-2.5 py-1 text-[11px] text-[#6b7a99] hover:text-white border border-[#1c2438] hover:border-[#2a3553] transition"
+          >
+            <X className="size-3" /> Trocar
           </button>
         )}
       </div>
 
       {loading ? (
-        <div className="flex items-center gap-2 text-xs text-[#3a4a66]">
-          <Loader2 className="size-3 animate-spin" /> Carregando seus livros...
+        <div className="flex items-center gap-2 px-4 py-5 text-xs text-[#3a4a66]">
+          <Loader2 className="size-3.5 animate-spin" /> Carregando seus livros...
         </div>
-      ) : selectedEbook ? (
-        <div className="flex items-center justify-between rounded-xl border border-[#2a3553] bg-[#0f1523] px-4 py-3">
-          <div className="flex items-center gap-3">
-            <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg" style={{ background: `${cor}20` }}>
-              <FileText className="size-4" style={{ color: cor }} />
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-white">{selectedEbook.titulo}</p>
-              <p className="text-xs text-[#3a4a66]">
-                {selectedEbook.tipo === 'draft' ? 'Rascunho' : selectedEbook.tipo === 'livro' ? 'Livro completo' : 'Prévia'}
-                {selectedEbook.capitulos && selectedEbook.capitulos.length > 0 && ` · ${selectedEbook.capitulos.length} capítulos`}
-              </p>
-            </div>
+      ) : !selectedEbook ? (
+        /* ── Lista de livros ─────────────────── */
+        <div>
+          <p className="px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider text-[#3a4a66]">
+            Clique em um livro para carregar seus dados nos campos
+          </p>
+          <div className="divide-y divide-[#1c2438]">
+            {ebooks.map(e => (
+              <button
+                key={e.id}
+                onClick={() => onSelectBook(e)}
+                className="flex w-full items-center gap-3 px-4 py-4 text-left transition hover:bg-[#0f1523] group"
+              >
+                <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl" style={{ background: `${cor}18` }}>
+                  <FileText className="size-5" style={{ color: cor }} />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-semibold text-white">{e.titulo}</p>
+                  <p className="mt-0.5 text-xs text-[#3a4a66]">
+                    {e.tipo === 'draft' ? 'Rascunho' : e.tipo === 'livro' ? 'Livro completo' : 'Prévia'}
+                    {e.capitulos && e.capitulos.length > 0 && (
+                      <> · <span style={{ color: cor }}>{e.capitulos.length} capítulos</span></>
+                    )}
+                    {e.genero && ` · ${e.genero}`}
+                  </p>
+                </div>
+                <ChevronRight className="size-4 shrink-0 text-[#3a4a66] group-hover:text-white transition" />
+              </button>
+            ))}
           </div>
-          <button
-            onClick={() => setOpen(true)}
-            className="text-xs text-[#6b7a99] hover:text-white transition flex items-center gap-1"
-          >
-            Trocar <ChevronRight className="size-3" />
-          </button>
         </div>
       ) : (
-        <button
-          onClick={() => setOpen(true)}
-          className="flex w-full items-center justify-between rounded-xl border border-dashed border-[#2a3553] px-4 py-3 text-sm text-[#6b7a99] transition hover:border-[#3a4a66] hover:text-white"
-        >
-          <span className="flex items-center gap-2">
-            <Library className="size-4" />
-            Selecionar um dos seus livros para auto-preencher os campos
-          </span>
-          <ChevronDown className="size-4 shrink-0" />
-        </button>
-      )}
+        /* ── Livro selecionado + capítulos ───── */
+        <div>
+          {/* Livro selecionado */}
+          <div
+            className="flex items-center gap-3 px-4 py-3.5"
+            style={{ background: `${cor}09`, borderBottom: `1px solid ${cor}25` }}
+          >
+            <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl" style={{ background: `${cor}22` }}>
+              <FileText className="size-5" style={{ color: cor }} />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-bold text-white">{selectedEbook.titulo}</p>
+              <p className="text-xs" style={{ color: `${cor}cc` }}>
+                {selectedEbook.tipo === 'draft' ? 'Rascunho' : selectedEbook.tipo === 'livro' ? 'Livro completo' : 'Prévia'}
+                {capitulos.length > 0 && ` · ${capitulos.length} capítulos`}
+              </p>
+            </div>
+            <div className="grid h-7 w-7 shrink-0 place-items-center rounded-full" style={{ background: `${cor}20` }}>
+              <Check className="size-3.5" style={{ color: cor }} />
+            </div>
+          </div>
 
-      {/* Dropdown */}
-      {open && (
-        <div className="mt-2 rounded-xl border border-[#1c2438] bg-[#080b14] overflow-hidden">
-          {ebooks.map(e => (
-            <button
-              key={e.id}
-              onClick={() => { onSelect(e); setOpen(false) }}
-              className="flex w-full items-center gap-3 px-4 py-3 text-left transition hover:bg-[#0b0f1c] border-b border-[#1c2438] last:border-0"
-            >
-              <div className="grid h-8 w-8 shrink-0 place-items-center rounded-lg" style={{ background: `${cor}18` }}>
-                <FileText className="size-3.5" style={{ color: cor }} />
+          {/* Capítulos */}
+          {capitulos.length > 0 ? (
+            <div>
+              <p className="px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider text-[#3a4a66]">
+                Clique em um capítulo para carregar o texto nos campos
+              </p>
+              <div className="divide-y divide-[#1c2438]">
+                {capitulos.map(c => {
+                  const active = selectedChapterNum === c.numero
+                  return (
+                    <button
+                      key={c.numero}
+                      onClick={() => onSelectChapter(c)}
+                      className="flex w-full items-center gap-3 px-4 py-3.5 text-left transition group"
+                      style={active ? { background: `${cor}10` } : undefined}
+                    >
+                      <span
+                        className="grid h-9 w-9 shrink-0 place-items-center rounded-xl text-xs font-bold transition"
+                        style={{
+                          background: active ? cor : `${cor}20`,
+                          color: active ? '#080b14' : cor,
+                        }}
+                      >
+                        {c.numero}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p className={`text-sm font-medium ${active ? 'text-white' : 'text-[#c8d3f5] group-hover:text-white'} transition truncate`}>
+                          {c.titulo}
+                        </p>
+                        {c.texto && (
+                          <p className="mt-0.5 text-[11px] text-[#3a4a66] truncate">
+                            {c.texto.slice(0, 90).trim()}…
+                          </p>
+                        )}
+                      </div>
+                      {active
+                        ? <span className="shrink-0 rounded-lg px-2 py-0.5 text-[10px] font-bold" style={{ background: `${cor}20`, color: cor }}>Carregado</span>
+                        : <ChevronRight className="size-4 shrink-0 text-[#3a4a66] group-hover:text-white transition" />}
+                    </button>
+                  )
+                })}
               </div>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium text-white">{e.titulo}</p>
-                <p className="text-xs text-[#3a4a66]">
-                  {e.tipo === 'draft' ? 'Rascunho' : e.tipo === 'livro' ? 'Livro completo' : 'Prévia'}
-                  {e.capitulos && e.capitulos.length > 0 && ` · ${e.capitulos.length} caps`}
-                </p>
-              </div>
-            </button>
-          ))}
+            </div>
+          ) : (
+            <div className="px-4 py-4 text-xs text-[#3a4a66]">
+              {selectedEbook.tipo === 'draft'
+                ? 'Rascunho sem capítulos gerados — os campos de título, gênero e público foram preenchidos automaticamente.'
+                : 'Este livro não possui capítulos com conteúdo disponível.'}
+            </div>
+          )}
         </div>
       )}
-    </div>
-  )
-}
-
-// ─── Chapter selector ─────────────────────────────────────────────────────────
-
-function ChapterSelector({
-  capitulos,
-  cor,
-  onSelect,
-}: {
-  capitulos: { numero: number; titulo: string; texto: string }[]
-  cor: string
-  onSelect: (titulo: string, texto: string) => void
-}) {
-  if (!capitulos || capitulos.length === 0) return null
-  return (
-    <div className="mt-2 rounded-xl border border-[#1c2438] bg-[#0b0f1c] overflow-hidden">
-      <p className="px-4 py-2 text-[10px] font-bold uppercase tracking-wider text-[#3a4a66]">Selecionar capítulo do livro</p>
-      {capitulos.map(c => (
-        <button
-          key={c.numero}
-          onClick={() => onSelect(c.titulo, c.texto)}
-          className="flex w-full items-center gap-3 px-4 py-2.5 text-left transition hover:bg-[#0f1523] border-t border-[#1c2438]"
-        >
-          <span className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-[10px] font-bold" style={{ background: `${cor}20`, color: cor }}>
-            {c.numero}
-          </span>
-          <span className="truncate text-xs text-[#c8d3f5]">{c.titulo}</span>
-        </button>
-      ))}
     </div>
   )
 }
@@ -451,53 +478,21 @@ function ChapterSelector({
 // ─── Field Renderer ───────────────────────────────────────────────────────────
 
 function FieldRenderer({
-  field, value, onChange, ebook, cor,
+  field, value, onChange,
 }: {
   field: Field
   value: string
   onChange: (v: string) => void
-  ebook: EbookOption | null
-  cor: string
 }) {
-  const [showChapters, setShowChapters] = useState(false)
   const base = "w-full rounded-xl border border-[#1c2438] bg-[#080b14] px-4 py-2.5 text-sm text-white placeholder:text-[#3a4a66] focus:border-[#2a3553] focus:outline-none transition"
-
-  const hasChapters = ebook && ebook.capitulos && ebook.capitulos.length > 0
-  const isChapterField = field.key === 'texto' || field.key === 'tituloCapitulo'
 
   if (field.type === 'text') return (
     <input type="text" value={value} onChange={e => onChange(e.target.value)} placeholder={field.placeholder} className={base} />
   )
 
   if (field.type === 'textarea') return (
-    <div>
-      <textarea value={value} onChange={e => onChange(e.target.value)} placeholder={field.placeholder} rows={field.rows ?? 3}
-        className={`${base} resize-none leading-relaxed`} />
-      {hasChapters && isChapterField && (
-        <div className="mt-1.5">
-          <button
-            type="button"
-            onClick={() => setShowChapters(s => !s)}
-            className="flex items-center gap-1.5 text-[11px] transition"
-            style={{ color: cor }}
-          >
-            <Library className="size-3" />
-            {showChapters ? 'Fechar capítulos' : `Usar capítulo do livro (${ebook!.capitulos!.length} disponíveis)`}
-          </button>
-          {showChapters && (
-            <ChapterSelector
-              capitulos={ebook!.capitulos!}
-              cor={cor}
-              onSelect={(titulo, texto) => {
-                if (field.key === 'tituloCapitulo') onChange(titulo)
-                else onChange(texto)
-                setShowChapters(false)
-              }}
-            />
-          )}
-        </div>
-      )}
-    </div>
+    <textarea value={value} onChange={e => onChange(e.target.value)} placeholder={field.placeholder} rows={field.rows ?? 3}
+      className={`${base} resize-none leading-relaxed`} />
   )
 
   if (field.type === 'select') return (
@@ -545,15 +540,9 @@ function FieldRenderer({
 // ─── Saved works panel ────────────────────────────────────────────────────────
 
 function SavedWorksPanel({
-  toolSlug,
-  ebookId,
-  cor,
-  onLoad,
+  toolSlug, ebookId, cor, onLoad,
 }: {
-  toolSlug: string
-  ebookId: string | null
-  cor: string
-  onLoad: (resultado: string) => void
+  toolSlug: string; ebookId: string | null; cor: string; onLoad: (r: string) => void
 }) {
   const [works, setWorks] = useState<SavedWork[]>([])
   const [open, setOpen] = useState(false)
@@ -570,16 +559,11 @@ function SavedWorksPanel({
 
   return (
     <div className="rounded-2xl border border-[#1c2438] bg-[#0b0f1c] overflow-hidden">
-      <button
-        onClick={() => setOpen(s => !s)}
-        className="flex w-full items-center justify-between px-4 py-3"
-      >
+      <button onClick={() => setOpen(s => !s)} className="flex w-full items-center justify-between px-4 py-3">
         <div className="flex items-center gap-2">
           <Clock className="size-4" style={{ color: cor }} />
           <span className="text-sm font-semibold text-white">Trabalhos salvos</span>
-          <span className="rounded-full px-2 py-0.5 text-[10px] font-bold" style={{ background: `${cor}20`, color: cor }}>
-            {works.length}
-          </span>
+          <span className="rounded-full px-2 py-0.5 text-[10px] font-bold" style={{ background: `${cor}20`, color: cor }}>{works.length}</span>
         </div>
         <ChevronDown className={`size-4 text-[#6b7a99] transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
@@ -589,15 +573,13 @@ function SavedWorksPanel({
             <div key={i} className="flex items-center justify-between gap-3 px-4 py-3 border-b border-[#1c2438] last:border-0">
               <div className="min-w-0 flex-1">
                 <p className="text-xs font-medium text-[#c8d3f5] truncate">
-                  {w.ebookTitulo ? `📖 ${w.ebookTitulo}` : 'Sem livro vinculado'}
+                  {w.chapterTitulo ? `📖 ${w.chapterTitulo}` : w.ebookTitulo ? `📚 ${w.ebookTitulo}` : 'Sem livro vinculado'}
                 </p>
                 <p className="text-[10px] text-[#3a4a66]">{new Date(w.timestamp).toLocaleString('pt-BR')}</p>
               </div>
-              <button
-                onClick={() => { onLoad(w.resultado); setOpen(false) }}
+              <button onClick={() => { onLoad(w.resultado); setOpen(false) }}
                 className="shrink-0 rounded-lg px-3 py-1.5 text-xs font-semibold transition hover:opacity-80"
-                style={{ background: `${cor}20`, color: cor }}
-              >
+                style={{ background: `${cor}20`, color: cor }}>
                 Carregar
               </button>
             </div>
@@ -620,6 +602,7 @@ export default function FerramentaPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [streamingText, setStreamingText] = useState('')
   const [selectedEbook, setSelectedEbook] = useState<EbookOption | null>(null)
+  const [selectedChapterNum, setSelectedChapterNum] = useState<number | null>(null)
   const [saved, setSaved] = useState(false)
   const resultRef = useRef<HTMLDivElement>(null)
 
@@ -629,21 +612,45 @@ export default function FerramentaPage() {
     }
   }, [streamingText, resultado])
 
-  // Auto-fill fields from selected ebook
-  const handleSelectEbook = useCallback((ebook: EbookOption | null) => {
+  const handleSelectBook = useCallback((ebook: EbookOption | null) => {
     setSelectedEbook(ebook)
-    if (!ebook || !tool.autoFill) return
+    setSelectedChapterNum(null)
 
-    const newValues: Record<string, string> = { ...values }
-    for (const [fieldKey, ebookKey] of Object.entries(tool.autoFill)) {
-      if (ebookKey === 'capitulo_titulo' || ebookKey === 'capitulo_texto') continue
-      const val = ebook[ebookKey as keyof EbookOption]
-      if (val && typeof val === 'string') {
-        newValues[fieldKey] = val
+    if (!ebook) {
+      setValues({})
+      return
+    }
+
+    // Auto-fill book-level fields
+    const newValues: Record<string, string> = {}
+    if (tool.autoFill) {
+      for (const [fieldKey, ebookKey] of Object.entries(tool.autoFill)) {
+        const val = ebook[ebookKey as keyof EbookOption]
+        if (val && typeof val === 'string') {
+          newValues[fieldKey] = val
+        }
       }
     }
     setValues(newValues)
-  }, [tool, values])
+  }, [tool])
+
+  const handleSelectChapter = useCallback((chapter: Chapter) => {
+    setSelectedChapterNum(chapter.numero)
+    // Fill chapter-specific fields
+    setValues(prev => ({
+      ...prev,
+      // texto field (all tools with chapter content)
+      texto: chapter.texto,
+      // titulo fields
+      tituloCapitulo: chapter.titulo,
+      // Also fill contexto for "novo-capitulo" tool
+      ...(slug === 'novo-capitulo' ? { contexto: chapter.texto } : {}),
+    }))
+    // Scroll to form
+    setTimeout(() => {
+      document.getElementById('ferramenta-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 100)
+  }, [slug])
 
   const saveWork = useCallback(() => {
     if (!resultado) return
@@ -651,18 +658,19 @@ export default function FerramentaPage() {
     try {
       const raw = localStorage.getItem(key)
       const existing: SavedWork[] = raw ? JSON.parse(raw) : []
-      const newWork: SavedWork = {
+      const updated = [{
         resultado,
         timestamp: new Date().toISOString(),
         ebookTitulo: selectedEbook?.titulo,
-        formValues: values,
-      }
-      const updated = [newWork, ...existing].slice(0, 5)
+        chapterTitulo: selectedChapterNum != null
+          ? selectedEbook?.capitulos?.find(c => c.numero === selectedChapterNum)?.titulo
+          : undefined,
+      }, ...existing].slice(0, 5)
       localStorage.setItem(key, JSON.stringify(updated))
       setSaved(true)
       setTimeout(() => setSaved(false), 2000)
     } catch { /* ignore */ }
-  }, [resultado, slug, selectedEbook, values])
+  }, [resultado, slug, selectedEbook, selectedChapterNum])
 
   if (!tool) {
     return (
@@ -676,7 +684,6 @@ export default function FerramentaPage() {
   const Icon = tool.icon
   const requiredFields = tool.fields.filter(f => 'required' in f && f.required)
   const isFormValid = requiredFields.every(f => (values[f.key] ?? '').trim().length > 0)
-  const outputText = streamingText || resultado
 
   async function gerarResultado() {
     if (!isFormValid || isLoading) return
@@ -724,7 +731,13 @@ export default function FerramentaPage() {
           </div>
           <div className="min-w-0 flex-1">
             <h1 className="text-sm font-bold text-white">{tool.titulo}</h1>
-            <p className="text-xs text-[#6b7a99]">{selectedEbook ? `📖 ${selectedEbook.titulo}` : tool.subtitulo}</p>
+            <p className="text-xs text-[#6b7a99]">
+              {selectedChapterNum != null
+                ? `Cap. ${selectedChapterNum} · ${selectedEbook?.titulo}`
+                : selectedEbook
+                  ? `📖 ${selectedEbook.titulo}`
+                  : tool.subtitulo}
+            </p>
           </div>
           <div className="shrink-0">
             {tool.tipo === 'pago'
@@ -737,8 +750,40 @@ export default function FerramentaPage() {
 
       <div className="mx-auto max-w-4xl px-5 py-8 pb-16 md:px-8 space-y-5">
 
-        {/* Ebook selector */}
-        <EbookSelector cor={tool.cor} onSelect={handleSelectEbook} selectedId={selectedEbook?.id ?? null} />
+        {/* Book panel: livro + capítulos */}
+        <BookPanel
+          cor={tool.cor}
+          onSelectBook={handleSelectBook}
+          onSelectChapter={handleSelectChapter}
+          selectedEbook={selectedEbook}
+          selectedChapterNum={selectedChapterNum}
+        />
+
+        {/* Banner: capítulo carregado */}
+        {selectedChapterNum != null && (
+          <div
+            className="flex items-center gap-3 rounded-2xl px-4 py-3"
+            style={{ background: `${tool.cor}12`, border: `1px solid ${tool.cor}30` }}
+          >
+            <div className="grid h-7 w-7 shrink-0 place-items-center rounded-lg" style={{ background: `${tool.cor}22` }}>
+              <Check className="size-4" style={{ color: tool.cor }} />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold text-white">
+                Capítulo {selectedChapterNum} carregado nos campos abaixo
+              </p>
+              <p className="text-xs text-[#6b7a99] truncate">
+                {selectedEbook?.capitulos?.find(c => c.numero === selectedChapterNum)?.titulo}
+              </p>
+            </div>
+            <button
+              onClick={() => { setSelectedChapterNum(null); setValues(prev => ({ ...prev, texto: '', tituloCapitulo: '' })) }}
+              className="shrink-0 text-[#3a4a66] hover:text-white transition"
+            >
+              <X className="size-4" />
+            </button>
+          </div>
+        )}
 
         {/* Saved works */}
         <SavedWorksPanel
@@ -750,7 +795,7 @@ export default function FerramentaPage() {
 
         {/* Form */}
         {!resultado && (
-          <div className="space-y-5">
+          <div id="ferramenta-form" className="space-y-5">
             <div className="rounded-2xl border border-[#1c2438] bg-[#0b0f1c] p-5">
               <div className="flex items-start gap-3">
                 <Sparkles className="size-4 mt-0.5 shrink-0" style={{ color: tool.cor }} />
@@ -769,8 +814,6 @@ export default function FerramentaPage() {
                     field={field}
                     value={values[field.key] ?? ''}
                     onChange={v => setValues(prev => ({ ...prev, [field.key]: v }))}
-                    ebook={selectedEbook}
-                    cor={tool.cor}
                   />
                 </div>
               ))}
@@ -807,7 +850,7 @@ export default function FerramentaPage() {
         {resultado && !isLoading && (
           <div ref={resultRef} className="space-y-4">
             <div className="flex items-center justify-between flex-wrap gap-2">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <div className="grid h-7 w-7 place-items-center rounded-lg" style={{ background: `${tool.cor}20` }}>
                   <Sparkles className="size-3.5" style={{ color: tool.cor }} />
                 </div>
@@ -815,27 +858,22 @@ export default function FerramentaPage() {
                 {selectedEbook && (
                   <span className="rounded-full px-2 py-0.5 text-[10px] font-medium text-[#6b7a99] border border-[#1c2438]">
                     📖 {selectedEbook.titulo}
+                    {selectedChapterNum != null && ` · Cap. ${selectedChapterNum}`}
                   </span>
                 )}
               </div>
               <div className="flex items-center gap-2">
-                <button
-                  onClick={saveWork}
+                <button onClick={saveWork}
                   className="flex items-center gap-1.5 rounded-lg border border-[#1c2438] bg-[#0b0f1c] px-3 py-1.5 text-xs transition hover:text-white"
-                  style={{ color: saved ? '#00e5c3' : '#6b7a99' }}
-                >
+                  style={{ color: saved ? '#00e5c3' : '#6b7a99' }}>
                   {saved ? <><Check className="size-3.5" /> Salvo!</> : <><Save className="size-3.5" /> Salvar</>}
                 </button>
-                <button
-                  onClick={() => { navigator.clipboard.writeText(resultado) }}
-                  className="flex items-center gap-1.5 rounded-lg border border-[#1c2438] bg-[#0b0f1c] px-3 py-1.5 text-xs text-[#6b7a99] transition hover:text-white"
-                >
+                <button onClick={() => navigator.clipboard.writeText(resultado)}
+                  className="flex items-center gap-1.5 rounded-lg border border-[#1c2438] bg-[#0b0f1c] px-3 py-1.5 text-xs text-[#6b7a99] transition hover:text-white">
                   <Copy className="size-3.5" /> Copiar
                 </button>
-                <button
-                  onClick={() => { setResultado(''); setStreamingText('') }}
-                  className="flex items-center gap-1.5 rounded-lg border border-[#1c2438] bg-[#0b0f1c] px-3 py-1.5 text-xs text-[#6b7a99] transition hover:text-white"
-                >
+                <button onClick={() => { setResultado(''); setStreamingText('') }}
+                  className="flex items-center gap-1.5 rounded-lg border border-[#1c2438] bg-[#0b0f1c] px-3 py-1.5 text-xs text-[#6b7a99] transition hover:text-white">
                   <RefreshCw className="size-3.5" /> Refazer
                 </button>
               </div>
@@ -846,10 +884,8 @@ export default function FerramentaPage() {
             </div>
 
             <div className="flex flex-wrap gap-3">
-              <button
-                onClick={() => { setResultado(''); setStreamingText('') }}
-                className="flex items-center gap-2 rounded-xl border border-[#1c2438] bg-[#0b0f1c] px-4 py-2.5 text-sm text-[#6b7a99] transition hover:text-white"
-              >
+              <button onClick={() => { setResultado(''); setStreamingText('') }}
+                className="flex items-center gap-2 rounded-xl border border-[#1c2438] bg-[#0b0f1c] px-4 py-2.5 text-sm text-[#6b7a99] transition hover:text-white">
                 <ArrowLeft className="size-4" /> Ajustar e regerar
               </button>
               <button
@@ -857,11 +893,10 @@ export default function FerramentaPage() {
                   const blob = new Blob([resultado], { type: 'text/plain' })
                   const a = document.createElement('a')
                   a.href = URL.createObjectURL(blob)
-                  a.download = `${tool.titulo.replace(/\s+/g, '-').toLowerCase()}-${selectedEbook?.titulo?.replace(/\s+/g, '-').toLowerCase() ?? 'resultado'}.txt`
+                  a.download = `${tool.titulo.replace(/\s+/g, '-').toLowerCase()}-cap${selectedChapterNum ?? ''}-${selectedEbook?.titulo?.replace(/\s+/g, '-').toLowerCase() ?? 'resultado'}.txt`
                   a.click()
                 }}
-                className="flex items-center gap-2 rounded-xl border border-[#1c2438] bg-[#0b0f1c] px-4 py-2.5 text-sm text-[#6b7a99] transition hover:text-white"
-              >
+                className="flex items-center gap-2 rounded-xl border border-[#1c2438] bg-[#0b0f1c] px-4 py-2.5 text-sm text-[#6b7a99] transition hover:text-white">
                 <Download className="size-4" /> Baixar .txt
               </button>
             </div>
