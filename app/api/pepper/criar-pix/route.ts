@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
+import QRCode from 'qrcode'
 
 const PEPPER_BASE = 'https://api.cloud.pepperpay.com.br/public/v1'
 
@@ -79,9 +80,12 @@ export async function POST(req: NextRequest) {
     )
   }
 
+  const qrImageBase64 = await QRCode.toDataURL(pixCode, { width: 200, margin: 2 })
+
   return NextResponse.json({
     hash: data.hash,
     qr_code: pixCode,
+    qr_image: qrImageBase64,
     payment_url: data.pix?.pix_url ?? '',
     credits: pkg.credits,
   })

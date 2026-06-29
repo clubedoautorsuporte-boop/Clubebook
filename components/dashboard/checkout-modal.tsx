@@ -46,6 +46,7 @@ export function CheckoutModal({ pacote, userEmail, userName, onClose }: Props) {
 
   // PIX state
   const [qrCode, setQrCode] = useState('')
+  const [qrImage, setQrImage] = useState('')
   const [txHash, setTxHash] = useState('')
   const [copied, setCopied] = useState(false)
   const [timeLeft, setTimeLeft] = useState(15 * 60) // 15 min
@@ -85,9 +86,10 @@ export function CheckoutModal({ pacote, userEmail, userName, onClose }: Props) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ pacote: pacote.id, nome, email: userEmail, cpf, telefone }),
       })
-      const data = await res.json() as { qr_code?: string; hash?: string; error?: string }
+      const data = await res.json() as { qr_code?: string; qr_image?: string; hash?: string; error?: string }
       if (!res.ok || !data.qr_code) throw new Error(data.error ?? 'Erro ao gerar PIX')
       setQrCode(data.qr_code)
+      setQrImage(data.qr_image ?? '')
       setTxHash(data.hash ?? '')
       setStep('pix')
     } catch (err) {
@@ -261,12 +263,11 @@ export function CheckoutModal({ pacote, userEmail, userName, onClose }: Props) {
               <div className="relative mb-3 rounded-2xl border-2 border-[#4f7fff30] bg-white p-3">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=4&data=${encodeURIComponent(qrCode)}`}
+                  src={qrImage || `https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=4&data=${encodeURIComponent(qrCode)}`}
                   alt="QR Code PIX"
                   width={200}
                   height={200}
                   className="block rounded-lg"
-                  onError={(e) => { (e.target as HTMLImageElement).src = `https://quickchart.io/qr?text=${encodeURIComponent(qrCode)}&size=200` }}
                 />
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="grid h-10 w-10 place-items-center rounded-xl bg-white shadow-lg">
