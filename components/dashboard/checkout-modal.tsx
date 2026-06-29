@@ -261,11 +261,12 @@ export function CheckoutModal({ pacote, userEmail, userName, onClose }: Props) {
               <div className="relative mb-3 rounded-2xl border-2 border-[#4f7fff30] bg-white p-3">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrCode)}`}
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=4&data=${encodeURIComponent(qrCode)}`}
                   alt="QR Code PIX"
                   width={200}
                   height={200}
                   className="block rounded-lg"
+                  onError={(e) => { (e.target as HTMLImageElement).src = `https://quickchart.io/qr?text=${encodeURIComponent(qrCode)}&size=200` }}
                 />
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="grid h-10 w-10 place-items-center rounded-xl bg-white shadow-lg">
