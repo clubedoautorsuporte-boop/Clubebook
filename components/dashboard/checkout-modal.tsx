@@ -14,7 +14,7 @@ type Pacote = {
   popular: boolean
 }
 
-type Step = 'form' | 'pix' | 'success'
+type Step = 'select' | 'form' | 'pix' | 'success'
 
 type Props = {
   pacote: Pacote
@@ -37,7 +37,7 @@ function formatPhone(v: string) {
 }
 
 export function CheckoutModal({ pacote, userEmail, userName, onClose }: Props) {
-  const [step, setStep] = useState<Step>('form')
+  const [step, setStep] = useState<Step>('select')
   const [nome, setNome] = useState(userName ?? '')
   const [cpf, setCpf] = useState('')
   const [telefone, setTelefone] = useState('')
@@ -158,6 +158,49 @@ export function CheckoutModal({ pacote, userEmail, userName, onClose }: Props) {
                 Pagamento único · Sem renovação
               </span>
             </div>
+          </div>
+        )}
+
+        {/* ── STEP: Seleção de pagamento ── */}
+        {step === 'select' && (
+          <div className="px-6 py-5 space-y-3">
+            <p className="text-xs font-semibold uppercase tracking-widest text-[#6b7a99] mb-4">Escolha a forma de pagamento</p>
+
+            <button
+              onClick={() => setStep('form')}
+              className="w-full flex items-center justify-between rounded-2xl border-2 border-[#00e5c340] bg-[#00e5c308] px-4 py-4 transition hover:border-[#00e5c3] hover:bg-[#00e5c310] group"
+            >
+              <div className="flex items-center gap-3">
+                <div className="grid h-10 w-10 place-items-center rounded-xl bg-[#00e5c318]">
+                  <QrCode className="size-5 text-[#00e5c3]" />
+                </div>
+                <div className="text-left">
+                  <p className="text-sm font-bold text-white">PIX</p>
+                  <p className="text-[11px] text-[#6b7a99]">Aprovação imediata · QR Code</p>
+                </div>
+              </div>
+              <span className="rounded-full bg-[#00e5c318] px-2.5 py-0.5 text-[10px] font-bold text-[#00e5c3]">Instantâneo</span>
+            </button>
+
+            <button
+              onClick={() => window.open(`https://go.pepper.com.br/${pacote.id === '20k' ? 'bpe3b' : pacote.id === '50k' ? 'f9w7z' : 'ufsa4'}`, '_blank')}
+              className="w-full flex items-center justify-between rounded-2xl border-2 border-[#1c2438] bg-[#0b0f1c] px-4 py-4 transition hover:border-[#4f7fff40] hover:bg-[#4f7fff08] group"
+            >
+              <div className="flex items-center gap-3">
+                <div className="grid h-10 w-10 place-items-center rounded-xl bg-[#4f7fff18]">
+                  <Zap className="size-5 text-[#4f7fff]" />
+                </div>
+                <div className="text-left">
+                  <p className="text-sm font-bold text-white">Cartão de Crédito</p>
+                  <p className="text-[11px] text-[#6b7a99]">Visa, Mastercard, Elo...</p>
+                </div>
+              </div>
+              <span className="rounded-full bg-[#4f7fff18] px-2.5 py-0.5 text-[10px] font-bold text-[#4f7fff]">Seguro</span>
+            </button>
+
+            <p className="text-center text-[10px] text-[#3a4a66] pt-2">
+              🔒 Pagamento processado com segurança pela Pepper
+            </p>
           </div>
         )}
 
