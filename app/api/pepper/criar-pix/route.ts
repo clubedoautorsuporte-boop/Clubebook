@@ -31,7 +31,6 @@ export async function POST(req: NextRequest) {
   }
 
   const payload = {
-    api_token: token,
     amount: pkg.amount,
     payment_method: 'pix',
     cart: [{
