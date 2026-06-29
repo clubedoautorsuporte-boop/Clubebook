@@ -24,7 +24,11 @@ async function getPepperData(): Promise<{ products: PepperProduct[]; error?: str
 
   try {
     const res = await fetch('https://api.cloud.pepperpay.com.br/public/v1/products', {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
       cache: 'no-store',
     })
     const data = await res.json() as { success?: boolean; data?: PepperProduct[]; message?: string }
