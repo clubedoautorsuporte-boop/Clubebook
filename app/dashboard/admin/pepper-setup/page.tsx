@@ -33,7 +33,7 @@ async function getPepperData(): Promise<{ products: PepperProduct[]; error?: str
     })
     const data = await res.json() as { success?: boolean; data?: PepperProduct[]; message?: string }
 
-    if (!data.success) return { products: [], error: data.message ?? 'Erro na API Pepper' }
+    if (!data.success) return { products: [], error: `${data.message ?? 'Erro na API Pepper'} | Status HTTP: ${res.status} | Resposta: ${JSON.stringify(data)}` }
     return { products: data.data ?? [] }
   } catch (err) {
     return { products: [], error: String(err) }
