@@ -1,235 +1,148 @@
 import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
-import { Zap, Check, Gift, Gem, TrendingUp, ArrowDownCircle, History } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { Zap, Check, Gift, Gem, TrendingUp, History } from 'lucide-react'
 import { ComprarButton } from './comprar-button'
+
+const PACOTES = [
+  {
+    id: 'starter',
+    nome: 'Starter',
+    creditos: 20000,
+    preco: 'R$ 179,99',
+    precoNum: 179.99,
+    desc: 'Ideal para começar e testar a plataforma',
+    features: ['~20 ebooks completos', 'PDF, DOCX e EPUB', 'Suporte por email', 'Sem vencimento'],
+    destaque: false,
+    cor: '#4f7fff',
+    g: 'linear-gradient(135deg,#4f7fff,#2554e0)',
+    s: 'rgba(79,127,255,0.4)',
+  },
+  {
+    id: 'pro',
+    nome: 'Pro',
+    creditos: 50000,
+    preco: 'R$ 439,99',
+    precoNum: 439.99,
+    desc: 'Para quem quer revender e escalar',
+    features: ['~50 ebooks completos', 'PDF, DOCX e EPUB', 'Suporte prioritário', 'Sem vencimento', 'Economize 18%'],
+    destaque: true,
+    cor: '#a855f7',
+    g: 'linear-gradient(135deg,#a855f7,#7c3aed)',
+    s: 'rgba(168,85,247,0.4)',
+  },
+  {
+    id: 'ultra',
+    nome: 'Ultra',
+    creditos: 100000,
+    preco: 'R$ 849,99',
+    precoNum: 849.99,
+    desc: 'Máxima produção para agências e revendedores',
+    features: ['~100 ebooks completos', 'PDF, DOCX e EPUB', 'Suporte VIP 24h', 'Sem vencimento', 'Economize 29%'],
+    destaque: false,
+    cor: '#f97316',
+    g: 'linear-gradient(135deg,#f97316,#ea580c)',
+    s: 'rgba(249,115,22,0.4)',
+  },
+]
 
 export default async function CreditosPage() {
   const session = await auth()
-  if (!session?.user?.id) redirect('/auth/login')
+  if (!session?.user?.id) redirect('/login')
 
-  const credits = (session.user as { credits?: number })?.credits ?? 1000
-  const creditsBought = 0
-  const creditsUsed = 0
-
-  const userEmail = session.user?.email ?? ''
-  const userName = session.user?.name ?? ''
-
-  const packages = [
-    { credits: 20000,  price: 179.99, discount: 10, realValue: 200,  popular: false },
-    { credits: 50000,  price: 439.99, discount: 12, realValue: 500,  popular: true  },
-    { credits: 100000, price: 849.99, discount: 15, realValue: 1000, popular: false },
-  ]
-
-  const services = [
-    {
-      title: 'Serviços Principais',
-      subtitle: 'Pagamento direto em R$',
-      color: '#4f7fff',
-      items: [
-        { name: 'Escrita do Livro (geração completa)',   value: 'R$ 49,99'       },
-        { name: 'Capa Profissional (4 variações)',        value: 'R$ 99,99'       },
-        { name: 'Ajuste de Capa',                         value: 'R$ 19,99'       },
-        { name: 'Audiobook Premium',                      value: 'R$ 409,99'      },
-        { name: 'Preparação para Publicação',             value: 'R$ 39,99'       },
-        { name: 'Material de Marketing (por peça)',       value: 'R$ 7,99–19,99'  },
-        { name: 'Tradução (por idioma)',                  value: 'R$ 29,99'       },
-        { name: 'Ilustrações (por imagem)',               value: 'R$ 9,99–14,99'  },
-      ],
-    },
-    {
-      title: 'Edições com Créditos',
-      subtitle: 'Aurora Builder — edite seu livro após a geração',
-      color: '#00e5c3',
-      items: [
-        { name: 'Criar novo capítulo',               value: '-488 créditos'  },
-        { name: 'Reescrever capítulo inteiro',        value: '-735 créditos'  },
-        { name: 'Reescrever seção',                   value: '-499 créditos'  },
-        { name: 'Reescrever parágrafo',               value: '-348 créditos'  },
-        { name: 'Corrigir texto do capítulo',         value: '-116 créditos'  },
-        { name: 'Análise editorial do capítulo',      value: '-65 créditos'   },
-        { name: 'Editar texto da capa',               value: '-498 créditos'  },
-        { name: 'Editar estilo da capa',              value: '-720 créditos'  },
-        { name: 'Gerar metadados de publicação',      value: '-260 créditos'  },
-        { name: 'Buscar e substituir (todo livro)',   value: '-30 créditos'   },
-      ],
-    },
-  ]
-
-  const transactions = [
-    {
-      badge: 'Presente',
-      badgeColor: 'bg-[#4f7fff22] text-[#4f7fff]',
-      description: 'Boas-vindas! 1.000 créditos para explorar a plataforma',
-      amount: '+1.000',
-      balance: '1.000',
-      date: '25 de Jun. de 2026',
-    },
-  ]
-
-  const STATS = [
-    { label: 'Saldo disponível', value: credits.toLocaleString('pt-BR'), unit: 'créditos', icon: Gem, color: '#00e5c3', bg: '#00e5c318' },
-    { label: 'Total comprado', value: creditsBought.toLocaleString('pt-BR'), unit: 'créditos', icon: TrendingUp, color: '#4f7fff', bg: '#4f7fff18' },
-    { label: 'Total utilizado', value: creditsUsed.toLocaleString('pt-BR'), unit: 'créditos', icon: ArrowDownCircle, color: '#f97316', bg: '#f9731618' },
-    { label: 'Equivale a', value: `R$ ${(credits / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, unit: 'em reais', icon: Zap, color: '#8b5cf6', bg: '#8b5cf618' },
-  ]
+  const creditos = (session.user as Record<string, unknown>).creditos as number ?? 0
+  const userEmail = session.user.email ?? ''
+  const userName = session.user.name ?? ''
 
   return (
-    <div className="px-5 pt-6 pb-16 md:px-8">
+    <div className="px-5 py-6 pb-16 md:px-8">
 
-      {/* ── Saldo em destaque ── */}
-      <div className="mb-6 overflow-hidden rounded-2xl border border-[#00e5c325] bg-gradient-to-br from-[#071e1a] via-[#040e0c] to-[#080b14] p-6">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-widest text-[#00e5c3]/60 mb-2">Saldo disponível</p>
-            <p className="text-5xl font-extrabold leading-none text-[#00e5c3]">
-              {credits.toLocaleString('pt-BR')}
-              <span className="ml-2 text-xl font-semibold text-[#00e5c3]/50">créditos</span>
-            </p>
-            <p className="mt-2 text-sm text-[#3a4a66]">
-              = R$ {(credits / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })} em serviços
-            </p>
-          </div>
-          <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-[#00e5c318]">
-            <Gem className="size-7 text-[#00e5c3]" />
-          </div>
+      <div className="mb-6 flex items-center gap-3">
+        <div className="grid h-12 w-12 place-items-center rounded-xl" style={{ background: 'linear-gradient(135deg,#f97316,#ea580c)', boxShadow: '0 4px 20px rgba(249,115,22,0.4)' }}>
+          <Zap className="size-6 text-white" />
+        </div>
+        <div>
+          <h1 className="text-xl font-bold text-white">Créditos</h1>
+          <p className="text-sm text-[#6b7a99]">Compre créditos para gerar ebooks com IA</p>
         </div>
       </div>
 
-      {/* ── Stats ── */}
-      <div className="mb-8 grid grid-cols-2 gap-2.5 sm:grid-cols-4">
-        {STATS.map(({ label, value, unit, icon: Icon, color, bg }) => (
-          <div key={label} className="rounded-2xl border border-[#1c2438] bg-[#0b0f1c] p-4">
-            <div className="mb-3 flex items-center justify-between">
-              <p className="text-[11px] text-[#6b7a99]">{label}</p>
-              <div className="grid h-7 w-7 place-items-center rounded-lg" style={{ background: bg }}>
-                <Icon className="size-3.5" style={{ color }} />
+      {/* Stats */}
+      <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
+        {[
+          { label: 'Saldo atual', value: creditos.toLocaleString('pt-BR'), sub: 'créditos disponíveis', icon: Zap, g: 'linear-gradient(135deg,#4f7fff,#2554e0)', s: 'rgba(79,127,255,0.5)' },
+          { label: 'Ebooks possíveis', value: Math.floor(creditos / 1000), sub: '~1.000 créditos por ebook', icon: TrendingUp, g: 'linear-gradient(135deg,#00e5c3,#00b09b)', s: 'rgba(0,229,195,0.5)' },
+          { label: 'Bônus acumulados', value: 0, sub: 'via indicações', icon: Gift, g: 'linear-gradient(135deg,#a855f7,#7c3aed)', s: 'rgba(168,85,247,0.5)' },
+        ].map(({ label, value, sub, icon: Icon, g, s }) => (
+          <div key={label} className="overflow-hidden rounded-xl border border-[#1c2438]" style={{ background: '#0d1220' }}>
+            <div className="flex h-full">
+              <div className="grid w-[64px] shrink-0 place-items-center" style={{ background: g, boxShadow: s }}>
+                <Icon className="size-6 text-white" />
+              </div>
+              <div className="flex flex-col justify-center p-4">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-[#6b7a99]">{label}</p>
+                <p className="text-2xl font-black text-white tabular-nums">{value}</p>
+                <p className="text-[10px] text-[#3a4a66]">{sub}</p>
               </div>
             </div>
-            <p className="text-xl font-extrabold text-white tabular-nums leading-tight">{value}</p>
-            <p className="mt-0.5 text-[10px] text-[#3a4a66]">{unit}</p>
           </div>
         ))}
       </div>
 
-      {/* ── Comprar Créditos ── */}
-      <div className="mb-8">
-        <div className="mb-5 flex items-center gap-2">
-          <div className="grid h-8 w-8 place-items-center rounded-xl bg-[#4f7fff18]">
-            <Zap className="size-4 text-[#4f7fff]" />
-          </div>
-          <h2 className="text-base font-bold text-white">Comprar Créditos</h2>
-        </div>
-
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          {packages.map((pkg, i) => (
-            <div key={i} className={cn(
-              'relative flex flex-col rounded-2xl border-2 p-6 transition',
-              pkg.popular
-                ? 'border-[#00e5c3] bg-[#00e5c30a]'
-                : 'border-[#1c2438] bg-[#0b0f1c] hover:border-[#2a3553]',
-            )}>
-              {pkg.popular && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <span className="rounded-full bg-[#00e5c3] px-3 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-[#040810]">
-                    MAIS POPULAR
-                  </span>
-                </div>
-              )}
-              <p className="text-4xl font-extrabold text-white">{pkg.credits.toLocaleString('pt-BR')}</p>
-              <p className="mb-4 text-sm text-[#6b7a99]">créditos</p>
-              <p className={cn('mb-3 text-2xl font-bold', pkg.popular ? 'text-[#00e5c3]' : 'text-white')}>
-                R$ {pkg.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-              </p>
-              <div className="mb-6 flex flex-col gap-0.5">
-                <span className="flex items-center gap-1 text-xs text-[#00e5c3]">
-                  <Check className="size-3" /> Economia de {pkg.discount}%
-                </span>
-                <span className="text-xs text-[#3a4a66]">
-                  Valor real R$ {pkg.realValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                </span>
-              </div>
-              <ComprarButton popular={pkg.popular} credits={pkg.credits} price={pkg.price} userEmail={userEmail} userName={userName} />
-            </div>
-          ))}
-        </div>
+      <div className="mb-3">
+        <h2 className="text-[15px] font-bold text-white">Escolha um pacote</h2>
+        <p className="text-[12px] text-[#6b7a99]">Pagamento único · sem mensalidade · créditos sem vencimento</p>
       </div>
 
-      {/* ── Tabela de Custos ── */}
-      <div className="mb-8">
-        <div className="mb-4 flex items-center gap-2">
-          <div className="grid h-8 w-8 place-items-center rounded-xl bg-[#8b5cf618]">
-            <Zap className="size-4 text-[#8b5cf6]" />
-          </div>
-          <h2 className="text-base font-bold text-white">Tabela de Custos por Serviço</h2>
-        </div>
-
-        <div className="space-y-3">
-          {services.map((section, si) => (
-            <div key={si} className="overflow-hidden rounded-2xl border border-[#1c2438]">
-              <div className="flex items-center gap-3 border-b border-[#1c2438] bg-[#0b0f1c] px-5 py-3.5">
-                <div className="h-1.5 w-1.5 rounded-full" style={{ background: section.color }} />
-                <div>
-                  <p className="text-[13px] font-bold text-white">{section.title}</p>
-                  <p className="text-[11px] text-[#3a4a66]">{section.subtitle}</p>
-                </div>
+      <div className="grid gap-5 sm:grid-cols-3">
+        {PACOTES.map(({ id, nome, creditos: cred, preco, precoNum, desc, features, destaque, g, s, cor }) => (
+          <div key={id} className={`relative flex flex-col rounded-xl border overflow-hidden ${destaque ? 'border-[#a855f7]' : 'border-[#1c2438]'}`} style={{ background: '#0d1220' }}>
+            {destaque && <div className="absolute top-0 left-0 right-0 h-0.5" style={{ background: g }} />}
+            {destaque && (
+              <div className="flex justify-center pt-3">
+                <span className="rounded-full px-3 py-0.5 text-[10px] font-bold text-white" style={{ background: g }}>
+                  Mais popular
+                </span>
               </div>
-              {section.items.map((item, ii) => (
-                <div key={ii} className={cn(
-                  'flex items-center justify-between px-5 py-3',
-                  ii % 2 === 0 ? 'bg-[#080b14]' : 'bg-[#0b0f1c]',
-                )}>
-                  <span className="text-sm text-[#b0bdd4]">{item.name}</span>
-                  <span className={cn(
-                    'text-sm font-bold tabular-nums',
-                    item.value.startsWith('-') ? 'text-[#4f7fff]' : 'text-[#00e5c3]',
-                  )}>{item.value}</span>
-                </div>
-              ))}
-            </div>
-          ))}
-        </div>
-        <p className="mt-3 text-[10px] leading-relaxed text-[#3a4a66] text-center">
-          100 créditos = R$ 1,00 · Custos incluem taxa base + tempo de processamento da Aurora
-        </p>
-      </div>
-
-      {/* ── Histórico ── */}
-      <div>
-        <div className="mb-4 flex items-center gap-2">
-          <div className="grid h-8 w-8 place-items-center rounded-xl bg-[#4f7fff18]">
-            <History className="size-4 text-[#4f7fff]" />
-          </div>
-          <h2 className="text-base font-bold text-white">Histórico de Transações</h2>
-        </div>
-
-        <div className="overflow-hidden rounded-2xl border border-[#1c2438]">
-          {transactions.length === 0 ? (
-            <p className="p-6 text-center text-sm text-[#6b7a99]">Nenhuma transação ainda.</p>
-          ) : (
-            <div className="divide-y divide-[#1c2438]">
-              {transactions.map((tx, i) => (
-                <div key={i} className="flex items-center gap-4 px-5 py-4 hover:bg-[#0b0f1c] transition">
-                  <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#4f7fff15]">
-                    <Gift className="size-5 text-[#4f7fff]" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-0.5">
-                      <span className={cn('rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider', tx.badgeColor)}>
-                        {tx.badge}
-                      </span>
+            )}
+            <div className="flex flex-col flex-1 p-5 pt-4">
+              <div className="mb-4 grid h-12 w-12 place-items-center rounded-xl" style={{ background: g, boxShadow: `0 4px 20px ${s}` }}>
+                <Gem className="size-5 text-white" />
+              </div>
+              <h3 className="text-[16px] font-extrabold text-white">{nome}</h3>
+              <p className="mt-0.5 text-[11px] text-[#6b7a99]">{desc}</p>
+              <div className="my-4 border-t border-[#1c2438]" />
+              <p className="text-2xl font-extrabold text-white">{preco}</p>
+              <p className="text-[11px] text-[#3a4a66]">{(cred / 1000).toFixed(0)}k créditos</p>
+              <div className="my-4 space-y-2">
+                {features.map(f => (
+                  <div key={f} className="flex items-center gap-2">
+                    <div className="grid h-4 w-4 place-items-center rounded-full" style={{ background: `${cor}20` }}>
+                      <Check className="size-2.5" style={{ color: cor }} />
                     </div>
-                    <p className="truncate text-sm text-[#c4d0e8]">{tx.description}</p>
+                    <span className="text-[11px] text-[#6b7a99]">{f}</span>
                   </div>
-                  <div className="shrink-0 text-right">
-                    <p className="text-sm font-bold text-[#00e5c3]">{tx.amount}</p>
-                    <p className="text-[10px] text-[#3a4a66]">Saldo: {tx.balance}</p>
-                    <p className="mt-0.5 text-[10px] text-[#3a4a66]">{tx.date}</p>
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
+              <div className="mt-auto">
+                <ComprarButton popular={destaque} credits={cred} price={precoNum} userEmail={userEmail} userName={userName} />
+              </div>
             </div>
-          )}
+          </div>
+        ))}
+      </div>
+
+      {/* Histórico */}
+      <div className="mt-8 rounded-xl border border-[#1c2438] overflow-hidden" style={{ background: '#0d1220' }}>
+        <div className="flex items-center gap-2 border-b border-[#1c2438] px-5 py-4">
+          <History className="size-4 text-[#3a4a66]" />
+          <h2 className="text-[14px] font-bold text-white">Histórico de compras</h2>
+        </div>
+        <div className="flex flex-col items-center justify-center py-10 text-center">
+          <div className="mb-3 grid h-12 w-12 place-items-center rounded-xl" style={{ background: '#0b0f1c' }}>
+            <History className="size-5 text-[#3a4a66]" />
+          </div>
+          <p className="text-[13px] font-semibold text-white">Sem histórico ainda</p>
+          <p className="text-[11px] text-[#3a4a66]">Suas compras aparecerão aqui</p>
         </div>
       </div>
     </div>

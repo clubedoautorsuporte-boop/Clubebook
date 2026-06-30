@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { auth } from '@/auth'
+import { prisma } from '@/lib/prisma'
 
 const PRICES: Record<string, { amount: number; credits: number }> = {
   '20k':  { amount: 179.99, credits: 20000  },
@@ -7,6 +9,9 @@ const PRICES: Record<string, { amount: number; credits: number }> = {
 }
 
 export async function POST(req: NextRequest) {
+  const session = await auth()
+  if (!session?.user?.id) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+
   const token = process.env.MERCADOPAGO_ACCESS_TOKEN
   if (!token) return NextResponse.json({ error: 'Mercado Pago não configurado' }, { status: 503 })
 
@@ -44,12 +49,16 @@ export async function POST(req: NextRequest) {
           },
         },
         description: `${pkg.credits.toLocaleString('pt-BR')} Créditos — Clube do Autor IA`,
-        metadata: { pacoteId: body.pacoteId, credits: pkg.credits },
+        metadata: { pacoteId: body.pacoteId, credits: pkg.credits, userId: session.user.id },
       },
     })
 
     const status = result.status
     if (status === 'approved') {
+      await prisma.user.update({
+        where: { id: session.user.id },
+        data: { credits: { increment: pkg.credits } },
+      })
       return NextResponse.json({ status: 'approved' })
     }
     if (status === 'in_process' || status === 'pending') {

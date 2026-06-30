@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
@@ -26,7 +26,7 @@ export function ComprarButton({ popular, credits, price, userEmail, userName }: 
           'mt-auto flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold transition hover:-translate-y-0.5',
           popular
             ? 'bg-[#00e5c3] text-[#040810] hover:bg-[#00cfb0] shadow-[0_0_20px_rgba(0,229,195,0.3)]'
-            : 'border border-[#1c2438] text-white hover:bg-[#0f1523] hover:border-[#4f7fff40]',
+            : 'border border-[#1c2438] bg-[#0b0f1c] text-white hover:border-[#4f7fff] hover:bg-[#4f7fff10]',
         )}
       >
         <Zap className="size-4" />

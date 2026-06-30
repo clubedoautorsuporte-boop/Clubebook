@@ -158,11 +158,13 @@ function MPCardBrick({ price, userEmail, onReady, onSubmit }: {
   onReady: () => void
   onSubmit: (data: MPCardData) => Promise<void>
 }) {
-  const [CardPayment, setCardPayment] = useState<React.ComponentType<unknown> | null>(null)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [CardPayment, setCardPayment] = useState<React.ComponentType<any> | null>(null)
 
   useEffect(() => {
     import('@mercadopago/sdk-react').then(mod => {
-      setCardPayment(() => mod.CardPayment)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      setCardPayment(mod.CardPayment as React.ComponentType<any>)
     })
   }, [])
 
