@@ -4,7 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import {
-  LayoutDashboard, BookOpen, TrendingUp, Gem, Library,
+  BookOpen, TrendingUp, Gem, Library,
   Gift, Wrench, Settings, LogOut, ChevronRight, Crown, Rocket,
   FolderOpen,
 } from 'lucide-react'
@@ -23,8 +23,7 @@ type SidebarProps = {
 }
 
 const NAV = [
-  { href: '/dashboard',                 icon: LayoutDashboard, label: 'Dashboard'       },
-  { href: '/dashboard/criar',           icon: FolderOpen,      label: 'Projetos'        },
+  { href: '/dashboard/projetos',        icon: FolderOpen,      label: 'Projetos'        },
   { href: '/dashboard/biblioteca',      icon: BookOpen,        label: 'Livros'          },
   { href: '/dashboard/vendas',          icon: TrendingUp,      label: 'Receitas'        },
   { href: '/dashboard/creditos',        icon: Gem,             label: 'Créditos'        },
@@ -125,9 +124,7 @@ function SidebarInner({ userName, userImage, userEmail, credits = 0, isAdmin }: 
       <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto px-3 py-4 scrollbar-none">
         <p className="mb-2 px-3 text-[9px] font-bold uppercase tracking-[0.15em] text-[#2a3a56]">Menu</p>
         {NAV.map(({ href, icon, label }) => {
-          const active = href === '/dashboard'
-            ? pathname === '/dashboard'
-            : pathname.startsWith(href)
+          const active = pathname.startsWith(href)
           return <NavItem key={href} href={href} icon={icon} label={label} active={active} />
         })}
         {isAdmin && (
@@ -224,8 +221,7 @@ export function Sidebar(props: SidebarProps) {
 export function BottomNav() {
   const pathname = usePathname()
   const items = [
-    { href: '/dashboard',               icon: LayoutDashboard, label: 'Home'     },
-    { href: '/dashboard/criar',         icon: FolderOpen,      label: 'Criar', highlight: true },
+    { href: '/dashboard/projetos',      icon: FolderOpen,      label: 'Projetos', highlight: true },
     { href: '/dashboard/creditos',      icon: Gem,             label: 'Créditos' },
     { href: '/dashboard/indicar',       icon: Gift,            label: 'Indicar'  },
     { href: '/dashboard/configuracoes', icon: Settings,        label: 'Config'   },
