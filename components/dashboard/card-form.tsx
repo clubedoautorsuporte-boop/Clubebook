@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
 import { ShieldCheck, Loader2, ArrowLeft } from 'lucide-react'
 
 type CardFormProps = {
@@ -11,13 +11,26 @@ type CardFormProps = {
   onBack: () => void
 }
 
-type MPCardData = {
+// Estrutura real retornada pelo Brick do Mercado Pago
+type MPFormData = {
   token: string
+  issuer_id: string
+  payment_method_id: string
+  transaction_amount: number
   installments: number
-  paymentMethodId: string
-  issuerId: string
-  identificationType: string
-  identificationNumber: string
+  payer: {
+    email?: string
+    identification?: { type: string; number: string }
+  }
+}
+
+declare global {
+  interface Window {
+    cardPaymentBrickController?: {
+      submit: () => Promise<void>
+      unmount: () => void
+    }
+  }
 }
 
 export function CardForm({ price, pacoteId, userEmail, onSuccess, onBack }: CardFormProps) {
@@ -38,14 +51,34 @@ export function CardForm({ price, pacoteId, userEmail, onSuccess, onBack }: Card
 
   const priceFormatted = price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })
 
-  async function onSubmit(data: MPCardData) {
+  async function handlePay() {
+    if (!window.cardPaymentBrickController) return
+    setSubmitting(true)
+    setErrorMsg('')
+    try {
+      await window.cardPaymentBrickController.submit()
+    } catch {
+      setSubmitting(false)
+    }
+  }
+
+  async function onSubmit(data: MPFormData) {
     setSubmitting(true)
     setErrorMsg('')
     try {
       const res = await fetch('/api/mercadopago/criar-pagamento', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...data, pacoteId, email: userEmail }),
+        body: JSON.stringify({
+          token: data.token,
+          issuer_id: data.issuer_id,
+          payment_method_id: data.payment_method_id,
+          transaction_amount: data.transaction_amount,
+          installments: data.installments,
+          payer: data.payer,
+          pacoteId,
+          email: userEmail,
+        }),
       })
       const result = await res.json() as { status: string; error?: string; detail?: string }
       if (result.status === 'approved') {
@@ -73,8 +106,7 @@ export function CardForm({ price, pacoteId, userEmail, onSuccess, onBack }: Card
         <div className="rounded-xl border border-yellow-500/20 bg-yellow-500/08 px-4 py-4 text-center">
           <p className="text-sm font-semibold text-yellow-400 mb-1">Mercado Pago não configurado</p>
           <p className="text-xs text-[#6b7a99]">
-            Adicione <code className="text-yellow-400">NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY</code> e{' '}
-            <code className="text-yellow-400">MERCADOPAGO_ACCESS_TOKEN</code> nas variáveis de ambiente do Vercel.
+            Adicione <code className="text-yellow-400">NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY</code> nas variáveis de ambiente.
           </p>
         </div>
         <button onClick={onBack} className="mt-4 w-full text-center text-xs text-[#6b7a99] underline">
@@ -130,8 +162,7 @@ export function CardForm({ price, pacoteId, userEmail, onSuccess, onBack }: Card
       {ready && (
         <div className="px-5 pb-5 pt-3 flex flex-col gap-3">
           <button
-            type="submit"
-            form="mp-card-form"
+            onClick={handlePay}
             disabled={submitting}
             className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#00e5c3] py-3.5 text-sm font-bold text-[#040810] transition hover:bg-[#00cfb0] disabled:opacity-60"
           >
@@ -156,7 +187,7 @@ function MPCardBrick({ price, userEmail, onReady, onSubmit }: {
   price: number
   userEmail: string
   onReady: () => void
-  onSubmit: (data: MPCardData) => Promise<void>
+  onSubmit: (data: MPFormData) => Promise<void>
 }) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [CardPayment, setCardPayment] = useState<React.ComponentType<any> | null>(null)
@@ -164,22 +195,21 @@ function MPCardBrick({ price, userEmail, onReady, onSubmit }: {
   useEffect(() => {
     import('@mercadopago/sdk-react').then(mod => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      setCardPayment(mod.CardPayment as React.ComponentType<any>)
+      setCardPayment(() => mod.CardPayment as React.ComponentType<any>)
     })
   }, [])
 
-  if (!CardPayment) return null
-
-  const CP = CardPayment as React.ComponentType<{
-    initialization: { amount: number; payer: { email: string } }
-    customization: object
-    onSubmit: (data: MPCardData) => Promise<void>
-    onReady: () => void
-    onError: (err: unknown) => void
-  }>
+  if (!CardPayment) {
+    return (
+      <div className="flex items-center justify-center gap-2 py-6 text-[#6b7a99]">
+        <Loader2 className="size-4 animate-spin" />
+        <span className="text-xs">Inicializando…</span>
+      </div>
+    )
+  }
 
   return (
-    <CP
+    <CardPayment
       initialization={{ amount: price, payer: { email: userEmail } }}
       customization={{
         visual: {
@@ -204,7 +234,7 @@ function MPCardBrick({ price, userEmail, onReady, onSubmit }: {
       }}
       onReady={onReady}
       onSubmit={onSubmit}
-      onError={(err) => console.error('[MP CardPayment]', err)}
+      onError={(err: unknown) => console.error('[MP CardPayment]', err)}
     />
   )
 }

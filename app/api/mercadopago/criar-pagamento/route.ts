@@ -23,12 +23,12 @@ export async function POST(req: NextRequest) {
     const body = await req.json() as {
       pacoteId: string
       token: string
+      issuer_id: string
+      payment_method_id: string
+      transaction_amount: number
       installments: number
-      paymentMethodId: string
-      issuerId: string
+      payer: { email?: string; identification?: { type: string; number: string } }
       email: string
-      identificationType: string
-      identificationNumber: string
     }
 
     const pkg = PRICES[body.pacoteId]
@@ -39,14 +39,11 @@ export async function POST(req: NextRequest) {
         transaction_amount: pkg.amount,
         token: body.token,
         installments: body.installments,
-        payment_method_id: body.paymentMethodId,
-        issuer_id: Number(body.issuerId) || undefined,
+        payment_method_id: body.payment_method_id,
+        issuer_id: Number(body.issuer_id) || undefined,
         payer: {
-          email: body.email,
-          identification: {
-            type: body.identificationType,
-            number: body.identificationNumber,
-          },
+          email: body.payer?.email ?? body.email,
+          identification: body.payer?.identification,
         },
         description: `${pkg.credits.toLocaleString('pt-BR')} Créditos — Clube do Autor IA`,
         metadata: { pacoteId: body.pacoteId, credits: pkg.credits, userId: session.user.id },
