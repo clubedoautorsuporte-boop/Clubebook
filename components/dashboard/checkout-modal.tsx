@@ -6,6 +6,7 @@ import {
   ShieldCheck, Zap, ChevronRight, RefreshCw,
 } from 'lucide-react'
 import Image from 'next/image'
+import { CardForm } from './card-form'
 
 type Pacote = {
   id: '20k' | '50k' | '100k'
@@ -14,7 +15,7 @@ type Pacote = {
   popular: boolean
 }
 
-type Step = 'select' | 'form' | 'pix' | 'success'
+type Step = 'select' | 'form' | 'pix' | 'card' | 'success'
 
 type Props = {
   pacote: Pacote
@@ -121,28 +122,30 @@ export function CheckoutModal({ pacote, userEmail, userName, onClose }: Props) {
         <div className="pointer-events-none absolute left-1/2 top-0 h-32 w-64 -translate-x-1/2 rounded-full bg-[#4f7fff08] blur-3xl" />
 
         {/* Header */}
-        <div className="relative flex items-start justify-between border-b border-[#1c2438] px-6 py-5">
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <div className="grid h-11 w-11 place-items-center rounded-2xl bg-gradient-to-br from-[#4f7fff] to-[#00e5c3]">
-                <Sparkles className="size-5 text-white" />
+        {step !== 'card' && (
+          <div className="relative flex items-start justify-between border-b border-[#1c2438] px-6 py-5">
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <div className="grid h-11 w-11 place-items-center rounded-2xl bg-gradient-to-br from-[#4f7fff] to-[#00e5c3]">
+                  <Sparkles className="size-5 text-white" />
+                </div>
+                <span className="absolute -right-1 -top-1 h-3 w-3 animate-pulse rounded-full border-2 border-[#080b14] bg-[#00e5c3]" />
               </div>
-              <span className="absolute -right-1 -top-1 h-3 w-3 animate-pulse rounded-full border-2 border-[#080b14] bg-[#00e5c3]" />
+              <div>
+                <p className="text-[11px] font-bold uppercase tracking-widest text-[#4f7fff]">Clube do Autor IA</p>
+                <p className="text-base font-extrabold text-white">
+                  {pacote.credits.toLocaleString('pt-BR')} Créditos
+                </p>
+              </div>
             </div>
-            <div>
-              <p className="text-[11px] font-bold uppercase tracking-widest text-[#4f7fff]">Clube do Autor IA</p>
-              <p className="text-base font-extrabold text-white">
-                {pacote.credits.toLocaleString('pt-BR')} Créditos
-              </p>
-            </div>
+            <button onClick={onClose} className="grid h-8 w-8 place-items-center rounded-xl text-[#6b7a99] transition hover:bg-[#0f1523] hover:text-white">
+              <X className="size-4" />
+            </button>
           </div>
-          <button onClick={onClose} className="grid h-8 w-8 place-items-center rounded-xl text-[#6b7a99] transition hover:bg-[#0f1523] hover:text-white">
-            <X className="size-4" />
-          </button>
-        </div>
+        )}
 
         {/* Preço em destaque */}
-        {step !== 'success' && (
+        {step !== 'success' && step !== 'card' && (
           <div className="flex flex-col items-center gap-1 border-b border-[#1c2438] bg-[#4f7fff06] py-5">
             <div className="flex items-baseline gap-1">
               <span className="text-sm font-semibold text-[#6b7a99]">R$</span>
@@ -183,7 +186,7 @@ export function CheckoutModal({ pacote, userEmail, userName, onClose }: Props) {
             </button>
 
             <button
-              onClick={() => window.open(`https://go.pepper.com.br/${pacote.id === '20k' ? 'bpe3b' : pacote.id === '50k' ? 'f9w7z' : 'ufsa4'}`, '_blank')}
+              onClick={() => setStep('card')}
               className="w-full flex items-center justify-between rounded-2xl border-2 border-[#1c2438] bg-[#0b0f1c] px-4 py-4 transition hover:border-[#4f7fff40] hover:bg-[#4f7fff08] group"
             >
               <div className="flex items-center gap-3">
@@ -192,7 +195,7 @@ export function CheckoutModal({ pacote, userEmail, userName, onClose }: Props) {
                 </div>
                 <div className="text-left">
                   <p className="text-sm font-bold text-white">Cartão de Crédito</p>
-                  <p className="text-[11px] text-[#6b7a99]">Visa, Mastercard, Elo...</p>
+                  <p className="text-[11px] text-[#6b7a99]">Visa, Mastercard, Google Pay…</p>
                 </div>
               </div>
               <span className="rounded-full bg-[#4f7fff18] px-2.5 py-0.5 text-[10px] font-bold text-[#4f7fff]">Seguro</span>
@@ -347,6 +350,16 @@ export function CheckoutModal({ pacote, userEmail, userName, onClose }: Props) {
               <span className="text-xs text-[#6b7a99]">Verificando pagamento automaticamente…</span>
             </div>
           </div>
+        )}
+
+        {/* ── STEP: Cartão ── */}
+        {step === 'card' && (
+          <CardForm
+            price={pacote.price}
+            pacoteId={pacote.id}
+            onSuccess={() => setStep('success')}
+            onBack={() => setStep('select')}
+          />
         )}
 
         {/* ── STEP: Sucesso ── */}
