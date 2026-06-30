@@ -4,12 +4,14 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import {
-  FolderOpen, TrendingUp, Gem, Library, Gift,
-  Package2, Settings, LogOut, Plus, Coins,
+  LayoutDashboard, BookOpen, TrendingUp, Gem, Library,
+  Gift, Wrench, Settings, LogOut, ChevronRight, Crown, Rocket,
+  FolderOpen,
 } from 'lucide-react'
 import { signOut } from 'next-auth/react'
 import { cn } from '@/lib/utils'
 import { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 
 type SidebarProps = {
   userName?: string | null
@@ -21,22 +23,34 @@ type SidebarProps = {
 }
 
 const NAV = [
-  { href: '/dashboard',                 icon: FolderOpen, label: 'Projetos'        },
-  { href: '/dashboard/vendas',          icon: TrendingUp, label: 'Receita'         },
-  { href: '/dashboard/creditos',        icon: Gem,        label: 'Créditos'        },
-  { href: '/dashboard/biblioteca',      icon: Library,    label: 'Biblioteca'      },
-  { href: '/dashboard/indicar',         icon: Gift,       label: 'Indique e Ganhe' },
-  { href: '/dashboard/kit-ferramentas', icon: Package2,   label: 'Recursos'        },
-  { href: '/dashboard/configuracoes',   icon: Settings,   label: 'Configurações'   },
+  { href: '/dashboard',                 icon: LayoutDashboard, label: 'Dashboard'       },
+  { href: '/dashboard/criar',           icon: FolderOpen,      label: 'Projetos'        },
+  { href: '/dashboard/biblioteca',      icon: BookOpen,        label: 'Livros'          },
+  { href: '/dashboard/vendas',          icon: TrendingUp,      label: 'Receitas'        },
+  { href: '/dashboard/creditos',        icon: Gem,             label: 'Créditos'        },
+  { href: '/dashboard/kit-ferramentas', icon: Library,         label: 'Biblioteca'      },
+  { href: '/dashboard/nichos',          icon: Wrench,          label: 'Ferramentas'     },
+  { href: '/dashboard/indicar',         icon: Gift,            label: 'Indique e Ganhe' },
+  { href: '/dashboard/configuracoes',   icon: Settings,        label: 'Configurações'   },
 ]
 
 function Avatar({ name, image }: { name?: string | null; image?: string | null }) {
-  if (image) return <img src={image} alt={name ?? ''} className="h-8 w-8 rounded-full object-cover" />
+  if (image) {
+    return (
+      <div className="relative">
+        <img src={image} alt={name ?? ''} className="h-9 w-9 rounded-full object-cover ring-2 ring-[#4f7fff40]" />
+        <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-emerald-400 ring-2 ring-[#08090f]" />
+      </div>
+    )
+  }
   const initials = name?.split(' ').slice(0, 2).map(w => w[0]).join('') ?? '?'
   return (
-    <div className="grid h-8 w-8 place-items-center rounded-full text-xs font-bold text-white"
-      style={{ background: 'linear-gradient(135deg,#f97316,#ea580c)' }}>
-      {initials}
+    <div className="relative">
+      <div className="grid h-9 w-9 place-items-center rounded-full text-xs font-bold text-white ring-2 ring-[#4f7fff40]"
+        style={{ background: 'linear-gradient(135deg,#4f7fff,#a855f7)' }}>
+        {initials}
+      </div>
+      <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-emerald-400 ring-2 ring-[#08090f]" />
     </div>
   )
 }
@@ -45,112 +59,116 @@ function NavItem({ href, icon: Icon, label, active }: {
   href: string; icon: React.ElementType; label: string; active: boolean
 }) {
   return (
-    <Link
-      href={href}
-      className={cn(
-        'flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium transition-all duration-150',
-        active
-          ? 'bg-[#111827] text-white'
-          : 'text-[#9aa5bc] hover:bg-[#0d1117] hover:text-[#8896b0]',
+    <Link href={href} className="group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium transition-all duration-200">
+      {active && (
+        <motion.div
+          layoutId="sidebar-active"
+          className="absolute inset-0 rounded-xl"
+          style={{
+            background: 'linear-gradient(135deg, rgba(79,127,255,0.22), rgba(168,85,247,0.22))',
+            border: '1px solid rgba(79,127,255,0.35)',
+          }}
+          transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+        />
       )}
-    >
-      <Icon className={cn('size-4 shrink-0', active ? 'text-[#f97316]' : 'text-[#7080a0]')} />
-      <span>{label}</span>
-      {active && <span className="ml-auto h-1.5 w-1.5 rounded-full bg-[#f97316]" />}
+      {!active && (
+        <div className="absolute inset-0 rounded-xl bg-transparent transition-colors duration-200 group-hover:bg-white/[0.04]" />
+      )}
+      <div
+        className={cn(
+          'relative z-10 grid h-7 w-7 shrink-0 place-items-center rounded-lg transition-all duration-200',
+          !active && 'bg-white/5 group-hover:bg-white/10',
+        )}
+        style={active ? {
+          background: 'linear-gradient(135deg,#4f7fff,#a855f7)',
+          boxShadow: '0 0 14px rgba(79,127,255,0.55)',
+        } : {}}
+      >
+        <Icon className={cn('size-3.5', active ? 'text-white' : 'text-[#6b7a99] group-hover:text-[#a0b0c8]')} />
+      </div>
+      <span className={cn('relative z-10 transition-colors', active ? 'text-white font-semibold' : 'text-[#8896b0] group-hover:text-[#c4d0e8]')}>
+        {label}
+      </span>
+      {active && <ChevronRight className="relative z-10 ml-auto size-3.5 text-[#4f7fff]" />}
     </Link>
   )
 }
 
-function SidebarInner({ userName, userImage, credits = 0, isAdmin }: SidebarProps) {
+function SidebarInner({ userName, userImage, userEmail, credits = 0, isAdmin }: SidebarProps) {
   const pathname = usePathname()
 
   return (
     <aside
-      className="flex h-full w-[240px] flex-col"
-      style={{ background: '#080c14', borderRight: '1px solid #0f1828' }}
+      className="flex h-full w-[220px] flex-col"
+      style={{
+        background: 'linear-gradient(180deg,#07090f 0%,#050810 100%)',
+        borderRight: '1px solid rgba(255,255,255,0.06)',
+      }}
     >
-      {/* ── Brand ── */}
-      <div className="flex items-center gap-3 px-5 py-5" style={{ borderBottom: '1px solid #0f1828' }}>
-        <Image src="/logo.png" alt="Logo" width={32} height={32} className="rounded-lg shrink-0" />
-        <div>
-          <p className="text-[13px] font-bold leading-tight text-white">Clube do Autor</p>
-          <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-[#7080a0]">IA Platform</p>
+      {/* Brand */}
+      <div className="flex flex-col items-center gap-3 px-5 py-6" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+        <div className="relative">
+          <div className="absolute inset-0 rounded-2xl blur-2xl opacity-70"
+            style={{ background: 'linear-gradient(135deg,#4f7fff,#a855f7)' }} />
+          <div className="relative h-16 w-16 overflow-hidden rounded-2xl"
+            style={{ background: 'linear-gradient(135deg,#0d1a3a,#1a0d40)', border: '1px solid rgba(79,127,255,0.35)' }}>
+            <Image src="/logo.png" alt="Logo" fill className="object-contain p-2" />
+          </div>
+        </div>
+        <div className="text-center">
+          <p className="text-[14px] font-bold leading-tight text-white">Clube do Autor</p>
+          <p className="mt-0.5 text-[9px] font-bold uppercase tracking-[0.2em] text-[#4f7fff]">IA Platform</p>
         </div>
       </div>
 
-      {/* ── Widgets acima das categorias ── */}
-      <div className="px-3 pt-4 pb-3 flex flex-col gap-2">
-
-        {/* Créditos */}
-        <div
-          className="flex items-center gap-3 rounded-2xl px-3 py-2.5"
-          style={{ background: '#0d1220', border: '1px solid #131e30' }}
-        >
-          {/* Badge laranja com ícone */}
-          <div
-            className="grid h-8 w-8 shrink-0 place-items-center rounded-xl"
-            style={{ background: 'linear-gradient(135deg,#f97316,#ea580c)', boxShadow: '0 0 12px rgba(249,115,22,0.4)' }}
-          >
-            <Coins className="size-4 text-white" />
-          </div>
-
-          <div className="flex-1 min-w-0">
-            <p className="text-[14px] font-black leading-none text-white tabular-nums">
-              {credits.toLocaleString('pt-BR')}
-            </p>
-            <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-[#7080a0] mt-0.5">Créditos</p>
-          </div>
-
-          {/* Botão "+" laranja */}
-          <Link
-            href="/dashboard/creditos"
-            className="grid h-7 w-7 shrink-0 place-items-center rounded-lg transition hover:opacity-90"
-            style={{ background: 'linear-gradient(135deg,#f97316,#ea580c)' }}
-            title="Comprar créditos"
-          >
-            <Plus className="size-3.5 text-white" />
-          </Link>
-        </div>
-
-        {/* Novo Livro */}
-        <Link
-          href="/dashboard/criar"
-          className="flex items-center gap-2.5 rounded-2xl px-3 py-2.5 text-[13px] font-semibold text-[#a0b0c8] transition hover:text-white"
-          style={{ background: '#0d1220', border: '1px solid #131e30' }}
-        >
-          <span
-            className="grid h-5 w-5 place-items-center rounded-md"
-            style={{ background: 'rgba(0,229,195,0.15)' }}
-          >
-            <Plus className="size-3 text-[#00e5c3]" />
-          </span>
-          Novo Livro
-        </Link>
-      </div>
-
-      {/* ── Divisor ── */}
-      <div className="mx-4 mb-2" style={{ height: 1, background: '#0f1828' }} />
-
-      {/* ── Categorias ── */}
-      <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto px-3 pb-4 scrollbar-none">
-        {NAV.map(({ href, icon, label }) => (
-          <NavItem
-            key={href}
-            href={href}
-            icon={icon}
-            label={label}
-            active={href === '/dashboard' ? pathname === href : pathname.startsWith(href)}
-          />
-        ))}
+      {/* Nav */}
+      <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto px-3 py-4 scrollbar-none">
+        <p className="mb-2 px-3 text-[9px] font-bold uppercase tracking-[0.15em] text-[#2a3a56]">Menu</p>
+        {NAV.map(({ href, icon, label }) => {
+          const active = href === '/dashboard'
+            ? pathname === '/dashboard'
+            : pathname.startsWith(href)
+          return <NavItem key={href} href={href} icon={icon} label={label} active={active} />
+        })}
+        {isAdmin && (
+          <>
+            <p className="mt-4 mb-1 px-3 text-[9px] font-bold uppercase tracking-[0.15em] text-[#2a3a56]">Admin</p>
+            <NavItem href="/dashboard/admin" icon={Settings} label="Admin" active={pathname.startsWith('/dashboard/admin')} />
+          </>
+        )}
       </nav>
 
-      {/* ── Usuário ── */}
-      <div className="px-3 pb-4" style={{ borderTop: '1px solid #0f1828', paddingTop: '1rem' }}>
-        <div className="flex items-center gap-2.5 rounded-xl px-2 py-2 transition hover:bg-[#0d1220]">
+      {/* Upgrade card */}
+      <div className="relative mx-3 mb-3 overflow-hidden rounded-2xl p-4"
+        style={{ background: 'linear-gradient(135deg,#0d1a3a,#1a0d40)', border: '1px solid rgba(168,85,247,0.25)' }}>
+        <div className="pointer-events-none absolute inset-0 opacity-25"
+          style={{ background: 'radial-gradient(circle at 80% 10%,#a855f7,transparent 60%)' }} />
+        <div className="relative z-10">
+          <div className="mb-2 flex items-center gap-2">
+            <div className="grid h-6 w-6 place-items-center rounded-lg"
+              style={{ background: 'linear-gradient(135deg,#f59e0b,#d97706)' }}>
+              <Crown className="size-3.5 text-white" />
+            </div>
+            <p className="text-[13px] font-bold text-white">Plano Pro</p>
+          </div>
+          <p className="mb-3 text-[11px] leading-relaxed text-[#8896b0]">
+            Desbloqueie todos os recursos e aumente seus resultados.
+          </p>
+          <Link href="/dashboard/creditos"
+            className="flex items-center justify-center gap-1.5 rounded-xl py-2 text-[12px] font-bold text-white transition-opacity hover:opacity-90"
+            style={{ background: 'linear-gradient(135deg,#4f7fff,#a855f7)', boxShadow: '0 4px 16px rgba(79,127,255,0.35)' }}>
+            <Rocket className="size-3.5" /> Upgrade agora
+          </Link>
+        </div>
+      </div>
+
+      {/* User */}
+      <div className="px-3 pb-4" style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '0.75rem' }}>
+        <div className="flex items-center gap-2.5 rounded-xl px-2 py-2 transition-colors hover:bg-white/[0.04]">
           <Avatar name={userName} image={userImage} />
           <div className="min-w-0 flex-1">
-            <p className="truncate text-[12px] font-semibold text-[#8896b0]">{userName ?? 'Usuário'}</p>
-            <p className="text-[10px] text-[#7080a0]">Membro ativo</p>
+            <p className="truncate text-[12px] font-semibold text-white">{userName ?? 'Usuário'}</p>
+            <p className="text-[10px] font-medium text-[#f59e0b]">✦ Autor Premium</p>
           </div>
           <button
             onClick={() => signOut({ callbackUrl: '/' })}
@@ -169,31 +187,36 @@ export function Sidebar(props: SidebarProps) {
   const [open, setOpen] = useState(false)
   return (
     <>
-      {/* Desktop */}
       <div className="hidden h-full md:block">
         <SidebarInner {...props} />
       </div>
-
-      {/* Botão hamburger mobile */}
       <button
         onClick={() => setOpen(true)}
         className="fixed left-4 top-4 z-40 grid h-9 w-9 place-items-center rounded-xl md:hidden"
-        style={{ background: '#0d1220', border: '1px solid #131e30' }}
+        style={{ background: 'rgba(7,9,15,0.9)', border: '1px solid rgba(255,255,255,0.08)', backdropFilter: 'blur(12px)' }}
       >
-        <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="#6b7a99" strokeWidth={2.5}>
+        <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="#8896b0" strokeWidth={2.5}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
         </svg>
       </button>
-
-      {/* Drawer mobile */}
-      {open && (
-        <div className="fixed inset-0 z-50 md:hidden">
-          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setOpen(false)} />
-          <div className="absolute inset-y-0 left-0">
-            <SidebarInner {...props} />
+      <AnimatePresence>
+        {open && (
+          <div className="fixed inset-0 z-50 md:hidden">
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+              onClick={() => setOpen(false)}
+            />
+            <motion.div
+              initial={{ x: -220 }} animate={{ x: 0 }} exit={{ x: -220 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              className="absolute inset-y-0 left-0"
+            >
+              <SidebarInner {...props} />
+            </motion.div>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
     </>
   )
 }
@@ -201,21 +224,19 @@ export function Sidebar(props: SidebarProps) {
 export function BottomNav() {
   const pathname = usePathname()
   const items = [
-    { href: '/dashboard',               icon: FolderOpen, label: 'Projetos'  },
-    { href: '/dashboard/criar',         icon: Plus,       label: 'Criar',    highlight: true },
-    { href: '/dashboard/creditos',      icon: Gem,        label: 'Créditos'  },
-    { href: '/dashboard/indicar',       icon: Gift,       label: 'Indicar'   },
-    { href: '/dashboard/configuracoes', icon: Settings,   label: 'Config'    },
+    { href: '/dashboard',               icon: LayoutDashboard, label: 'Home'     },
+    { href: '/dashboard/criar',         icon: FolderOpen,      label: 'Criar', highlight: true },
+    { href: '/dashboard/creditos',      icon: Gem,             label: 'Créditos' },
+    { href: '/dashboard/indicar',       icon: Gift,            label: 'Indicar'  },
+    { href: '/dashboard/configuracoes', icon: Settings,        label: 'Config'   },
   ]
   return (
-    <nav
-      className="fixed inset-x-0 bottom-0 z-40 flex md:hidden"
-      style={{ background: '#080c14', borderTop: '1px solid #0f1828' }}
-    >
+    <nav className="fixed inset-x-0 bottom-0 z-40 flex md:hidden"
+      style={{ background: 'rgba(5,7,13,0.96)', borderTop: '1px solid rgba(255,255,255,0.06)', backdropFilter: 'blur(20px)' }}>
       {items.map(({ href, icon: Icon, label, highlight }) => (
         <Link key={href} href={href} className={cn(
-          'flex flex-1 flex-col items-center gap-1 py-3 text-[10px] font-medium transition-colors',
-          highlight ? 'text-[#00e5c3]' : pathname === href ? 'text-white' : 'text-[#7080a0]',
+          'flex flex-1 flex-col items-center gap-1 py-3 text-[9px] font-bold uppercase tracking-wider transition-colors',
+          highlight ? 'text-[#00e5c3]' : pathname === href ? 'text-white' : 'text-[#4a5a7a]',
         )}>
           <Icon className="size-5" />
           {label}

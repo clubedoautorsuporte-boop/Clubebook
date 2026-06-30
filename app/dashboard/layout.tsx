@@ -15,61 +15,87 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   const credits = (session.user as { credits?: number })?.credits ?? 1000
   const firstName = session.user?.name?.split(' ')[0] ?? 'Autor'
-  const userId = session.user?.id
-  const isAdmin = session.user?.email === 'clubedoautor.suporte@gmail.com'
 
   return (
-    <div className="flex min-h-screen" style={{ background: '#060a12' }}>
-      {/* Sidebar desktop */}
+    <div className="flex min-h-screen" style={{ background: '#05070d' }}>
+      {/* Sidebar */}
       <div className="hidden md:flex shrink-0 h-screen sticky top-0 z-40">
         <Sidebar
           userName={session.user?.name}
           userImage={session.user?.image}
           userEmail={session.user?.email}
           credits={credits}
-          userId={userId}
-          isAdmin={isAdmin}
+          userId={session.user?.id}
+          isAdmin={session.user?.email === 'clubedoautor.suporte@gmail.com'}
         />
       </div>
 
       <div className="flex flex-1 flex-col min-w-0">
-        {/* Topbar */}
-        <header className="sticky top-0 z-30 flex items-center justify-between border-b border-[#1c2438] px-6 py-3" style={{ background: 'rgba(6,10,18,0.85)', backdropFilter: 'blur(12px)' }}>
-          <div className="flex flex-col">
-            <nav className="flex items-center gap-1 text-[11px] text-[#8896b0]">
-              <Link href="/" className="hover:text-[#a0b0c8] transition">Home</Link>
-              <span>/</span>
-              <span className="text-[#a0b0c8] font-medium">Dashboard</span>
-            </nav>
-            <p className="text-[15px] font-bold text-white">Olá, {firstName} 👋</p>
+        {/* Header */}
+        <header
+          className="sticky top-0 z-30 flex items-center justify-between px-6 py-3"
+          style={{
+            background: 'rgba(5,7,13,0.82)',
+            backdropFilter: 'blur(20px)',
+            borderBottom: '1px solid rgba(255,255,255,0.05)',
+          }}
+        >
+          <div>
+            <h1 className="text-[19px] font-bold leading-tight text-white">
+              Olá, {firstName}! 👋
+            </h1>
+            <p className="text-[12px] text-[#5a6a84]">Pronto para criar algo incrível hoje?</p>
           </div>
 
           <div className="flex items-center gap-2">
-            <div className="hidden sm:flex items-center gap-2 rounded-xl border border-[#1c2438] bg-[#0b0f1c] px-3 py-2 w-52 focus-within:border-[#4f7fff40] transition">
-              <Search className="size-3.5 text-[#8896b0] shrink-0" />
-              <input type="text" placeholder="Buscar…"
-                className="bg-transparent text-[12px] text-white placeholder-[#8896b0] outline-none w-full" />
+            {/* Search */}
+            <div
+              className="hidden sm:flex items-center gap-2 rounded-xl px-3 py-2 w-52 transition-colors"
+              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}
+            >
+              <Search className="size-3.5 shrink-0 text-[#3a4a66]" />
+              <input
+                type="text"
+                placeholder="Buscar…"
+                className="bg-transparent text-[12px] text-white placeholder-[#3a4a66] outline-none w-full"
+              />
+              <span className="hidden lg:block text-[10px] font-mono text-[#3a4a66] rounded px-1 py-0.5"
+                style={{ background: 'rgba(255,255,255,0.06)' }}>
+                ⌘K
+              </span>
             </div>
 
-            <button className="relative grid h-8 w-8 place-items-center rounded-xl border border-[#1c2438] text-[#a0b0c8] transition hover:bg-[#0f1523] hover:text-white">
-              <Bell className="size-4" />
-              <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-[#e53935]" />
+            {/* Criar Livro */}
+            <Link href="/dashboard/criar"
+              className="hidden sm:flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-[12px] font-bold text-white transition-opacity hover:opacity-90"
+              style={{ background: 'linear-gradient(135deg,#4f7fff,#a855f7)', boxShadow: '0 4px 16px rgba(79,127,255,0.28)' }}>
+              <Plus className="size-3.5" /> Criar Livro
+            </Link>
+
+            {/* Bell */}
+            <button
+              className="relative grid h-9 w-9 place-items-center rounded-xl transition-colors hover:bg-white/[0.06]"
+              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}
+            >
+              <Bell className="size-4 text-[#8896b0]" />
+              <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full text-[8px] font-bold text-white"
+                style={{ background: 'linear-gradient(135deg,#4f7fff,#a855f7)' }}>
+                3
+              </span>
             </button>
 
-            <Link
-              href="/dashboard/criar"
-              className="hidden sm:flex items-center gap-1.5 rounded-xl px-4 py-2 text-[12px] font-bold text-white transition hover:opacity-90 hover:-translate-y-0.5"
-              style={{ background: 'linear-gradient(135deg, #4f7fff, #a855f7)', boxShadow: '0 4px 16px rgba(79,127,255,0.35)' }}
-            >
-              <Plus className="size-3.5" /> Criar Ebook
-            </Link>
+            {/* Credits */}
+            <div className="hidden md:flex items-center gap-1.5 rounded-xl px-3 py-2 text-[12px]"
+              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
+              <span className="text-[#a855f7]">◆</span>
+              <span className="font-bold text-white">{credits.toLocaleString('pt-BR')}</span>
+              <span className="text-[#5a6a84]">créditos</span>
+            </div>
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto pb-24 md:pb-6">
-          <div className="mx-auto w-full max-w-6xl">
-            {children}
-          </div>
+        <main className="flex-1 overflow-y-auto pb-24 md:pb-0">
+          {children}
         </main>
       </div>
 
