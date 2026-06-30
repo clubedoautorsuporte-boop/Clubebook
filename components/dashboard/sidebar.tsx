@@ -33,21 +33,13 @@ const NAV = [
   { href: '/dashboard/configuracoes',   icon: Settings,        label: 'Configurações'   },
 ]
 
-function Avatar({ name, image }: { name?: string | null; image?: string | null }) {
-  if (image) {
-    return (
-      <div className="relative">
-        <img src={image} alt={name ?? ''} className="h-9 w-9 rounded-full object-cover ring-2 ring-[#4f7fff40]" />
-        <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-emerald-400 ring-2 ring-[#08090f]" />
-      </div>
-    )
-  }
-  const initials = name?.split(' ').slice(0, 2).map(w => w[0]).join('') ?? '?'
+function Avatar({ name }: { name?: string | null; image?: string | null }) {
+  const initial = name?.trim()[0]?.toUpperCase() ?? '?'
   return (
     <div className="relative">
-      <div className="grid h-9 w-9 place-items-center rounded-full text-xs font-bold text-white ring-2 ring-[#4f7fff40]"
+      <div className="grid h-9 w-9 place-items-center rounded-full text-sm font-black text-white ring-2 ring-[#4f7fff40]"
         style={{ background: 'linear-gradient(135deg,#4f7fff,#a855f7)' }}>
-        {initials}
+        {initial}
       </div>
       <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-emerald-400 ring-2 ring-[#08090f]" />
     </div>
