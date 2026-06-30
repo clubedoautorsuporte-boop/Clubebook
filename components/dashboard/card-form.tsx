@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { ShieldCheck, Loader2, Lock, X, CreditCard, ChevronLeft } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
+import { Lock, X, CreditCard, ChevronLeft, Loader2, ShieldCheck } from 'lucide-react'
 
 type CardFormProps = {
   price: number
@@ -13,57 +13,108 @@ type CardFormProps = {
   onClose: () => void
 }
 
-type MPFormData = {
+type CardFormData = {
   token: string
-  issuer_id: string
-  payment_method_id: string
-  transaction_amount: number
-  installments: number
-  payer: {
-    email?: string
-    identification?: { type: string; number: string }
-  }
+  paymentMethodId: string
+  issuerId: string
+  installments: string
+  identificationType?: string
+  identificationNumber?: string
 }
 
 declare global {
   interface Window {
-    cardPaymentBrickController?: {
-      submit: () => Promise<void>
-      unmount: () => void
-    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    MercadoPago?: new (publicKey: string, options?: object) => any
   }
 }
 
 export function CardForm({ price, pacoteId, pacoteNome, userEmail, onSuccess, onBack, onClose }: CardFormProps) {
-  const [brickReady, setBrickReady] = useState(false)
+  const [loaded, setLoaded] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
-  const [MPReady, setMPReady] = useState(false)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const cardFormRef = useRef<any>(null)
 
   const publicKey = process.env.NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY
+  const priceFormatted = price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })
 
   useEffect(() => {
     if (!publicKey) return
-    import('@mercadopago/sdk-react').then(({ initMercadoPago }) => {
-      initMercadoPago(publicKey, { locale: 'pt-BR' })
-      setMPReady(true)
-    })
-  }, [publicKey])
 
-  const priceFormatted = price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })
+    function initCardForm() {
+      if (!window.MercadoPago) {
+        setErrorMsg('Não foi possível carregar o formulário de pagamento.')
+        return
+      }
+      const mp = new window.MercadoPago(publicKey, { locale: 'pt-BR' })
 
-  async function handlePay() {
-    if (!window.cardPaymentBrickController) return
-    setSubmitting(true)
-    setErrorMsg('')
-    try {
-      await window.cardPaymentBrickController.submit()
-    } catch {
-      setSubmitting(false)
+      const cardForm = mp.cardForm({
+        amount: String(price),
+        iframe: true,
+        form: {
+          id: 'mp-card-form',
+          cardNumber: {
+            id: 'mp-card-number',
+            placeholder: '1234 1234 1234 1234',
+          },
+          expirationDate: {
+            id: 'mp-expiration-date',
+            placeholder: 'MM / AA',
+          },
+          securityCode: {
+            id: 'mp-security-code',
+            placeholder: 'CVC',
+          },
+          cardholderName: {
+            id: 'mp-cardholder-name',
+            placeholder: 'Nome no cartão',
+          },
+          issuer: { id: 'mp-issuer', label: 'Emissor' },
+          installments: { id: 'mp-installments', label: 'Parcelas' },
+          identificationType: { id: 'mp-id-type', label: 'Tipo de documento' },
+          identificationNumber: { id: 'mp-id-number', placeholder: '000.000.000-00' },
+        },
+        callbacks: {
+          onFormMounted: (err: unknown) => {
+            if (err) console.warn('[MP cardForm] mount error:', err)
+            else setLoaded(true)
+          },
+          onSubmit: async (event: Event) => {
+            event.preventDefault()
+            const data = cardForm.getCardFormData() as CardFormData
+            await processPayment(data)
+          },
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          onFetching: (resource: any) => {
+            console.log('[MP cardForm] fetching:', resource)
+          },
+        },
+      })
+
+      cardFormRef.current = cardForm
     }
-  }
 
-  async function onSubmit(data: MPFormData) {
+    if (window.MercadoPago) {
+      initCardForm()
+      return
+    }
+
+    const script = document.createElement('script')
+    script.src = 'https://sdk.mercadopago.com/js/v2'
+    script.async = true
+    script.onload = initCardForm
+    script.onerror = () => setErrorMsg('Erro ao carregar o formulário de pagamento. Verifique sua conexão.')
+    document.head.appendChild(script)
+
+    return () => {
+      if (document.head.contains(script)) document.head.removeChild(script)
+      cardFormRef.current = null
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [publicKey, price])
+
+  async function processPayment(data: CardFormData) {
     setSubmitting(true)
     setErrorMsg('')
     try {
@@ -72,11 +123,16 @@ export function CardForm({ price, pacoteId, pacoteNome, userEmail, onSuccess, on
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           token: data.token,
-          issuer_id: data.issuer_id,
-          payment_method_id: data.payment_method_id,
-          transaction_amount: data.transaction_amount,
-          installments: data.installments,
-          payer: data.payer,
+          payment_method_id: data.paymentMethodId,
+          issuer_id: data.issuerId,
+          installments: Number(data.installments) || 1,
+          payer: {
+            email: userEmail,
+            identification: data.identificationType ? {
+              type: data.identificationType,
+              number: data.identificationNumber ?? '',
+            } : undefined,
+          },
           pacoteId,
           email: userEmail,
         }),
@@ -85,12 +141,12 @@ export function CardForm({ price, pacoteId, pacoteNome, userEmail, onSuccess, on
       if (result.status === 'approved') {
         onSuccess()
       } else if (result.status === 'pending') {
-        setErrorMsg('Pagamento em análise. Você receberá uma confirmação por e-mail.')
+        setErrorMsg('Pagamento em análise. Você receberá confirmação por e-mail.')
       } else {
-        const detail = result.detail ?? ''
+        const d = result.detail ?? ''
         setErrorMsg(
-          detail === 'cc_rejected_insufficient_amount' ? 'Cartão sem limite suficiente.' :
-          detail === 'cc_rejected_bad_filled_security_code' ? 'Código de segurança incorreto.' :
+          d === 'cc_rejected_insufficient_amount' ? 'Cartão sem limite suficiente.' :
+          d === 'cc_rejected_bad_filled_security_code' ? 'Código de segurança incorreto.' :
           result.error ?? 'Pagamento recusado. Verifique os dados e tente novamente.'
         )
       }
@@ -101,10 +157,16 @@ export function CardForm({ price, pacoteId, pacoteNome, userEmail, onSuccess, on
     }
   }
 
+  function handlePay() {
+    // Trigger the hidden submit button inside the mp-card-form
+    const btn = document.getElementById('mp-submit-btn')
+    btn?.click()
+  }
+
   return (
     <div className="flex flex-col">
       {/* ── Header ── */}
-      <div className="flex items-center justify-between px-5 py-4 border-b border-[#ffffff10]">
+      <div className="flex items-center justify-between border-b border-[#ffffff10] px-5 py-4">
         <div className="flex items-center gap-2.5">
           <div className="grid h-8 w-8 place-items-center rounded-full bg-gradient-to-br from-yellow-400 to-orange-500">
             <CreditCard className="size-4 text-white" />
@@ -128,47 +190,127 @@ export function CardForm({ price, pacoteId, pacoteNome, userEmail, onSuccess, on
       </div>
 
       {/* ── Tabs ── */}
-      <div className="flex gap-2 px-5 pt-4 pb-3">
-        <button className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-[#1c2438] bg-[#111827] py-2.5 text-[13px] font-bold text-white transition">
+      <div className="flex gap-2 px-5 pb-3 pt-4">
+        <button className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-[#1c2438] bg-[#111827] py-2.5 text-[13px] font-bold text-white">
           <CreditCard className="size-4" />
           Cartão
         </button>
         <button
-          className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-[#0d1117] py-2.5 text-[13px] font-medium text-[#3a4a66] transition hover:text-[#6b7a99]"
           disabled
-          title="Em breve"
+          className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-[#0d1117] py-2.5 text-[13px] font-medium text-[#3a4a66]"
         >
-          <span className="flex h-4 w-4 items-center justify-center rounded-sm bg-white text-[9px] font-black text-[#333] leading-none">G</span>
+          <span className="flex h-4 w-4 items-center justify-center rounded-sm bg-white text-[9px] font-black leading-none text-[#333]">G</span>
           Google Pay
         </button>
       </div>
 
-      {/* ── Brick MP ── */}
-      <div className="px-5">
-        {!MPReady && (
-          <div className="flex items-center justify-center gap-2 py-10 text-[#6b7a99]">
-            <Loader2 className="size-5 animate-spin" />
-            <span className="text-sm">Carregando formulário…</span>
+      {/* ── Loading ── */}
+      {!loaded && !errorMsg && (
+        <div className="flex items-center justify-center gap-2 py-10 text-[#6b7a99]">
+          <Loader2 className="size-5 animate-spin" />
+          <span className="text-sm">Carregando formulário…</span>
+        </div>
+      )}
+
+      {/* ── MP Card Form (hidden — only used for iframes) ── */}
+      <form id="mp-card-form" style={{ display: loaded ? 'none' : 'none' }}>
+        <input type="submit" id="mp-submit-btn" style={{ display: 'none' }} />
+        <select id="mp-issuer" style={{ display: 'none' }} />
+        <select id="mp-installments" style={{ display: 'none' }} />
+        <select id="mp-id-type" style={{ display: 'none' }} />
+      </form>
+
+      {/* ── Custom styled fields (MP mounts iframes into these divs) ── */}
+      <div className="px-5" style={{ display: loaded ? 'block' : 'none' }}>
+        <div className="flex flex-col gap-4">
+
+          {/* Card Number */}
+          <div>
+            <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-[#6b7a99]">
+              Número do cartão
+            </label>
+            <div
+              id="mp-card-number"
+              className="flex h-[46px] w-full items-center overflow-hidden rounded-xl border border-[#ffffff10] bg-[#111827] px-3 text-white"
+            />
           </div>
-        )}
-        {MPReady && (
-          <MPCardBrick
-            price={price}
-            userEmail={userEmail}
-            onReady={() => setBrickReady(true)}
-            onSubmit={onSubmit}
-          />
-        )}
+
+          {/* Expiry + CVV */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-[#6b7a99]">
+                Data de validade
+              </label>
+              <div
+                id="mp-expiration-date"
+                className="flex h-[46px] w-full items-center overflow-hidden rounded-xl border border-[#ffffff10] bg-[#111827] px-3 text-white"
+              />
+            </div>
+            <div>
+              <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-[#6b7a99]">
+                Código de segurança
+              </label>
+              <div className="relative">
+                <div
+                  id="mp-security-code"
+                  className="flex h-[46px] w-full items-center overflow-hidden rounded-xl border border-[#ffffff10] bg-[#111827] px-3 text-white"
+                />
+                <Lock className="absolute right-3 top-1/2 -translate-y-1/2 size-3.5 pointer-events-none text-[#3a4a66]" />
+              </div>
+            </div>
+          </div>
+
+          {/* Cardholder name */}
+          <div>
+            <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-[#6b7a99]">
+              Nome no cartão
+            </label>
+            <input
+              id="mp-cardholder-name"
+              name="cardholderName"
+              placeholder="NOME COMO ESTÁ NO CARTÃO"
+              className="h-[46px] w-full rounded-xl border border-[#ffffff10] bg-[#111827] px-3 text-sm uppercase text-white placeholder-[#3a4a66] outline-none transition focus:border-[#00e5c330]"
+            />
+          </div>
+
+          {/* ID number (CPF) — MP needs this in Brazil */}
+          <div>
+            <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-[#6b7a99]">
+              CPF do titular
+            </label>
+            <input
+              id="mp-id-number"
+              name="identificationNumber"
+              placeholder="000.000.000-00"
+              className="h-[46px] w-full rounded-xl border border-[#ffffff10] bg-[#111827] px-3 text-sm text-white placeholder-[#3a4a66] outline-none transition focus:border-[#00e5c330]"
+            />
+          </div>
+
+          {/* País */}
+          <div>
+            <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-[#6b7a99]">
+              País
+            </label>
+            <div className="relative">
+              <select className="h-[46px] w-full appearance-none rounded-xl border border-[#ffffff10] bg-[#111827] px-3 text-sm text-white outline-none">
+                <option value="BR">Brasil</option>
+              </select>
+              <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#6b7a99]">▾</span>
+            </div>
+          </div>
+
+        </div>
+
         {errorMsg && (
-          <p className="mt-2 rounded-xl border border-red-500/20 bg-red-500/10 px-3 py-2 text-xs text-red-400">
+          <p className="mt-3 rounded-xl border border-red-500/20 bg-red-500/10 px-3 py-2 text-xs text-red-400">
             {errorMsg}
           </p>
         )}
       </div>
 
-      {/* ── Pay button + footer ── */}
-      <div className="flex flex-col gap-3 px-5 pt-3 pb-5">
-        {brickReady && (
+      {/* ── Footer ── */}
+      <div className="flex flex-col gap-3 px-5 pb-5 pt-4">
+        {loaded && (
           <button
             onClick={handlePay}
             disabled={submitting}
@@ -198,61 +340,5 @@ export function CardForm({ price, pacoteId, pacoteNome, userEmail, onSuccess, on
         </button>
       </div>
     </div>
-  )
-}
-
-function MPCardBrick({ price, userEmail, onReady, onSubmit }: {
-  price: number
-  userEmail: string
-  onReady: () => void
-  onSubmit: (data: MPFormData) => Promise<void>
-}) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [CardPayment, setCardPayment] = useState<React.ComponentType<any> | null>(null)
-
-  useEffect(() => {
-    import('@mercadopago/sdk-react').then(mod => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      setCardPayment(() => mod.CardPayment as React.ComponentType<any>)
-    })
-  }, [])
-
-  if (!CardPayment) {
-    return (
-      <div className="flex items-center justify-center gap-2 py-6 text-[#6b7a99]">
-        <Loader2 className="size-4 animate-spin" />
-        <span className="text-xs">Inicializando…</span>
-      </div>
-    )
-  }
-
-  return (
-    <CardPayment
-      initialization={{ amount: price, payer: { email: userEmail } }}
-      customization={{
-        visual: {
-          style: {
-            theme: 'dark',
-            customVariables: {
-              baseColor: '#00e5c3',
-              borderRadiusFull: '12px',
-              borderRadiusMedium: '10px',
-              formBackgroundColor: '#080b14',
-              inputBackgroundColor: '#111827',
-              inputBorderColor: 'rgba(255,255,255,0.08)',
-              inputFontColor: '#ffffff',
-              inputPlaceholderColor: '#3a4a66',
-              labelFontColor: '#8896b0',
-            },
-          },
-          hideFormTitle: true,
-          hidePaymentButton: true,
-        },
-        paymentMethods: { maxInstallments: 12 },
-      }}
-      onReady={onReady}
-      onSubmit={onSubmit}
-      onError={(err: unknown) => console.error('[MP CardPayment]', err)}
-    />
   )
 }
