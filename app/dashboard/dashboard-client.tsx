@@ -294,7 +294,7 @@ function EmptyProjects() {
       </div>
       <div>
         <p className="text-[15px] font-bold text-white mb-1">Nenhum projeto ainda</p>
-        <p className="text-[12px] text-[#5a6a84]">Comece criando seu primeiro livro com a IA da SÁBHIA</p>
+        <p className="text-[12px] text-[#5a6a84]">Comece criando seu primeiro livro com a IA da Aurora</p>
       </div>
       <Link href="/dashboard/criar"
         className="inline-flex items-center gap-2 rounded-xl px-6 py-2.5 text-[13px] font-bold text-white transition-all hover:scale-105"
@@ -381,7 +381,7 @@ export function DashboardClient({ rows, drafts, credits, chartData, recentActivi
                   está pronto pra nascer
                 </h2>
                 <p className="text-[12px] text-[#6a7a96] mb-4">
-                  O planejamento já foi entregue. Agora a SÁBHIA escreve cada capítulo por você — por apenas{' '}
+                  O planejamento já foi entregue. Agora a Aurora escreve cada capítulo por você — por apenas{' '}
                   <strong className="text-white">R$ 49,99</strong>, pagamento único.
                 </p>
                 <Link href={`/dashboard/criar?draft=${topDraft.id}`}
@@ -409,7 +409,7 @@ export function DashboardClient({ rows, drafts, credits, chartData, recentActivi
               color="#4f7fff"
               bg="rgba(79,127,255,0.12)"
               label="Criar novo livro"
-              desc="A SÁBHIA ajuda você a começar do zero com IA"
+              desc="A Aurora ajuda você a começar do zero com IA"
               href="/dashboard/criar"
             />
             <ActionCard
@@ -417,7 +417,7 @@ export function DashboardClient({ rows, drafts, credits, chartData, recentActivi
               color="#00e5c3"
               bg="rgba(0,229,195,0.12)"
               label="Importar Rascunhos"
-              desc="Mande rascunhos, ideias, PDFs — a SÁBHIA transforma em livro"
+              desc="Mande rascunhos, ideias, PDFs — a Aurora transforma em livro"
               href="/dashboard/criar"
               badge="Em breve"
             />
