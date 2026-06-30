@@ -1,17 +1,18 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ShieldCheck, Loader2, ArrowLeft } from 'lucide-react'
+import { ShieldCheck, Loader2, Lock, X, CreditCard, ChevronLeft } from 'lucide-react'
 
 type CardFormProps = {
   price: number
   pacoteId: string
+  pacoteNome: string
   userEmail: string
   onSuccess: () => void
   onBack: () => void
+  onClose: () => void
 }
 
-// Estrutura real retornada pelo Brick do Mercado Pago
 type MPFormData = {
   token: string
   issuer_id: string
@@ -33,8 +34,8 @@ declare global {
   }
 }
 
-export function CardForm({ price, pacoteId, userEmail, onSuccess, onBack }: CardFormProps) {
-  const [ready, setReady] = useState(false)
+export function CardForm({ price, pacoteId, pacoteNome, userEmail, onSuccess, onBack, onClose }: CardFormProps) {
+  const [brickReady, setBrickReady] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
   const [MPReady, setMPReady] = useState(false)
@@ -100,85 +101,102 @@ export function CardForm({ price, pacoteId, userEmail, onSuccess, onBack }: Card
     }
   }
 
-  if (!publicKey) {
-    return (
-      <div className="px-5 py-6">
-        <div className="rounded-xl border border-yellow-500/20 bg-yellow-500/08 px-4 py-4 text-center">
-          <p className="text-sm font-semibold text-yellow-400 mb-1">Mercado Pago não configurado</p>
-          <p className="text-xs text-[#6b7a99]">
-            Adicione <code className="text-yellow-400">NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY</code> nas variáveis de ambiente.
-          </p>
-        </div>
-        <button onClick={onBack} className="mt-4 w-full text-center text-xs text-[#6b7a99] underline">
-          Voltar
-        </button>
-      </div>
-    )
-  }
-
   return (
     <div className="flex flex-col">
-      {/* Header */}
-      <div className="flex items-center justify-between border-b border-[#ffffff10] bg-[#0d1117] px-5 py-3">
-        <button
-          onClick={onBack}
-          className="flex items-center gap-1.5 text-[11px] text-[#6b7a99] transition hover:text-white"
-        >
-          <ArrowLeft className="size-3.5" />
-          Voltar
-        </button>
-        <div className="flex items-center gap-1 text-[#6b7a99]">
-          <ShieldCheck className="size-3" />
-          <span className="text-[10px] font-semibold">Pagamento seguro</span>
+      {/* ── Header ── */}
+      <div className="flex items-center justify-between px-5 py-4 border-b border-[#ffffff10]">
+        <div className="flex items-center gap-2.5">
+          <div className="grid h-8 w-8 place-items-center rounded-full bg-gradient-to-br from-yellow-400 to-orange-500">
+            <CreditCard className="size-4 text-white" />
+          </div>
+          <span className="text-[12px] font-extrabold uppercase tracking-[0.12em] text-white">
+            {pacoteNome}
+          </span>
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-[#6b7a99]">
+            <Lock className="size-3" />
+            SEGURO
+          </div>
+          <button
+            onClick={onClose}
+            className="grid h-7 w-7 place-items-center rounded-lg text-[#6b7a99] transition hover:bg-white/10 hover:text-white"
+          >
+            <X className="size-4" />
+          </button>
         </div>
       </div>
 
-      {/* Brick */}
-      <div className="px-5 pt-4">
+      {/* ── Tabs ── */}
+      <div className="flex gap-2 px-5 pt-4 pb-3">
+        <button className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-[#1c2438] bg-[#111827] py-2.5 text-[13px] font-bold text-white transition">
+          <CreditCard className="size-4" />
+          Cartão
+        </button>
+        <button
+          className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-[#0d1117] py-2.5 text-[13px] font-medium text-[#3a4a66] transition hover:text-[#6b7a99]"
+          disabled
+          title="Em breve"
+        >
+          <span className="flex h-4 w-4 items-center justify-center rounded-sm bg-white text-[9px] font-black text-[#333] leading-none">G</span>
+          Google Pay
+        </button>
+      </div>
+
+      {/* ── Brick MP ── */}
+      <div className="px-5">
         {!MPReady && (
           <div className="flex items-center justify-center gap-2 py-10 text-[#6b7a99]">
             <Loader2 className="size-5 animate-spin" />
             <span className="text-sm">Carregando formulário…</span>
           </div>
         )}
-
         {MPReady && (
           <MPCardBrick
             price={price}
             userEmail={userEmail}
-            onReady={() => setReady(true)}
+            onReady={() => setBrickReady(true)}
             onSubmit={onSubmit}
           />
         )}
-
         {errorMsg && (
-          <p className="mt-3 rounded-xl border border-red-500/20 bg-red-500/10 px-3 py-2 text-xs text-red-400">
+          <p className="mt-2 rounded-xl border border-red-500/20 bg-red-500/10 px-3 py-2 text-xs text-red-400">
             {errorMsg}
           </p>
         )}
       </div>
 
-      {/* Botão pagar */}
-      {ready && (
-        <div className="px-5 pb-5 pt-3 flex flex-col gap-3">
+      {/* ── Pay button + footer ── */}
+      <div className="flex flex-col gap-3 px-5 pt-3 pb-5">
+        {brickReady && (
           <button
             onClick={handlePay}
             disabled={submitting}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#00e5c3] py-3.5 text-sm font-bold text-[#040810] transition hover:bg-[#00cfb0] disabled:opacity-60"
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#00e5c3] py-3.5 text-[15px] font-bold text-[#040810] transition hover:bg-[#00cfb0] disabled:opacity-60"
           >
-            {submitting
-              ? <><Loader2 className="size-4 animate-spin" /> Processando…</>
-              : <><ShieldCheck className="size-4" /> Pagar R$ {priceFormatted}</>
-            }
+            {submitting ? (
+              <><Loader2 className="size-4 animate-spin" /> Processando…</>
+            ) : (
+              <><ShieldCheck className="size-4" /> Pagar R$ {priceFormatted}</>
+            )}
           </button>
-          <div className="flex items-center justify-center gap-2 text-[10px] text-[#3a4a66]">
-            <ShieldCheck className="size-3" />
-            <span>Criptografia SSL</span>
-            <span>•</span>
-            <span>Processado por Mercado Pago</span>
-          </div>
+        )}
+
+        <div className="flex items-center justify-center gap-2 text-[10px] text-[#3a4a66]">
+          <Lock className="size-3" />
+          <span>Criptografia SSL</span>
+          <span>•</span>
+          <span>Processado por Mercado Pago</span>
         </div>
-      )}
+
+        <button
+          onClick={onBack}
+          className="flex items-center justify-center gap-1.5 text-[11px] text-[#6b7a99] transition hover:text-white"
+        >
+          <ChevronLeft className="size-3.5" />
+          Alterar forma de pagamento
+        </button>
+      </div>
     </div>
   )
 }
@@ -219,7 +237,7 @@ function MPCardBrick({ price, userEmail, onReady, onSubmit }: {
               baseColor: '#00e5c3',
               borderRadiusFull: '12px',
               borderRadiusMedium: '10px',
-              formBackgroundColor: '#0d1117',
+              formBackgroundColor: '#080b14',
               inputBackgroundColor: '#111827',
               inputBorderColor: 'rgba(255,255,255,0.08)',
               inputFontColor: '#ffffff',

@@ -357,9 +357,11 @@ export function CheckoutModal({ pacote, userEmail, userName, onClose }: Props) {
           <CardForm
             price={pacote.price}
             pacoteId={pacote.id}
+            pacoteNome={pacote.id === '20k' ? 'Starter' : pacote.id === '50k' ? 'Pro' : 'Ultra'}
             userEmail={userEmail}
             onSuccess={() => setStep('success')}
             onBack={() => setStep('select')}
+            onClose={onClose}
           />
         )}
 
