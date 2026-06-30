@@ -348,13 +348,13 @@ function BookPanel({
             {selectedEbook ? 'Livro selecionado' : 'Selecionar livro'}
           </span>
           {!loading && !selectedEbook && (
-            <span className="rounded-full px-2 py-0.5 text-[10px] font-bold bg-[#1c2438] text-[#6b7a99]">{ebooks.length}</span>
+            <span className="rounded-full px-2 py-0.5 text-[10px] font-bold bg-[#1c2438] text-[#a0b0c8]">{ebooks.length}</span>
           )}
         </div>
         {selectedEbook && (
           <button
             onClick={() => onSelectBook(null)}
-            className="flex items-center gap-1 rounded-lg px-2.5 py-1 text-[11px] text-[#6b7a99] hover:text-white border border-[#1c2438] hover:border-[#2a3553] transition"
+            className="flex items-center gap-1 rounded-lg px-2.5 py-1 text-[11px] text-[#a0b0c8] hover:text-white border border-[#1c2438] hover:border-[#2a3553] transition"
           >
             <X className="size-3" /> Trocar
           </button>
@@ -362,13 +362,13 @@ function BookPanel({
       </div>
 
       {loading ? (
-        <div className="flex items-center gap-2 px-4 py-5 text-xs text-[#3a4a66]">
+        <div className="flex items-center gap-2 px-4 py-5 text-xs text-[#8896b0]">
           <Loader2 className="size-3.5 animate-spin" /> Carregando seus livros...
         </div>
       ) : !selectedEbook ? (
         /* ── Lista de livros ─────────────────── */
         <div>
-          <p className="px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider text-[#3a4a66]">
+          <p className="px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider text-[#8896b0]">
             Clique em um livro para carregar seus dados nos campos
           </p>
           <div className="divide-y divide-[#1c2438]">
@@ -383,7 +383,7 @@ function BookPanel({
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-semibold text-white">{e.titulo}</p>
-                  <p className="mt-0.5 text-xs text-[#3a4a66]">
+                  <p className="mt-0.5 text-xs text-[#8896b0]">
                     {e.tipo === 'draft' ? 'Rascunho' : e.tipo === 'livro' ? 'Livro completo' : 'Prévia'}
                     {e.capitulos && e.capitulos.length > 0 && (
                       <> · <span style={{ color: cor }}>{e.capitulos.length} capítulos</span></>
@@ -391,7 +391,7 @@ function BookPanel({
                     {e.genero && ` · ${e.genero}`}
                   </p>
                 </div>
-                <ChevronRight className="size-4 shrink-0 text-[#3a4a66] group-hover:text-white transition" />
+                <ChevronRight className="size-4 shrink-0 text-[#8896b0] group-hover:text-white transition" />
               </button>
             ))}
           </div>
@@ -422,7 +422,7 @@ function BookPanel({
           {/* Capítulos */}
           {capitulos.length > 0 ? (
             <div>
-              <p className="px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider text-[#3a4a66]">
+              <p className="px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider text-[#8896b0]">
                 Clique em um capítulo para carregar o texto nos campos
               </p>
               <div className="divide-y divide-[#1c2438]">
@@ -449,21 +449,21 @@ function BookPanel({
                           {c.titulo}
                         </p>
                         {c.texto && (
-                          <p className="mt-0.5 text-[11px] text-[#3a4a66] truncate">
+                          <p className="mt-0.5 text-[11px] text-[#8896b0] truncate">
                             {c.texto.slice(0, 90).trim()}…
                           </p>
                         )}
                       </div>
                       {active
                         ? <span className="shrink-0 rounded-lg px-2 py-0.5 text-[10px] font-bold" style={{ background: `${cor}20`, color: cor }}>Carregado</span>
-                        : <ChevronRight className="size-4 shrink-0 text-[#3a4a66] group-hover:text-white transition" />}
+                        : <ChevronRight className="size-4 shrink-0 text-[#8896b0] group-hover:text-white transition" />}
                     </button>
                   )
                 })}
               </div>
             </div>
           ) : (
-            <div className="px-4 py-4 text-xs text-[#3a4a66]">
+            <div className="px-4 py-4 text-xs text-[#8896b0]">
               {selectedEbook.tipo === 'draft'
                 ? 'Rascunho sem capítulos gerados — os campos de título, gênero e público foram preenchidos automaticamente.'
                 : 'Este livro não possui capítulos com conteúdo disponível.'}
@@ -484,7 +484,7 @@ function FieldRenderer({
   value: string
   onChange: (v: string) => void
 }) {
-  const base = "w-full rounded-xl border border-[#1c2438] bg-[#080b14] px-4 py-2.5 text-sm text-white placeholder:text-[#3a4a66] focus:border-[#2a3553] focus:outline-none transition"
+  const base = "w-full rounded-xl border border-[#1c2438] bg-[#080b14] px-4 py-2.5 text-sm text-white placeholder:text-[#8896b0] focus:border-[#2a3553] focus:outline-none transition"
 
   if (field.type === 'text') return (
     <input type="text" value={value} onChange={e => onChange(e.target.value)} placeholder={field.placeholder} className={base} />
@@ -501,7 +501,7 @@ function FieldRenderer({
         <option value="">Selecione...</option>
         {field.options.map(o => <option key={o} value={o}>{o}</option>)}
       </select>
-      <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 size-4 text-[#3a4a66]" />
+      <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 size-4 text-[#8896b0]" />
     </div>
   )
 
@@ -509,7 +509,7 @@ function FieldRenderer({
     <div className="flex flex-wrap gap-2">
       {field.options.map(o => (
         <button key={o.value} type="button" onClick={() => onChange(o.value)}
-          className={`rounded-xl border px-4 py-2 text-xs font-medium transition ${value === o.value ? 'border-[#4f7fff50] bg-[#4f7fff15] text-[#4f7fff]' : 'border-[#1c2438] bg-[#0b0f1c] text-[#6b7a99] hover:border-[#2a3553] hover:text-white'}`}>
+          className={`rounded-xl border px-4 py-2 text-xs font-medium transition ${value === o.value ? 'border-[#4f7fff50] bg-[#4f7fff15] text-[#4f7fff]' : 'border-[#1c2438] bg-[#0b0f1c] text-[#a0b0c8] hover:border-[#2a3553] hover:text-white'}`}>
           {o.label}
         </button>
       ))}
@@ -526,7 +526,7 @@ function FieldRenderer({
       <div className="flex flex-wrap gap-2">
         {field.options.map(o => (
           <button key={o} type="button" onClick={() => toggle(o)}
-            className={`rounded-xl border px-3 py-1.5 text-xs transition ${selected.includes(o) ? 'border-[#4f7fff50] bg-[#4f7fff15] text-[#4f7fff]' : 'border-[#1c2438] bg-[#0b0f1c] text-[#6b7a99] hover:border-[#2a3553] hover:text-white'}`}>
+            className={`rounded-xl border px-3 py-1.5 text-xs transition ${selected.includes(o) ? 'border-[#4f7fff50] bg-[#4f7fff15] text-[#4f7fff]' : 'border-[#1c2438] bg-[#0b0f1c] text-[#a0b0c8] hover:border-[#2a3553] hover:text-white'}`}>
             {o}
           </button>
         ))}
@@ -565,7 +565,7 @@ function SavedWorksPanel({
           <span className="text-sm font-semibold text-white">Trabalhos salvos</span>
           <span className="rounded-full px-2 py-0.5 text-[10px] font-bold" style={{ background: `${cor}20`, color: cor }}>{works.length}</span>
         </div>
-        <ChevronDown className={`size-4 text-[#6b7a99] transition-transform ${open ? 'rotate-180' : ''}`} />
+        <ChevronDown className={`size-4 text-[#a0b0c8] transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
       {open && (
         <div className="border-t border-[#1c2438]">
@@ -575,7 +575,7 @@ function SavedWorksPanel({
                 <p className="text-xs font-medium text-[#c8d3f5] truncate">
                   {w.chapterTitulo ? `📖 ${w.chapterTitulo}` : w.ebookTitulo ? `📚 ${w.ebookTitulo}` : 'Sem livro vinculado'}
                 </p>
-                <p className="text-[10px] text-[#3a4a66]">{new Date(w.timestamp).toLocaleString('pt-BR')}</p>
+                <p className="text-[10px] text-[#8896b0]">{new Date(w.timestamp).toLocaleString('pt-BR')}</p>
               </div>
               <button onClick={() => { onLoad(w.resultado); setOpen(false) }}
                 className="shrink-0 rounded-lg px-3 py-1.5 text-xs font-semibold transition hover:opacity-80"
@@ -675,7 +675,7 @@ export default function FerramentaPage() {
   if (!tool) {
     return (
       <div className="flex flex-col items-center justify-center h-96 gap-4">
-        <p className="text-[#6b7a99]">Ferramenta não encontrada.</p>
+        <p className="text-[#a0b0c8]">Ferramenta não encontrada.</p>
         <Link href="/dashboard/kit-ferramentas" className="text-sm text-[#4f7fff] hover:underline">← Voltar ao Kit</Link>
       </div>
     )
@@ -723,7 +723,7 @@ export default function FerramentaPage() {
       {/* Header */}
       <div className="sticky top-0 z-10 border-b border-[#1c2438] bg-[#080b14] px-5 py-4 md:px-8">
         <div className="mx-auto flex max-w-4xl items-center gap-4">
-          <Link href="/dashboard/kit-ferramentas" className="grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-[#1c2438] text-[#6b7a99] transition hover:text-white">
+          <Link href="/dashboard/kit-ferramentas" className="grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-[#1c2438] text-[#a0b0c8] transition hover:text-white">
             <ArrowLeft className="size-4" />
           </Link>
           <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl" style={{ background: `${tool.cor}20` }}>
@@ -731,7 +731,7 @@ export default function FerramentaPage() {
           </div>
           <div className="min-w-0 flex-1">
             <h1 className="text-sm font-bold text-white">{tool.titulo}</h1>
-            <p className="text-xs text-[#6b7a99]">
+            <p className="text-xs text-[#a0b0c8]">
               {selectedChapterNum != null
                 ? `Cap. ${selectedChapterNum} · ${selectedEbook?.titulo}`
                 : selectedEbook
@@ -772,13 +772,13 @@ export default function FerramentaPage() {
               <p className="text-sm font-semibold text-white">
                 Capítulo {selectedChapterNum} carregado nos campos abaixo
               </p>
-              <p className="text-xs text-[#6b7a99] truncate">
+              <p className="text-xs text-[#a0b0c8] truncate">
                 {selectedEbook?.capitulos?.find(c => c.numero === selectedChapterNum)?.titulo}
               </p>
             </div>
             <button
               onClick={() => { setSelectedChapterNum(null); setValues(prev => ({ ...prev, texto: '', tituloCapitulo: '' })) }}
-              className="shrink-0 text-[#3a4a66] hover:text-white transition"
+              className="shrink-0 text-[#8896b0] hover:text-white transition"
             >
               <X className="size-4" />
             </button>
@@ -835,7 +835,7 @@ export default function FerramentaPage() {
           <div ref={resultRef} className="space-y-4">
             <div className="flex items-center gap-2 rounded-2xl border border-[#1c2438] bg-[#0b0f1c] px-5 py-3">
               <Loader2 className="size-4 animate-spin shrink-0" style={{ color: tool.cor }} />
-              <span className="text-xs text-[#6b7a99]">Aurora IA gerando...</span>
+              <span className="text-xs text-[#a0b0c8]">Aurora IA gerando...</span>
             </div>
             <div className="rounded-2xl border border-[#1c2438] bg-[#0b0f1c] p-6">
               <pre className="whitespace-pre-wrap text-sm leading-relaxed text-[#c8d3f5] font-sans">
@@ -856,7 +856,7 @@ export default function FerramentaPage() {
                 </div>
                 <span className="text-sm font-semibold text-white">{tool.outputLabel}</span>
                 {selectedEbook && (
-                  <span className="rounded-full px-2 py-0.5 text-[10px] font-medium text-[#6b7a99] border border-[#1c2438]">
+                  <span className="rounded-full px-2 py-0.5 text-[10px] font-medium text-[#a0b0c8] border border-[#1c2438]">
                     📖 {selectedEbook.titulo}
                     {selectedChapterNum != null && ` · Cap. ${selectedChapterNum}`}
                   </span>
@@ -869,11 +869,11 @@ export default function FerramentaPage() {
                   {saved ? <><Check className="size-3.5" /> Salvo!</> : <><Save className="size-3.5" /> Salvar</>}
                 </button>
                 <button onClick={() => navigator.clipboard.writeText(resultado)}
-                  className="flex items-center gap-1.5 rounded-lg border border-[#1c2438] bg-[#0b0f1c] px-3 py-1.5 text-xs text-[#6b7a99] transition hover:text-white">
+                  className="flex items-center gap-1.5 rounded-lg border border-[#1c2438] bg-[#0b0f1c] px-3 py-1.5 text-xs text-[#a0b0c8] transition hover:text-white">
                   <Copy className="size-3.5" /> Copiar
                 </button>
                 <button onClick={() => { setResultado(''); setStreamingText('') }}
-                  className="flex items-center gap-1.5 rounded-lg border border-[#1c2438] bg-[#0b0f1c] px-3 py-1.5 text-xs text-[#6b7a99] transition hover:text-white">
+                  className="flex items-center gap-1.5 rounded-lg border border-[#1c2438] bg-[#0b0f1c] px-3 py-1.5 text-xs text-[#a0b0c8] transition hover:text-white">
                   <RefreshCw className="size-3.5" /> Refazer
                 </button>
               </div>
@@ -885,7 +885,7 @@ export default function FerramentaPage() {
 
             <div className="flex flex-wrap gap-3">
               <button onClick={() => { setResultado(''); setStreamingText('') }}
-                className="flex items-center gap-2 rounded-xl border border-[#1c2438] bg-[#0b0f1c] px-4 py-2.5 text-sm text-[#6b7a99] transition hover:text-white">
+                className="flex items-center gap-2 rounded-xl border border-[#1c2438] bg-[#0b0f1c] px-4 py-2.5 text-sm text-[#a0b0c8] transition hover:text-white">
                 <ArrowLeft className="size-4" /> Ajustar e regerar
               </button>
               <button
@@ -896,7 +896,7 @@ export default function FerramentaPage() {
                   a.download = `${tool.titulo.replace(/\s+/g, '-').toLowerCase()}-cap${selectedChapterNum ?? ''}-${selectedEbook?.titulo?.replace(/\s+/g, '-').toLowerCase() ?? 'resultado'}.txt`
                   a.click()
                 }}
-                className="flex items-center gap-2 rounded-xl border border-[#1c2438] bg-[#0b0f1c] px-4 py-2.5 text-sm text-[#6b7a99] transition hover:text-white">
+                className="flex items-center gap-2 rounded-xl border border-[#1c2438] bg-[#0b0f1c] px-4 py-2.5 text-sm text-[#a0b0c8] transition hover:text-white">
                 <Download className="size-4" /> Baixar .txt
               </button>
             </div>

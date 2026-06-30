@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { ShoppingCart, Copy, Check, ArrowRight } from 'lucide-react'
@@ -76,18 +76,18 @@ function CopyBlock({ titulo, rotulo, texto }: { titulo: string; rotulo: string; 
     })
   }
   return (
-    <div className="rounded-2xl border border-[#1c2438] bg-[#0f1523] p-4">
+    <div className="rounded-2xl border border-[#e9ecef] bg-white p-4">
       <div className="mb-3 flex items-center justify-between">
-        <span className="text-xs font-bold uppercase tracking-wider text-[#6b7a99]">{rotulo}</span>
+        <span className="text-xs font-bold uppercase tracking-wider text-[#7b809a]">{rotulo}</span>
         <button
           onClick={copy}
-          className="flex items-center gap-1.5 rounded-lg border border-[#1c2438] px-2.5 py-1 text-xs font-medium text-[#6b7a99] transition hover:border-[#4f7fff40] hover:text-white"
+          className="flex items-center gap-1.5 rounded-lg border border-[#e9ecef] px-2.5 py-1 text-xs font-medium text-[#7b809a] transition hover:border-[#4f7fff40] hover:text-[#344767]"
         >
           {copied ? <Check className="size-3 text-[#00e5c3]" /> : <Copy className="size-3" />}
           {copied ? 'Copiado!' : 'Copiar'}
         </button>
       </div>
-      <pre className="whitespace-pre-wrap text-sm leading-relaxed text-[#c8d3eb]">{texto}</pre>
+      <pre className="whitespace-pre-wrap text-sm leading-relaxed text-[#495057]">{texto}</pre>
     </div>
   )
 }
@@ -104,8 +104,8 @@ export default function KitVendasPage() {
           <ShoppingCart className="size-5 text-[#4f7fff]" />
         </div>
         <div>
-          <h1 className="text-xl font-bold text-white">Kit de Vendas</h1>
-          <p className="text-sm text-[#6b7a99]">Copy pronta para vender seu ebook em qualquer canal</p>
+          <h1 className="text-xl font-bold text-[#344767]">Kit de Vendas</h1>
+          <p className="text-sm text-[#7b809a]">Copy pronta para vender seu ebook em qualquer canal</p>
         </div>
       </div>
 
@@ -117,7 +117,7 @@ export default function KitVendasPage() {
           onChange={e => setTitulo(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && setGerado(true)}
           placeholder="Nome do seu ebook (ex: Finanças Pessoais para Iniciantes)"
-          className="flex-1 rounded-xl border border-[#1c2438] bg-[#0f1523] px-4 py-3 text-sm text-white placeholder:text-[#3a4a66] focus:border-[#4f7fff50] focus:outline-none"
+          className="flex-1 rounded-xl border border-[#e9ecef] bg-white px-4 py-3 text-sm text-[#344767] placeholder:text-[#9ca3af] focus:border-[#4f7fff50] focus:outline-none"
         />
         <button
           onClick={() => setGerado(true)}
@@ -136,10 +136,10 @@ export default function KitVendasPage() {
           <CopyBlock titulo={titulo} rotulo="Sequência de E-mail" texto={copy.email} />
         </div>
       ) : (
-        <div className="rounded-2xl border border-dashed border-[#1c2438] py-16 text-center">
+        <div className="rounded-2xl border border-dashed border-[#e9ecef] py-16 text-center">
           <p className="text-3xl mb-3">📝</p>
-          <p className="text-sm text-[#6b7a99]">Digite o nome do seu ebook acima e clique em "Gerar Kit"</p>
-          <p className="mt-1 text-xs text-[#3a4a66]">Você receberá copy para página de vendas, WhatsApp, Instagram e e-mail</p>
+          <p className="text-sm text-[#7b809a]">Digite o nome do seu ebook acima e clique em "Gerar Kit"</p>
+          <p className="mt-1 text-xs text-[#9ca3af]">Você receberá copy para página de vendas, WhatsApp, Instagram e e-mail</p>
         </div>
       )}
     </div>

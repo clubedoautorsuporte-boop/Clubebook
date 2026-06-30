@@ -7,7 +7,10 @@
       "Bash(npx vercel *)",
       "Bash(npx vercel@latest deploy --prod --scope team_p9LPqHxtFf8DhBJ1rywQd1jE)",
       "mcp__Claude_Preview__preview_start",
-      "WebFetch(domain:docs.pepper.com.br)"
+      "WebFetch(domain:docs.pepper.com.br)",
+      "Bash(git push *)",
+      "Bash(git add *)",
+      "Bash(git commit -m 'feat: center all dashboard pages with max-w-5xl container *)"
     ]
   }
 }

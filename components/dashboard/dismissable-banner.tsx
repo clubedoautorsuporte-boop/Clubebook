@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { X, ArrowRight, Zap } from 'lucide-react'
@@ -24,7 +24,7 @@ export function DismissableBanner() {
               LANÇAMENTO
             </span>
           </div>
-          <p className="text-xs text-[#6b7a99]">
+          <p className="text-xs text-[#a0b0c8]">
             Crie agora e receba PDF + DOCX + EPUB com direitos de revenda 100% seus
           </p>
         </div>
@@ -39,7 +39,7 @@ export function DismissableBanner() {
         </Link>
         <button
           onClick={() => setDismissed(true)}
-          className="grid h-7 w-7 place-items-center rounded-lg text-[#3a4a66] transition hover:bg-[#1c2438] hover:text-white"
+          className="grid h-7 w-7 place-items-center rounded-lg text-[#9ca3af] transition hover:bg-[#e9ecef] hover:text-white"
         >
           <X className="size-4" />
         </button>

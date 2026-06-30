@@ -30,9 +30,9 @@ declare global {
 }
 
 const INPUT =
-  'h-[46px] w-full rounded-xl border border-[#ffffff10] bg-[#111827] px-3 text-sm text-white placeholder-[#3a4a66] outline-none transition focus:border-[#00e5c340] focus:ring-1 focus:ring-[#00e5c315]'
+  'h-[46px] w-full rounded-xl border border-[#ffffff10] bg-[#111827] px-3 text-sm text-white placeholder-[#8896b0] outline-none transition focus:border-[#00e5c340] focus:ring-1 focus:ring-[#00e5c315]'
 
-const LABEL = 'mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-[#6b7a99]'
+const LABEL = 'mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-[#a0b0c8]'
 
 // ── Formatters ────────────────────────────────────────────────────────────────
 
@@ -214,10 +214,10 @@ export function CardForm({ price, pacoteId, pacoteNome, userEmail, onSuccess, on
           <span className="text-[12px] font-extrabold uppercase tracking-[0.12em] text-white">{pacoteNome}</span>
         </div>
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-[#6b7a99]">
+          <div className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-[#a0b0c8]">
             <Lock className="size-3" /> SEGURO
           </div>
-          <button onClick={onClose} className="grid h-7 w-7 place-items-center rounded-lg text-[#6b7a99] transition hover:bg-white/10 hover:text-white">
+          <button onClick={onClose} className="grid h-7 w-7 place-items-center rounded-lg text-[#a0b0c8] transition hover:bg-white/10 hover:text-white">
             <X className="size-4" />
           </button>
         </div>
@@ -228,7 +228,7 @@ export function CardForm({ price, pacoteId, pacoteNome, userEmail, onSuccess, on
         <button type="button" className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-[#1c2438] bg-[#111827] py-2.5 text-[13px] font-bold text-white">
           <CreditCard className="size-4" /> Cartão
         </button>
-        <button type="button" disabled className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-[#0d1117] py-2.5 text-[13px] font-medium text-[#3a4a66]">
+        <button type="button" disabled className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-[#0d1117] py-2.5 text-[13px] font-medium text-[#8896b0]">
           <span className="flex h-4 w-4 items-center justify-center rounded-sm bg-white text-[9px] font-black leading-none text-[#333]">G</span>
           Google Pay
         </button>
@@ -236,7 +236,7 @@ export function CardForm({ price, pacoteId, pacoteNome, userEmail, onSuccess, on
 
       {/* Loading */}
       {!loaded && !errorMsg && (
-        <div className="flex items-center justify-center gap-2 py-10 text-[#6b7a99]">
+        <div className="flex items-center justify-center gap-2 py-10 text-[#a0b0c8]">
           <Loader2 className="size-5 animate-spin" />
           <span className="text-sm">Carregando formulário…</span>
         </div>
@@ -288,7 +288,7 @@ export function CardForm({ price, pacoteId, pacoteNome, userEmail, onSuccess, on
                 maxLength={4}
                 className={INPUT + ' pr-9'}
               />
-              <Lock className="pointer-events-none absolute right-3 top-1/2 size-3.5 -translate-y-1/2 text-[#3a4a66]" />
+              <Lock className="pointer-events-none absolute right-3 top-1/2 size-3.5 -translate-y-1/2 text-[#8896b0]" />
             </div>
           </div>
         </div>
@@ -352,14 +352,14 @@ export function CardForm({ price, pacoteId, pacoteNome, userEmail, onSuccess, on
           <p className="rounded-xl border border-red-500/20 bg-red-500/10 px-3 py-2 text-center text-xs text-red-400">{errorMsg}</p>
         )}
 
-        <div className="flex items-center justify-center gap-2 text-[10px] text-[#3a4a66]">
+        <div className="flex items-center justify-center gap-2 text-[10px] text-[#8896b0]">
           <Lock className="size-3" />
           <span>Criptografia SSL</span>
           <span>•</span>
           <span>Processado por Mercado Pago</span>
         </div>
 
-        <button type="button" onClick={onBack} className="flex items-center justify-center gap-1.5 text-[11px] text-[#6b7a99] transition hover:text-white">
+        <button type="button" onClick={onBack} className="flex items-center justify-center gap-1.5 text-[11px] text-[#a0b0c8] transition hover:text-white">
           <ChevronLeft className="size-3.5" />
           Alterar forma de pagamento
         </button>

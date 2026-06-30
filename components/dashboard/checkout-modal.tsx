@@ -138,7 +138,7 @@ export function CheckoutModal({ pacote, userEmail, userName, onClose }: Props) {
                 </p>
               </div>
             </div>
-            <button onClick={onClose} className="grid h-8 w-8 place-items-center rounded-xl text-[#6b7a99] transition hover:bg-[#0f1523] hover:text-white">
+            <button onClick={onClose} className="grid h-8 w-8 place-items-center rounded-xl text-[#a0b0c8] transition hover:bg-[#0f1523] hover:text-white">
               <X className="size-4" />
             </button>
           </div>
@@ -148,11 +148,11 @@ export function CheckoutModal({ pacote, userEmail, userName, onClose }: Props) {
         {step !== 'success' && step !== 'card' && (
           <div className="flex flex-col items-center gap-1 border-b border-[#1c2438] bg-[#4f7fff06] py-5">
             <div className="flex items-baseline gap-1">
-              <span className="text-sm font-semibold text-[#6b7a99]">R$</span>
+              <span className="text-sm font-semibold text-[#a0b0c8]">R$</span>
               <span className="text-4xl font-black tracking-tight text-white">
                 {Math.floor(pacote.price).toLocaleString('pt-BR')}
               </span>
-              <span className="text-xl font-bold text-[#6b7a99]">
+              <span className="text-xl font-bold text-[#a0b0c8]">
                 ,{String(Math.round((pacote.price % 1) * 100)).padStart(2, '0')}
               </span>
             </div>
@@ -167,7 +167,7 @@ export function CheckoutModal({ pacote, userEmail, userName, onClose }: Props) {
         {/* ── STEP: Seleção de pagamento ── */}
         {step === 'select' && (
           <div className="px-6 py-5 space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-widest text-[#6b7a99] mb-4">Escolha a forma de pagamento</p>
+            <p className="text-xs font-semibold uppercase tracking-widest text-[#a0b0c8] mb-4">Escolha a forma de pagamento</p>
 
             <button
               onClick={() => setStep('form')}
@@ -179,7 +179,7 @@ export function CheckoutModal({ pacote, userEmail, userName, onClose }: Props) {
                 </div>
                 <div className="text-left">
                   <p className="text-sm font-bold text-white">PIX</p>
-                  <p className="text-[11px] text-[#6b7a99]">Aprovação imediata · QR Code</p>
+                  <p className="text-[11px] text-[#a0b0c8]">Aprovação imediata · QR Code</p>
                 </div>
               </div>
               <span className="rounded-full bg-[#00e5c318] px-2.5 py-0.5 text-[10px] font-bold text-[#00e5c3]">Instantâneo</span>
@@ -195,13 +195,13 @@ export function CheckoutModal({ pacote, userEmail, userName, onClose }: Props) {
                 </div>
                 <div className="text-left">
                   <p className="text-sm font-bold text-white">Cartão de Crédito</p>
-                  <p className="text-[11px] text-[#6b7a99]">Visa, Mastercard, Google Pay…</p>
+                  <p className="text-[11px] text-[#a0b0c8]">Visa, Mastercard, Google Pay…</p>
                 </div>
               </div>
               <span className="rounded-full bg-[#4f7fff18] px-2.5 py-0.5 text-[10px] font-bold text-[#4f7fff]">Seguro</span>
             </button>
 
-            <p className="text-center text-[10px] text-[#3a4a66] pt-2">
+            <p className="text-center text-[10px] text-[#8896b0] pt-2">
               🔒 Pagamento processado com segurança pela Pepper
             </p>
           </div>
@@ -211,44 +211,44 @@ export function CheckoutModal({ pacote, userEmail, userName, onClose }: Props) {
         {step === 'form' && (
           <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
             <div>
-              <label className="mb-1.5 block text-xs font-semibold text-[#6b7a99]">Nome completo</label>
+              <label className="mb-1.5 block text-xs font-semibold text-[#a0b0c8]">Nome completo</label>
               <input
                 value={nome}
                 onChange={e => setNome(e.target.value)}
                 required
                 placeholder="Seu nome"
-                className="w-full rounded-xl border border-[#1c2438] bg-[#0b0f1c] px-4 py-3 text-sm text-white placeholder-[#3a4a66] outline-none transition focus:border-[#4f7fff50] focus:ring-1 focus:ring-[#4f7fff30]"
+                className="w-full rounded-xl border border-[#1c2438] bg-[#0b0f1c] px-4 py-3 text-sm text-white placeholder-[#8896b0] outline-none transition focus:border-[#4f7fff50] focus:ring-1 focus:ring-[#4f7fff30]"
               />
             </div>
 
             <div>
-              <label className="mb-1.5 block text-xs font-semibold text-[#6b7a99]">Email</label>
+              <label className="mb-1.5 block text-xs font-semibold text-[#a0b0c8]">Email</label>
               <input
                 value={userEmail}
                 disabled
-                className="w-full rounded-xl border border-[#1c2438] bg-[#080b14] px-4 py-3 text-sm text-[#3a4a66] outline-none"
+                className="w-full rounded-xl border border-[#1c2438] bg-[#080b14] px-4 py-3 text-sm text-[#8896b0] outline-none"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="mb-1.5 block text-xs font-semibold text-[#6b7a99]">CPF</label>
+                <label className="mb-1.5 block text-xs font-semibold text-[#a0b0c8]">CPF</label>
                 <input
                   value={cpf}
                   onChange={e => setCpf(formatCPF(e.target.value))}
                   required
                   placeholder="000.000.000-00"
-                  className="w-full rounded-xl border border-[#1c2438] bg-[#0b0f1c] px-4 py-3 text-sm text-white placeholder-[#3a4a66] outline-none transition focus:border-[#4f7fff50] focus:ring-1 focus:ring-[#4f7fff30]"
+                  className="w-full rounded-xl border border-[#1c2438] bg-[#0b0f1c] px-4 py-3 text-sm text-white placeholder-[#8896b0] outline-none transition focus:border-[#4f7fff50] focus:ring-1 focus:ring-[#4f7fff30]"
                 />
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-semibold text-[#6b7a99]">Telefone</label>
+                <label className="mb-1.5 block text-xs font-semibold text-[#a0b0c8]">Telefone</label>
                 <input
                   value={telefone}
                   onChange={e => setTelefone(formatPhone(e.target.value))}
                   required
                   placeholder="(11) 99999-9999"
-                  className="w-full rounded-xl border border-[#1c2438] bg-[#0b0f1c] px-4 py-3 text-sm text-white placeholder-[#3a4a66] outline-none transition focus:border-[#4f7fff50] focus:ring-1 focus:ring-[#4f7fff30]"
+                  className="w-full rounded-xl border border-[#1c2438] bg-[#0b0f1c] px-4 py-3 text-sm text-white placeholder-[#8896b0] outline-none transition focus:border-[#4f7fff50] focus:ring-1 focus:ring-[#4f7fff30]"
                 />
               </div>
             </div>
@@ -266,7 +266,7 @@ export function CheckoutModal({ pacote, userEmail, userName, onClose }: Props) {
                   </div>
                   <div>
                     <p className="text-sm font-bold text-white">PIX</p>
-                    <p className="text-[11px] text-[#6b7a99]">Aprovação imediata · QR Code</p>
+                    <p className="text-[11px] text-[#a0b0c8]">Aprovação imediata · QR Code</p>
                   </div>
                 </div>
                 <span className="rounded-full bg-[#00e5c320] px-2.5 py-0.5 text-[10px] font-bold text-[#00e5c3]">Instantâneo</span>
@@ -283,7 +283,7 @@ export function CheckoutModal({ pacote, userEmail, userName, onClose }: Props) {
                 : <><Zap className="size-4" /> Gerar QR Code PIX <ChevronRight className="size-4" /></>}
             </button>
 
-            <div className="flex items-center justify-center gap-1.5 text-[10px] text-[#3a4a66]">
+            <div className="flex items-center justify-center gap-1.5 text-[10px] text-[#8896b0]">
               <ShieldCheck className="size-3" />
               Pagamento processado com segurança pela Pepper
             </div>
@@ -297,7 +297,7 @@ export function CheckoutModal({ pacote, userEmail, userName, onClose }: Props) {
             <div className="mb-5 flex items-center justify-between rounded-2xl border border-[#1c2438] bg-[#0b0f1c] px-4 py-3">
               <div className="flex items-center gap-2">
                 <div className="h-2 w-2 animate-pulse rounded-full bg-[#00e5c3]" />
-                <span className="text-xs font-semibold text-[#6b7a99]">Aguardando pagamento</span>
+                <span className="text-xs font-semibold text-[#a0b0c8]">Aguardando pagamento</span>
               </div>
               <div className="flex items-center gap-1 rounded-lg bg-[#1c2438] px-2.5 py-1">
                 <span className="font-mono text-sm font-bold text-white">{mins}:{secs}</span>
@@ -322,17 +322,17 @@ export function CheckoutModal({ pacote, userEmail, userName, onClose }: Props) {
                 </div>
               </div>
 
-              <p className="text-center text-xs text-[#6b7a99]">
+              <p className="text-center text-xs text-[#a0b0c8]">
                 Abra seu banco → PIX → Ler QR Code
               </p>
             </div>
 
             {/* Copia e cola */}
             <div className="mb-4">
-              <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-[#3a4a66]">Ou use o código Copia e Cola</p>
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-[#8896b0]">Ou use o código Copia e Cola</p>
               <div className="flex gap-2">
                 <div className="flex-1 overflow-hidden rounded-xl border border-[#1c2438] bg-[#0b0f1c] px-3 py-2.5">
-                  <p className="truncate font-mono text-[11px] text-[#6b7a99]">{qrCode.slice(0, 60)}…</p>
+                  <p className="truncate font-mono text-[11px] text-[#a0b0c8]">{qrCode.slice(0, 60)}…</p>
                 </div>
                 <button
                   onClick={copy}
@@ -347,7 +347,7 @@ export function CheckoutModal({ pacote, userEmail, userName, onClose }: Props) {
             {/* Status polling indicator */}
             <div className="flex items-center justify-center gap-2 rounded-2xl border border-[#1c2438] bg-[#0b0f1c] py-3">
               <RefreshCw className="size-3.5 animate-spin text-[#4f7fff]" />
-              <span className="text-xs text-[#6b7a99]">Verificando pagamento automaticamente…</span>
+              <span className="text-xs text-[#a0b0c8]">Verificando pagamento automaticamente…</span>
             </div>
           </div>
         )}
@@ -380,9 +380,9 @@ export function CheckoutModal({ pacote, userEmail, userName, onClose }: Props) {
             <p className="mb-1 text-4xl font-black text-[#00e5c3]">
               +{pacote.credits.toLocaleString('pt-BR')}
             </p>
-            <p className="mb-6 text-sm text-[#6b7a99]">créditos na sua conta</p>
+            <p className="mb-6 text-sm text-[#a0b0c8]">créditos na sua conta</p>
 
-            <p className="mb-6 text-xs leading-relaxed text-[#3a4a66]">
+            <p className="mb-6 text-xs leading-relaxed text-[#8896b0]">
               Seus créditos já estão disponíveis. Use para criar capítulos, reescrever seções, gerar metadados e muito mais com a Aurora IA.
             </p>
 

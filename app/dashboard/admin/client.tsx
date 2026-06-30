@@ -156,7 +156,7 @@ export default function AdminClient() {
         </div>
         <div>
           <h1 className="text-xl font-bold text-white">Gerador de Livro Completo</h1>
-          <p className="text-sm text-[#6b7a99]">Gera o livro escrito de verdade — 10 capítulos com conteúdo real</p>
+          <p className="text-sm text-[#a0b0c8]">Gera o livro escrito de verdade — 10 capítulos com conteúdo real</p>
         </div>
         <span className="ml-auto rounded-full bg-amber-500/20 px-3 py-1 text-[11px] font-bold text-amber-400">ADMIN</span>
       </div>
@@ -168,7 +168,7 @@ export default function AdminClient() {
         {/* Tema */}
         <div className="mb-4">
           <div className="mb-1.5 flex items-center justify-between">
-            <label className="text-xs font-semibold text-[#6b7a99]">Tema do livro *</label>
+            <label className="text-xs font-semibold text-[#a0b0c8]">Tema do livro *</label>
             <button onClick={randomTema} disabled={running} className="flex items-center gap-1 text-[10px] text-[#4f7fff] hover:text-[#7fa0ff] disabled:opacity-40">
               <Shuffle className="size-3" /> Aleatório
             </button>
@@ -179,12 +179,12 @@ export default function AdminClient() {
             onChange={e => setTema(e.target.value)}
             placeholder="Ex: Finanças Pessoais para Iniciantes"
             disabled={running}
-            className="w-full rounded-xl border border-[#1c2438] bg-[#080b14] px-4 py-2.5 text-sm text-white placeholder:text-[#3a4a66] focus:border-[#4f7fff50] focus:outline-none disabled:opacity-40"
+            className="w-full rounded-xl border border-[#1c2438] bg-[#080b14] px-4 py-2.5 text-sm text-white placeholder:text-[#8896b0] focus:border-[#4f7fff50] focus:outline-none disabled:opacity-40"
           />
           <div className="mt-2 flex flex-wrap gap-1.5">
             {TEMAS_RAPIDOS.slice(0, 5).map(t => (
               <button key={t} onClick={() => setTema(t)} disabled={running}
-                className="rounded-lg bg-[#0f1523] px-2.5 py-1 text-[10px] text-[#6b7a99] transition hover:bg-[#1c2438] hover:text-white disabled:opacity-40">
+                className="rounded-lg bg-[#0f1523] px-2.5 py-1 text-[10px] text-[#a0b0c8] transition hover:bg-[#1c2438] hover:text-white disabled:opacity-40">
                 {t}
               </button>
             ))}
@@ -193,13 +193,13 @@ export default function AdminClient() {
 
         {/* Autor */}
         <div className="mb-6">
-          <label className="mb-1.5 block text-xs font-semibold text-[#6b7a99]">Nome do autor</label>
+          <label className="mb-1.5 block text-xs font-semibold text-[#a0b0c8]">Nome do autor</label>
           <input
             type="text"
             value={autor}
             onChange={e => setAutor(e.target.value)}
             disabled={running}
-            className="w-full rounded-xl border border-[#1c2438] bg-[#080b14] px-4 py-2.5 text-sm text-white placeholder:text-[#3a4a66] focus:border-[#4f7fff50] focus:outline-none disabled:opacity-40"
+            className="w-full rounded-xl border border-[#1c2438] bg-[#080b14] px-4 py-2.5 text-sm text-white placeholder:text-[#8896b0] focus:border-[#4f7fff50] focus:outline-none disabled:opacity-40"
           />
         </div>
 
@@ -212,7 +212,7 @@ export default function AdminClient() {
           ].map(({ v, l }) => (
             <div key={l} className="rounded-xl border border-[#1c2438] bg-[#080b14] py-3">
               <p className="text-lg font-extrabold text-amber-400">{v}</p>
-              <p className="text-[10px] text-[#6b7a99]">{l}</p>
+              <p className="text-[10px] text-[#a0b0c8]">{l}</p>
             </div>
           ))}
         </div>
@@ -294,7 +294,7 @@ export default function AdminClient() {
 
           <div className="mb-4 rounded-xl border border-[#1c2438] bg-[#080b14] p-4">
             <p className="text-base font-bold text-white">{result.titulo}</p>
-            <div className="mt-2 flex flex-wrap gap-3 text-[11px] text-[#6b7a99]">
+            <div className="mt-2 flex flex-wrap gap-3 text-[11px] text-[#a0b0c8]">
               <span className="flex items-center gap-1"><BookOpen className="size-3" /> {result.capitulos} capítulos escritos</span>
               <span className="flex items-center gap-1"><FileText className="size-3" /> {totalWords.toLocaleString('pt-BR')} palavras totais</span>
               <span className="flex items-center gap-1"><Clock className="size-3" /> {Math.round(result.pdfSize / 1024)} KB PDF</span>

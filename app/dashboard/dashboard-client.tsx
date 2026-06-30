@@ -46,7 +46,7 @@ export function DashboardClient({ rows, drafts, credits }: { rows: EbookRow[]; d
   }
 
   const statsFooter: Record<string, { label: string; color: string }> = {
-    total:     { label: total > 0 ? `+${total} nesta semana` : 'Crie seu primeiro!', color: total > 0 ? '#00e5c3' : '#3a4a66' },
+    total:     { label: total > 0 ? `+${total} nesta semana` : 'Crie seu primeiro!', color: total > 0 ? '#00e5c3' : '#8896b0' },
     drafts:    { label: drafts.length > 0 ? 'Em andamento' : 'Nenhum rascunho',      color: '#00e5c3' },
     completos: { label: livros.length > 0 ? 'Finalizados' : 'Finalize um livro!',    color: '#ec4899' },
     creditos:  { label: `≈ R$ ${(credits / 100).toFixed(0)} em serviços`,            color: '#00e5c3' },
@@ -64,10 +64,10 @@ export function DashboardClient({ rows, drafts, credits }: { rows: EbookRow[]; d
                 <Icon className="size-7 text-white" />
               </div>
               <div className="flex flex-1 flex-col justify-between p-3.5">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-[#6b7a99]">{label}</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-[#a0b0c8]">{label}</p>
                 <div>
                   <p className="text-2xl font-black text-white tabular-nums leading-none">{statsValues[key]}</p>
-                  <p className="text-[10px] text-[#3a4a66]">{unit}</p>
+                  <p className="text-[10px] text-[#8896b0]">{unit}</p>
                 </div>
                 <p className="text-[10px] font-semibold" style={{ color: statsFooter[key].color }}>{statsFooter[key].label}</p>
               </div>
@@ -88,7 +88,7 @@ export function DashboardClient({ rows, drafts, credits }: { rows: EbookRow[]; d
             </div>
             <div className="min-w-0">
               <p className="truncate text-[13px] font-bold text-white">{label}</p>
-              <p className="truncate text-[11px] text-[#6b7a99]">{desc}</p>
+              <p className="truncate text-[11px] text-[#a0b0c8]">{desc}</p>
             </div>
           </Link>
         ))}
@@ -103,7 +103,7 @@ export function DashboardClient({ rows, drafts, credits }: { rows: EbookRow[]; d
             <div className="flex items-center justify-between border-b border-[#1c2438] px-5 py-4">
               <div>
                 <h2 className="text-[15px] font-bold text-white">Meus Ebooks</h2>
-                <p className="text-[11px] text-[#6b7a99]">{total > 0 ? `${total} projeto${total > 1 ? 's' : ''}` : 'Comece criando seu primeiro'}</p>
+                <p className="text-[11px] text-[#a0b0c8]">{total > 0 ? `${total} projeto${total > 1 ? 's' : ''}` : 'Comece criando seu primeiro'}</p>
               </div>
               <Link href="/dashboard/criar"
                 className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-[12px] font-bold text-white transition hover:opacity-90 hover:-translate-y-0.5"
@@ -135,7 +135,7 @@ export function DashboardClient({ rows, drafts, credits }: { rows: EbookRow[]; d
                   )}
                   {rows.filter(r => r.tipo !== 'livro').length > 0 && (
                     <section>
-                      <p className="mb-3 text-[10px] font-bold uppercase tracking-widest text-[#6b7a99]">Prévias</p>
+                      <p className="mb-3 text-[10px] font-bold uppercase tracking-widest text-[#a0b0c8]">Prévias</p>
                       <div className="grid gap-3 sm:grid-cols-2">
                         {rows.filter(r => r.tipo !== 'livro').map(r => <EbookCard key={r.slug} {...r} tipo="preview" />)}
                       </div>
@@ -152,7 +152,7 @@ export function DashboardClient({ rows, drafts, credits }: { rows: EbookRow[]; d
           <div className="overflow-hidden rounded-2xl border border-[#1c2438]" style={{ background: '#0d1220' }}>
             <div className="border-b border-[#1c2438] px-5 py-4">
               <h2 className="text-[15px] font-bold text-white">Ferramentas</h2>
-              <p className="text-[11px] text-[#6b7a99]">Acesso rápido</p>
+              <p className="text-[11px] text-[#a0b0c8]">Acesso rápido</p>
             </div>
             <div className="p-3 flex flex-col gap-1">
               {QUICK_CARDS.map(({ href, icon: Icon, label, color }) => (
@@ -162,7 +162,7 @@ export function DashboardClient({ rows, drafts, credits }: { rows: EbookRow[]; d
                     <Icon className="size-4" style={{ color }} />
                   </div>
                   <span className="text-[13px] font-medium text-[#c4d0e8]">{label}</span>
-                  <ArrowUpRight className="ml-auto size-3.5 text-[#3a4a66]" />
+                  <ArrowUpRight className="ml-auto size-3.5 text-[#8896b0]" />
                 </Link>
               ))}
             </div>

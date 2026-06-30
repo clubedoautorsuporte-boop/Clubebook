@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { Calculator, ArrowRight } from 'lucide-react'
@@ -37,18 +37,18 @@ export default function CalculadoraPage() {
           <Calculator className="size-5 text-[#4f7fff]" />
         </div>
         <div>
-          <h1 className="text-xl font-bold text-white">Calculadora de Receita</h1>
-          <p className="text-sm text-[#6b7a99]">Descubra quanto você pode ganhar revendendo seus ebooks</p>
+          <h1 className="text-xl font-bold text-[#344767]">Calculadora de Receita</h1>
+          <p className="text-sm text-[#7b809a]">Descubra quanto você pode ganhar revendendo seus ebooks</p>
         </div>
       </div>
 
       <div className="grid gap-5 md:grid-cols-2">
         {/* Inputs */}
-        <div className="space-y-6 rounded-2xl border border-[#1c2438] bg-[#0f1523] p-6">
+        <div className="space-y-6 rounded-2xl border border-[#e9ecef] bg-white p-6">
           {/* Preço */}
           <div>
             <div className="mb-2 flex items-center justify-between">
-              <label className="text-sm font-semibold text-white">Preço do ebook</label>
+              <label className="text-sm font-semibold text-[#344767]">Preço do ebook</label>
               <span className="rounded-lg bg-[#4f7fff15] px-3 py-1 text-sm font-bold text-[#4f7fff]">
                 {fmt(preco)}
               </span>
@@ -62,7 +62,7 @@ export default function CalculadoraPage() {
               onChange={e => setPreco(Number(e.target.value))}
               className="w-full accent-[#4f7fff]"
             />
-            <div className="mt-1 flex justify-between text-[10px] text-[#3a4a66]">
+            <div className="mt-1 flex justify-between text-[10px] text-[#9ca3af]">
               <span>R$9</span><span>R$197</span>
             </div>
           </div>
@@ -70,7 +70,7 @@ export default function CalculadoraPage() {
           {/* Vendas */}
           <div>
             <div className="mb-2 flex items-center justify-between">
-              <label className="text-sm font-semibold text-white">Vendas por mês</label>
+              <label className="text-sm font-semibold text-[#344767]">Vendas por mês</label>
               <span className="rounded-lg bg-[#4f7fff15] px-3 py-1 text-sm font-bold text-[#4f7fff]">
                 {vendas}
               </span>
@@ -84,14 +84,14 @@ export default function CalculadoraPage() {
               onChange={e => setVendas(Number(e.target.value))}
               className="w-full accent-[#4f7fff]"
             />
-            <div className="mt-1 flex justify-between text-[10px] text-[#3a4a66]">
+            <div className="mt-1 flex justify-between text-[10px] text-[#9ca3af]">
               <span>10</span><span>1.000</span>
             </div>
           </div>
 
           {/* Plataforma */}
           <div>
-            <label className="mb-2 block text-sm font-semibold text-white">Plataforma</label>
+            <label className="mb-2 block text-sm font-semibold text-[#344767]">Plataforma</label>
             <div className="grid grid-cols-3 gap-2">
               {PLATAFORMAS.map((p, i) => (
                 <button
@@ -100,7 +100,7 @@ export default function CalculadoraPage() {
                   className={`rounded-xl border py-2 text-xs font-medium transition ${
                     plataformaIdx === i
                       ? 'border-[#4f7fff50] bg-[#4f7fff20] text-[#4f7fff]'
-                      : 'border-[#1c2438] bg-[#080b14] text-[#6b7a99] hover:border-[#2a3553]'
+                      : 'border-[#e9ecef] bg-[#f0f2f5] text-[#7b809a] hover:border-[#d4dae3]'
                   }`}
                 >
                   {p.nome}
@@ -114,16 +114,16 @@ export default function CalculadoraPage() {
         <div className="flex flex-col gap-4">
           {/* Receita mensal */}
           <div className="rounded-2xl border border-[#00e5c320] bg-gradient-to-br from-[#00e5c308] to-[#4f7fff05] p-6 text-center">
-            <p className="text-xs font-bold uppercase tracking-wider text-[#6b7a99] mb-1">Receita líquida mensal</p>
-            <p className="text-4xl font-extrabold text-white">{fmt(liquido)}</p>
-            <p className="mt-1 text-xs text-[#6b7a99]">
+            <p className="text-xs font-bold uppercase tracking-wider text-[#7b809a] mb-1">Receita líquida mensal</p>
+            <p className="text-4xl font-extrabold text-[#344767]">{fmt(liquido)}</p>
+            <p className="mt-1 text-xs text-[#7b809a]">
               {plataforma.nome} retém {fmt(taxa)} · Você fica com {Math.round(plataforma.comissao * 100)}%
             </p>
           </div>
 
           {/* Projeções */}
-          <div className="rounded-2xl border border-[#1c2438] bg-[#0f1523] p-5">
-            <p className="mb-4 text-xs font-bold uppercase tracking-wider text-[#3a4a66]">Projeção</p>
+          <div className="rounded-2xl border border-[#e9ecef] bg-white p-5">
+            <p className="mb-4 text-xs font-bold uppercase tracking-wider text-[#9ca3af]">Projeção</p>
             <div className="space-y-3">
               {[
                 { label: '3 meses', value: liquido * 3 },
@@ -131,8 +131,8 @@ export default function CalculadoraPage() {
                 { label: '1 ano', value: liquido * 12 },
               ].map(({ label, value }) => (
                 <div key={label} className="flex items-center justify-between">
-                  <span className="text-sm text-[#6b7a99]">{label}</span>
-                  <span className="font-bold text-white">{fmt(value)}</span>
+                  <span className="text-sm text-[#7b809a]">{label}</span>
+                  <span className="font-bold text-[#344767]">{fmt(value)}</span>
                 </div>
               ))}
             </div>
@@ -141,7 +141,7 @@ export default function CalculadoraPage() {
           {/* Equivalência */}
           <div className="rounded-2xl border border-[#4f7fff20] bg-[#4f7fff08] px-5 py-4 text-center">
             <p className="text-2xl font-extrabold text-[#4f7fff]">{salarios}×</p>
-            <p className="text-xs text-[#6b7a99]">salários mínimos por mês</p>
+            <p className="text-xs text-[#7b809a]">salários mínimos por mês</p>
           </div>
 
           <Link

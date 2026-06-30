@@ -62,7 +62,7 @@ export default async function CreditosPage() {
         </div>
         <div>
           <h1 className="text-xl font-bold text-white">Créditos</h1>
-          <p className="text-sm text-[#6b7a99]">Compre créditos para gerar ebooks com IA</p>
+          <p className="text-sm text-[#a0b0c8]">Compre créditos para gerar ebooks com IA</p>
         </div>
       </div>
 
@@ -79,9 +79,9 @@ export default async function CreditosPage() {
                 <Icon className="size-6 text-white" />
               </div>
               <div className="flex flex-col justify-center p-4">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-[#6b7a99]">{label}</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-[#a0b0c8]">{label}</p>
                 <p className="text-2xl font-black text-white tabular-nums">{value}</p>
-                <p className="text-[10px] text-[#3a4a66]">{sub}</p>
+                <p className="text-[10px] text-[#8896b0]">{sub}</p>
               </div>
             </div>
           </div>
@@ -90,7 +90,7 @@ export default async function CreditosPage() {
 
       <div className="mb-3">
         <h2 className="text-[15px] font-bold text-white">Escolha um pacote</h2>
-        <p className="text-[12px] text-[#6b7a99]">Pagamento único · sem mensalidade · créditos sem vencimento</p>
+        <p className="text-[12px] text-[#a0b0c8]">Pagamento único · sem mensalidade · créditos sem vencimento</p>
       </div>
 
       <div className="grid gap-5 sm:grid-cols-3">
@@ -109,17 +109,17 @@ export default async function CreditosPage() {
                 <Gem className="size-5 text-white" />
               </div>
               <h3 className="text-[16px] font-extrabold text-white">{nome}</h3>
-              <p className="mt-0.5 text-[11px] text-[#6b7a99]">{desc}</p>
+              <p className="mt-0.5 text-[11px] text-[#a0b0c8]">{desc}</p>
               <div className="my-4 border-t border-[#1c2438]" />
               <p className="text-2xl font-extrabold text-white">{preco}</p>
-              <p className="text-[11px] text-[#3a4a66]">{(cred / 1000).toFixed(0)}k créditos</p>
+              <p className="text-[11px] text-[#8896b0]">{(cred / 1000).toFixed(0)}k créditos</p>
               <div className="my-4 space-y-2">
                 {features.map(f => (
                   <div key={f} className="flex items-center gap-2">
                     <div className="grid h-4 w-4 place-items-center rounded-full" style={{ background: `${cor}20` }}>
                       <Check className="size-2.5" style={{ color: cor }} />
                     </div>
-                    <span className="text-[11px] text-[#6b7a99]">{f}</span>
+                    <span className="text-[11px] text-[#a0b0c8]">{f}</span>
                   </div>
                 ))}
               </div>
@@ -134,15 +134,15 @@ export default async function CreditosPage() {
       {/* Histórico */}
       <div className="mt-8 rounded-xl border border-[#1c2438] overflow-hidden" style={{ background: '#0d1220' }}>
         <div className="flex items-center gap-2 border-b border-[#1c2438] px-5 py-4">
-          <History className="size-4 text-[#3a4a66]" />
+          <History className="size-4 text-[#8896b0]" />
           <h2 className="text-[14px] font-bold text-white">Histórico de compras</h2>
         </div>
         <div className="flex flex-col items-center justify-center py-10 text-center">
           <div className="mb-3 grid h-12 w-12 place-items-center rounded-xl" style={{ background: '#0b0f1c' }}>
-            <History className="size-5 text-[#3a4a66]" />
+            <History className="size-5 text-[#8896b0]" />
           </div>
           <p className="text-[13px] font-semibold text-white">Sem histórico ainda</p>
-          <p className="text-[11px] text-[#3a4a66]">Suas compras aparecerão aqui</p>
+          <p className="text-[11px] text-[#8896b0]">Suas compras aparecerão aqui</p>
         </div>
       </div>
     </div>

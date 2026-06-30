@@ -51,10 +51,10 @@ function NavItem({ href, icon: Icon, label, active }: {
         'flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium transition-all duration-150',
         active
           ? 'bg-[#111827] text-white'
-          : 'text-[#4a5a7a] hover:bg-[#0d1117] hover:text-[#8896b0]',
+          : 'text-[#9aa5bc] hover:bg-[#0d1117] hover:text-[#8896b0]',
       )}
     >
-      <Icon className={cn('size-4 shrink-0', active ? 'text-[#f97316]' : 'text-[#2a3a56]')} />
+      <Icon className={cn('size-4 shrink-0', active ? 'text-[#f97316]' : 'text-[#7080a0]')} />
       <span>{label}</span>
       {active && <span className="ml-auto h-1.5 w-1.5 rounded-full bg-[#f97316]" />}
     </Link>
@@ -74,7 +74,7 @@ function SidebarInner({ userName, userImage, credits = 0, isAdmin }: SidebarProp
         <Image src="/logo.png" alt="Logo" width={32} height={32} className="rounded-lg shrink-0" />
         <div>
           <p className="text-[13px] font-bold leading-tight text-white">Clube do Autor</p>
-          <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-[#2a3a56]">IA Platform</p>
+          <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-[#7080a0]">IA Platform</p>
         </div>
       </div>
 
@@ -98,7 +98,7 @@ function SidebarInner({ userName, userImage, credits = 0, isAdmin }: SidebarProp
             <p className="text-[14px] font-black leading-none text-white tabular-nums">
               {credits.toLocaleString('pt-BR')}
             </p>
-            <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-[#2a3a56] mt-0.5">Créditos</p>
+            <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-[#7080a0] mt-0.5">Créditos</p>
           </div>
 
           {/* Botão "+" laranja */}
@@ -115,7 +115,7 @@ function SidebarInner({ userName, userImage, credits = 0, isAdmin }: SidebarProp
         {/* Novo Livro */}
         <Link
           href="/dashboard/criar"
-          className="flex items-center gap-2.5 rounded-2xl px-3 py-2.5 text-[13px] font-semibold text-[#6b7a99] transition hover:text-white"
+          className="flex items-center gap-2.5 rounded-2xl px-3 py-2.5 text-[13px] font-semibold text-[#a0b0c8] transition hover:text-white"
           style={{ background: '#0d1220', border: '1px solid #131e30' }}
         >
           <span
@@ -150,12 +150,12 @@ function SidebarInner({ userName, userImage, credits = 0, isAdmin }: SidebarProp
           <Avatar name={userName} image={userImage} />
           <div className="min-w-0 flex-1">
             <p className="truncate text-[12px] font-semibold text-[#8896b0]">{userName ?? 'Usuário'}</p>
-            <p className="text-[10px] text-[#2a3a56]">Membro ativo</p>
+            <p className="text-[10px] text-[#7080a0]">Membro ativo</p>
           </div>
           <button
             onClick={() => signOut({ callbackUrl: '/' })}
             title="Sair"
-            className="grid h-7 w-7 shrink-0 place-items-center rounded-lg text-[#2a3a56] transition hover:bg-white/10 hover:text-white"
+            className="grid h-7 w-7 shrink-0 place-items-center rounded-lg text-[#7080a0] transition hover:bg-white/10 hover:text-white"
           >
             <LogOut className="size-3.5" />
           </button>
@@ -215,7 +215,7 @@ export function BottomNav() {
       {items.map(({ href, icon: Icon, label, highlight }) => (
         <Link key={href} href={href} className={cn(
           'flex flex-1 flex-col items-center gap-1 py-3 text-[10px] font-medium transition-colors',
-          highlight ? 'text-[#00e5c3]' : pathname === href ? 'text-white' : 'text-[#2a3a56]',
+          highlight ? 'text-[#00e5c3]' : pathname === href ? 'text-white' : 'text-[#7080a0]',
         )}>
           <Icon className="size-5" />
           {label}

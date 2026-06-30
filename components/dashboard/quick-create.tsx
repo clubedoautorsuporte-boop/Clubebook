@@ -19,7 +19,7 @@ export function QuickCreate() {
           readOnly
           onClick={() => router.push('/dashboard/criar')}
           placeholder="Sobre qual tema você quer criar um ebook?"
-          className="flex-1 cursor-pointer rounded-xl border border-[#1c2438] bg-[#080b14] px-4 py-2.5 text-sm text-[#3a4a66] placeholder:text-[#3a4a66] focus:outline-none"
+          className="flex-1 cursor-pointer rounded-xl border border-[#1c2438] bg-[#080b14] px-4 py-2.5 text-sm text-[#8896b0] placeholder:text-[#8896b0] focus:outline-none"
         />
         <button
           onClick={() => router.push('/dashboard/criar')}
@@ -29,7 +29,7 @@ export function QuickCreate() {
           <ArrowRight className="size-3.5" />
         </button>
       </div>
-      <p className="mt-2 text-[10px] text-[#3a4a66]">Entrega em ~47 min • PDF + DOCX + EPUB • Direitos 100% seus</p>
+      <p className="mt-2 text-[10px] text-[#8896b0]">Entrega em ~47 min • PDF + DOCX + EPUB • Direitos 100% seus</p>
     </div>
   )
 }

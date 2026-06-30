@@ -50,21 +50,21 @@ export default async function PepperSetupPage() {
     <div className="px-5 pt-6 pb-16 md:px-8 max-w-3xl">
       <div className="mb-6">
         <h1 className="text-xl font-bold text-white">🔧 Setup Pepper API</h1>
-        <p className="text-sm text-[#6b7a99] mt-1">Copie os offer hashes e cole no .env.local e na Vercel</p>
+        <p className="text-sm text-[#a0b0c8] mt-1">Copie os offer hashes e cole no .env.local e na Vercel</p>
       </div>
 
       {error ? (
         <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-5">
           <p className="text-sm font-semibold text-red-400">Erro: {error}</p>
           <div className="mt-4 rounded-xl bg-[#080b14] border border-[#1c2438] p-4">
-            <p className="text-xs text-[#6b7a99] mb-2">Adicione no .env.local:</p>
+            <p className="text-xs text-[#a0b0c8] mb-2">Adicione no .env.local:</p>
             <code className="text-xs text-[#00e5c3]">PEPPER_API_TOKEN=seu_token_da_pepper</code>
-            <p className="text-[11px] text-[#3a4a66] mt-2">Token em: app.pepper.com.br → Configurações → API → Copiar token</p>
+            <p className="text-[11px] text-[#8896b0] mt-2">Token em: app.pepper.com.br → Configurações → API → Copiar token</p>
           </div>
         </div>
       ) : products.length === 0 ? (
         <div className="rounded-2xl border border-[#1c2438] bg-[#0b0f1c] p-8 text-center">
-          <p className="text-[#6b7a99]">Nenhum produto encontrado na sua conta Pepper.</p>
+          <p className="text-[#a0b0c8]">Nenhum produto encontrado na sua conta Pepper.</p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -72,7 +72,7 @@ export default async function PepperSetupPage() {
             <div key={product.hash} className="rounded-2xl border border-[#1c2438] bg-[#0b0f1c] overflow-hidden">
               <div className="border-b border-[#1c2438] bg-[#080b14] px-5 py-3.5">
                 <p className="font-bold text-white">{product.name}</p>
-                <p className="text-[11px] text-[#3a4a66] font-mono mt-0.5">Product hash: {product.hash}</p>
+                <p className="text-[11px] text-[#8896b0] font-mono mt-0.5">Product hash: {product.hash}</p>
               </div>
 
               {product.offers?.length > 0 ? (
@@ -81,18 +81,18 @@ export default async function PepperSetupPage() {
                     <div key={offer.hash} className="flex items-center justify-between gap-4 px-5 py-4">
                       <div className="min-w-0">
                         <p className="text-sm font-semibold text-white">{offer.title}</p>
-                        <p className="text-xs text-[#6b7a99] mt-0.5">
+                        <p className="text-xs text-[#a0b0c8] mt-0.5">
                           R$ {(offer.price / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                           {' · '}
-                          <span className="text-[#3a4a66]">Status: {offer.status}</span>
+                          <span className="text-[#8896b0]">Status: {offer.status}</span>
                         </p>
                         <div className="mt-2 flex items-center gap-2 rounded-lg bg-[#080b14] border border-[#1c2438] px-3 py-1.5">
-                          <span className="text-[11px] text-[#6b7a99]">offer_hash:</span>
+                          <span className="text-[11px] text-[#a0b0c8]">offer_hash:</span>
                           <code className="text-[11px] font-mono font-bold text-[#00e5c3]">{offer.hash}</code>
                         </div>
                       </div>
                       <div className="shrink-0 text-right">
-                        <p className="text-[10px] text-[#3a4a66] mb-1">Copie para o .env:</p>
+                        <p className="text-[10px] text-[#8896b0] mb-1">Copie para o .env:</p>
                         <code className="block text-[10px] text-[#4f7fff] bg-[#4f7fff08] rounded px-2 py-1">
                           PEPPER_OFFER_HASH_XXK={offer.hash}
                         </code>
@@ -101,7 +101,7 @@ export default async function PepperSetupPage() {
                   ))}
                 </div>
               ) : (
-                <p className="px-5 py-4 text-sm text-[#3a4a66]">Nenhuma oferta encontrada neste produto.</p>
+                <p className="px-5 py-4 text-sm text-[#8896b0]">Nenhuma oferta encontrada neste produto.</p>
               )}
             </div>
           ))}
