@@ -99,16 +99,25 @@ function SidebarInner({ userName, userImage, userEmail, credits = 0, isAdmin }: 
       {/* Brand */}
       <div className="flex flex-col items-center gap-3 px-5 py-6" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
         <div className="relative">
-          <div className="absolute inset-0 rounded-2xl blur-2xl opacity-70"
+          {/* Outer glow ring */}
+          <div className="absolute -inset-2 rounded-3xl opacity-60 blur-xl"
             style={{ background: 'linear-gradient(135deg,#4f7fff,#a855f7)' }} />
-          <div className="relative h-16 w-16 overflow-hidden rounded-2xl"
-            style={{ background: 'linear-gradient(135deg,#0d1a3a,#1a0d40)', border: '1px solid rgba(79,127,255,0.35)' }}>
-            <Image src="/logo.png" alt="Logo" fill className="object-contain p-2" />
+          {/* Inner glow ring */}
+          <div className="absolute -inset-[2px] rounded-2xl"
+            style={{ background: 'linear-gradient(135deg,#4f7fff,#a855f7)', padding: '1px' }}>
+            <div className="h-full w-full rounded-2xl" style={{ background: '#080e24' }} />
+          </div>
+          {/* Logo container */}
+          <div className="relative h-[72px] w-[72px] overflow-hidden rounded-2xl bg-white">
+            <Image src="/logo.png" alt="Logo" fill className="object-contain p-1.5" />
           </div>
         </div>
         <div className="text-center">
-          <p className="text-[14px] font-bold leading-tight text-white">Clube do Autor</p>
-          <p className="mt-0.5 text-[9px] font-bold uppercase tracking-[0.2em] text-[#4f7fff]">IA Platform</p>
+          <p className="text-[15px] font-extrabold leading-tight tracking-tight text-white">Clube do Autor</p>
+          <p className="mt-0.5 text-[9px] font-black uppercase tracking-[0.25em]"
+            style={{ background: 'linear-gradient(90deg,#4f7fff,#a855f7)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+            IA Platform
+          </p>
         </div>
       </div>
 
