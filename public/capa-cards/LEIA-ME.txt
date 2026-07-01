@@ -1,0 +1,31 @@
+PASTA DE IMAGENS — COVER STUDIO
+================================
+
+Coloque aqui as imagens dos cards de seleção de capa.
+Formatos aceitos: JPG, PNG, WEBP
+Tamanho recomendado: 600x400px (proporção 3:2)
+
+📁 estilos/
+  artistico.jpg      → Card "Artístico"
+  realista.jpg       → Card "Realista"
+  minimalista.jpg    → Card "Minimalista"
+  ilustrado.jpg      → Card "Ilustrado"
+  abstrato.jpg       → Card "Abstrato"
+  classico.jpg       → Card "Clássico"
+
+📁 cores/
+  quentes.jpg        → Card "Cores Quentes" (vermelho, laranja, dourado)
+  frias.jpg          → Card "Cores Frias" (azul, lilás, turquesa)
+  escuro.jpg         → Card "Escuro e Misterioso"
+  natural.jpg        → Card "Natural e Terroso"
+  vibrante.jpg       → Card "Vibrante e Colorido"
+  neutro.jpg         → Card "Neutro e Elegante"
+
+📁 elementos/
+  pessoa.jpg         → Card "Pessoa / Personagem"
+  paisagem.jpg       → Card "Paisagem / Cenário"
+  objeto.jpg         → Card "Objeto Simbólico"
+  abstrato.jpg       → Card "Formas Abstratas"
+  tipografia.jpg     → Card "Apenas Tipografia"
+
+Enquanto as imagens não estiverem na pasta, os cards mostram gradientes de cor.
