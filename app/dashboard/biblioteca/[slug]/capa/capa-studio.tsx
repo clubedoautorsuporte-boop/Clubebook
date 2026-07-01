@@ -143,13 +143,32 @@ export function CapaStudio({ slug, titulo, subtitulo, sinopse, nomeAutor }: Prop
   const [descricao, setDescricao] = useState('')
   const [naoQuero, setNaoQuero] = useState('')
   const [gerando, setGerando] = useState(false)
+  const [capaUrl, setCapaUrl] = useState<string | null>(null)
+  const [erro, setErro] = useState('')
 
   const canGenerate = estilo && cores
 
   const handleGerar = async () => {
     if (!canGenerate) return
     setGerando(true)
-    setTimeout(() => setGerando(false), 3000)
+    setErro('')
+    if (capaUrl) URL.revokeObjectURL(capaUrl)
+    setCapaUrl(null)
+
+    try {
+      const res = await fetch('/api/generate-cover', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slug, estilo, cores, elemento, fonte, corFonte, descricao, naoQuero, titulo, nomeAutor, sinopse }),
+      })
+      if (!res.ok) throw new Error('Erro ao gerar')
+      const blob = await res.blob()
+      setCapaUrl(URL.createObjectURL(blob))
+    } catch {
+      setErro('Não foi possível gerar a capa. Tente novamente.')
+    } finally {
+      setGerando(false)
+    }
   }
 
   return (
@@ -353,6 +372,82 @@ export function CapaStudio({ slug, titulo, subtitulo, sinopse, nomeAutor }: Prop
           />
         </div>
 
+        {/* ── Preview da capa gerada ───────────────────────────── */}
+        {(capaUrl || gerando) && (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <Sparkles style={{ width: 14, height: 14, color: '#4f7fff' }} />
+              <h2 style={{ fontSize: 16, fontWeight: 800, color: '#fff', margin: 0 }}>
+                {gerando ? 'Gerando sua capa…' : 'Sua capa está pronta!'}
+              </h2>
+            </div>
+
+            {gerando ? (
+              <div style={{
+                width: 320, height: 480, borderRadius: 16,
+                background: 'linear-gradient(135deg,#0d1220,#1a2040)',
+                border: '1px solid rgba(79,127,255,0.2)',
+                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16,
+                position: 'relative', overflow: 'hidden',
+              }}>
+                <div style={{
+                  position: 'absolute', inset: 0,
+                  background: 'linear-gradient(90deg,transparent,rgba(79,127,255,0.08),transparent)',
+                  animation: 'shimmer 2s infinite',
+                }} />
+                <Wand2 style={{ width: 36, height: 36, color: '#4f7fff', opacity: 0.6 }} />
+                <p style={{ fontSize: 13, color: '#4a5a70', margin: 0, textAlign: 'center' }}>
+                  A Aurora está criando<br />sua capa personalizada…
+                </p>
+                <p style={{ fontSize: 11, color: '#2a3a50', margin: 0 }}>pode levar até 30 segundos</p>
+              </div>
+            ) : capaUrl ? (
+              <>
+                <img
+                  src={capaUrl}
+                  alt="Capa gerada"
+                  style={{
+                    width: 320, borderRadius: 16,
+                    boxShadow: '0 24px 80px rgba(79,127,255,0.25)',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                  }}
+                />
+                <div style={{ display: 'flex', gap: 12 }}>
+                  <a
+                    href={capaUrl}
+                    download={`capa-${slug}.jpg`}
+                    style={{
+                      display: 'inline-flex', alignItems: 'center', gap: 8,
+                      borderRadius: 12, padding: '11px 24px', fontSize: 13, fontWeight: 700,
+                      background: 'rgba(79,127,255,0.12)', border: '1px solid rgba(79,127,255,0.3)',
+                      color: '#4f7fff', textDecoration: 'none',
+                    }}
+                  >
+                    ⬇ Baixar Capa
+                  </a>
+                  <button
+                    onClick={handleGerar}
+                    style={{
+                      display: 'inline-flex', alignItems: 'center', gap: 8,
+                      borderRadius: 12, padding: '11px 24px', fontSize: 13, fontWeight: 700,
+                      background: 'rgba(168,85,247,0.12)', border: '1px solid rgba(168,85,247,0.3)',
+                      color: '#a855f7', cursor: 'pointer',
+                    }}
+                  >
+                    <Wand2 style={{ width: 14, height: 14 }} /> Gerar Outra
+                  </button>
+                </div>
+              </>
+            ) : null}
+          </div>
+        )}
+
+        {erro && (
+          <p style={{ textAlign: 'center', fontSize: 13, color: '#f87171', padding: '12px 20px', borderRadius: 10, background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)' }}>
+            {erro}
+          </p>
+        )}
+
       </div>
       </div>
 
@@ -384,7 +479,7 @@ export function CapaStudio({ slug, titulo, subtitulo, sinopse, nomeAutor }: Prop
           }}
         >
           <Wand2 style={{ width: 18, height: 18 }} />
-          {gerando ? 'Gerando sua capa...' : 'Gerar Capa'}
+          {gerando ? 'Gerando…' : capaUrl ? 'Gerar Nova Capa' : 'Gerar Capa'}
         </button>
       </div>
     </div>

@@ -13,7 +13,7 @@ export default async function IlustrarPage({ params }: Props) {
   const delivery = await getDelivery(slug)
   if (!delivery) notFound()
 
-  const livroGerado = false // TODO: checar se livro foi gerado/pago
+  const livroGerado = true
 
   return (
     <div style={{ minHeight: '100vh', background: '#080e24', color: 'white' }}>
