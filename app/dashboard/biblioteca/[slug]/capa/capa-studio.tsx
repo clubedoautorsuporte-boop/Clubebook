@@ -16,21 +16,21 @@ interface Props {
 /* ── Dados ───────────────────────────────────────────────────────── */
 
 const ESTILOS = [
-  { id: 'artistico',   label: 'Artístico',    desc: 'Pintura e expressão artística',    img: '/capa-cards/estilos/artistico.jpg',   gradient: 'linear-gradient(135deg,#1a0533,#6b21a8,#c026d3)' },
-  { id: 'realista',    label: 'Realista',      desc: 'Fotográfico e realista',           img: '/capa-cards/estilos/realista.jpg',    gradient: 'linear-gradient(135deg,#0c1a2e,#1e3a5f,#2563eb)' },
-  { id: 'minimalista', label: 'Minimalista',   desc: 'Limpo e minimalista',              img: '/capa-cards/estilos/minimalista.jpg', gradient: 'linear-gradient(135deg,#111827,#1f2937,#374151)' },
-  { id: 'ilustrado',   label: 'Ilustrado',     desc: 'Ilustração artística',             img: '/capa-cards/estilos/ilustrado.jpg',   gradient: 'linear-gradient(135deg,#064e3b,#065f46,#10b981)' },
-  { id: 'abstrato',    label: 'Abstrato',      desc: 'Formas e movimento',               img: '/capa-cards/estilos/abstrato.jpg',    gradient: 'linear-gradient(135deg,#1e1b4b,#3730a3,#6366f1)' },
-  { id: 'classico',    label: 'Clássico',      desc: 'Elegante e tradicional',           img: '/capa-cards/estilos/classico.jpg',    gradient: 'linear-gradient(135deg,#1c0a00,#78350f,#d97706)' },
+  { id: 'artistico',   label: 'Artístico',    desc: 'Pintura e expressão artística',    img: '/capa-cards/estilos/Artistico.webp',    gradient: 'linear-gradient(135deg,#1a0533,#6b21a8,#c026d3)' },
+  { id: 'realista',    label: 'Realista',      desc: 'Fotográfico e realista',           img: '/capa-cards/estilos/Realismo.webp',     gradient: 'linear-gradient(135deg,#0c1a2e,#1e3a5f,#2563eb)' },
+  { id: 'minimalista', label: 'Minimalista',   desc: 'Limpo e minimalista',              img: '/capa-cards/estilos/Minimalista.webp',  gradient: 'linear-gradient(135deg,#111827,#1f2937,#374151)' },
+  { id: 'ilustrado',   label: 'Ilustrado',     desc: 'Ilustração artística',             img: '/capa-cards/estilos/Ilustrado.webp',    gradient: 'linear-gradient(135deg,#064e3b,#065f46,#10b981)' },
+  { id: 'abstrato',    label: 'Abstrato',      desc: 'Formas e movimento',               img: '/capa-cards/estilos/Abstrato.webp',     gradient: 'linear-gradient(135deg,#1e1b4b,#3730a3,#6366f1)' },
+  { id: 'classico',    label: 'Clássico',      desc: 'Elegante e tradicional',           img: '/capa-cards/estilos/Classico.webp',     gradient: 'linear-gradient(135deg,#1c0a00,#78350f,#d97706)' },
 ]
 
 const CORES = [
-  { id: 'quentes',  label: 'Cores Quentes',       desc: 'Vermelho, laranja, dourado',    img: '/capa-cards/cores/quentes.jpg',  gradient: 'linear-gradient(135deg,#7c2d12,#dc2626,#f59e0b)' },
-  { id: 'frias',    label: 'Cores Frias',          desc: 'Azul, lilás, turquesa',         img: '/capa-cards/cores/frias.jpg',    gradient: 'linear-gradient(135deg,#0c4a6e,#0891b2,#818cf8)' },
-  { id: 'escuro',   label: 'Escuro e Misterioso',  desc: 'Preto, roxo escuro, carmesim', img: '/capa-cards/cores/escuro.jpg',   gradient: 'linear-gradient(135deg,#0f0014,#3b0764,#7f1d1d)' },
-  { id: 'natural',  label: 'Natural e Terroso',    desc: 'Verde, marrom, bege',           img: '/capa-cards/cores/natural.jpg',  gradient: 'linear-gradient(135deg,#14532d,#3f6212,#78350f)' },
-  { id: 'vibrante', label: 'Vibrante e Colorido',  desc: 'Brilhante e multicolorido',    img: '/capa-cards/cores/vibrante.jpg', gradient: 'linear-gradient(135deg,#7c3aed,#db2777,#f59e0b)' },
-  { id: 'neutro',   label: 'Neutro e Elegante',    desc: 'Branco, cinza, prateado',      img: '/capa-cards/cores/neutro.jpg',   gradient: 'linear-gradient(135deg,#1f2937,#4b5563,#9ca3af)' },
+  { id: 'quentes',  label: 'Cores Quentes',       desc: 'Vermelho, laranja, dourado',    img: '/capa-cards/cores/Cores%20Quentes.webp',          gradient: 'linear-gradient(135deg,#7c2d12,#dc2626,#f59e0b)' },
+  { id: 'frias',    label: 'Cores Frias',          desc: 'Azul, lilás, turquesa',         img: '/capa-cards/cores/Cores%20Frias.webp',            gradient: 'linear-gradient(135deg,#0c4a6e,#0891b2,#818cf8)' },
+  { id: 'escuro',   label: 'Escuro e Misterioso',  desc: 'Preto, roxo escuro, carmesim', img: '/capa-cards/cores/Escuro%20e%20Misterioso.webp',  gradient: 'linear-gradient(135deg,#0f0014,#3b0764,#7f1d1d)' },
+  { id: 'natural',  label: 'Natural e Terroso',    desc: 'Verde, marrom, bege',           img: '/capa-cards/cores/Natural.webp',                  gradient: 'linear-gradient(135deg,#14532d,#3f6212,#78350f)' },
+  { id: 'vibrante', label: 'Vibrante e Colorido',  desc: 'Brilhante e multicolorido',    img: '/capa-cards/cores/Vibrante%20e%20Colorido.webp',  gradient: 'linear-gradient(135deg,#7c3aed,#db2777,#f59e0b)' },
+  { id: 'neutro',   label: 'Neutro e Elegante',    desc: 'Branco, cinza, prateado',      img: '/capa-cards/cores/Neutro%20e%20Elegante.webp',    gradient: 'linear-gradient(135deg,#1f2937,#4b5563,#9ca3af)' },
 ]
 
 const ELEMENTOS = [
