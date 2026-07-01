@@ -250,7 +250,7 @@ function BookCard({ row }: { row: EbookRow }) {
             </span>
           )}
         </div>
-        <Link href={`/dashboard/biblioteca/${row.slug}`}
+        <Link href={`/dashboard/projetos/${row.slug}`}
           className="flex items-center justify-center gap-1.5 rounded-xl py-2 text-[12px] font-bold text-white transition-all hover:opacity-90 hover:scale-[1.02]"
           style={{ background: `linear-gradient(135deg, ${color}cc, ${color})`, boxShadow: `0 4px 16px ${color}30` }}>
           Ver livro <ChevronRight className="size-3.5" />
