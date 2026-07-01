@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 import { ArrowLeft, Sparkles, Wand2, CheckCircle2 } from 'lucide-react'
+import { PublicationPipeline } from '@/components/publication-pipeline'
 
 interface Props {
   slug: string
@@ -173,7 +173,15 @@ export function CapaStudio({ slug, titulo, subtitulo, sinopse, nomeAutor }: Prop
         </div>
       </div>
 
-      <div style={{ maxWidth: 860, margin: '0 auto', padding: '36px 20px', display: 'flex', flexDirection: 'column', gap: 48 }}>
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '36px 20px', display: 'flex', gap: 24, alignItems: 'flex-start' }}>
+
+      {/* ── Pipeline sidebar ─────────────────────────────────────── */}
+      <div style={{ width: 220, flexShrink: 0, position: 'sticky', top: 70 }} className="hidden lg:block">
+        <PublicationPipeline slug={slug} />
+      </div>
+
+      {/* ── Conteúdo principal ───────────────────────────────────── */}
+      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 48 }}>
 
         {/* ── Hero ─────────────────────────────────────────────── */}
         <div style={{ textAlign: 'center' }}>
@@ -352,7 +360,8 @@ export function CapaStudio({ slug, titulo, subtitulo, sinopse, nomeAutor }: Prop
           />
         </div>
 
-      </div>
+      </div>{/* fim conteúdo principal */}
+      </div>{/* fim flex row */}
 
       {/* ── Botão fixo no bottom ──────────────────────────────── */}
       <div style={{
