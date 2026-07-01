@@ -19,7 +19,7 @@ const PIPELINE = [
   { icon: BookMarked,   label: 'Registro de ISBN',    status: 'a-fazer', href: 'isbn' },
   { icon: FileCheck,    label: 'Ficha Catalográfica', status: 'a-fazer', href: null   },
   { icon: Megaphone,    label: 'Kit de Marketing',    status: 'a-fazer', href: 'marketing' },
-  { icon: Rocket,       label: 'Plano de Lançamento', status: 'a-fazer', href: null   },
+  { icon: Rocket,       label: 'Plano de Lançamento', status: 'a-fazer', href: 'lancamento' },
   { icon: Headphones,   label: 'Audiobook',           status: 'a-fazer', href: 'audiobook' },
   { icon: ShoppingCart, label: 'Vender',              status: 'a-fazer', href: null   },
   { icon: Languages,    label: 'Tradução',            status: 'a-fazer', href: 'traducao' },
