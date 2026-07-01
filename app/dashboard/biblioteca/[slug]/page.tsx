@@ -3,11 +3,12 @@ import Link from 'next/link'
 import { BookOpen, Download, Sparkles, CheckCircle, ArrowLeft } from 'lucide-react'
 import { getDelivery } from '@/lib/delivery-store'
 import { CheckoutButton } from '@/components/checkout-button'
-
-const SLUG_RE = /^[a-f0-9]{32}$/
 import { ChaptersList, FaqList, PricingBlock } from '@/app/receiver/[slug]/receiver-client'
 import HolographicCard from '@/components/ui/holographic-card'
 import { EditorialPlan } from '@/app/receiver/[slug]/editorial-plan'
+import { PublicationPipeline } from '@/components/publication-pipeline'
+
+const SLUG_RE = /^[a-f0-9]{32}$/
 import { SERVICOS } from '@/lib/servicos-data'
 
 type Props = { params: Promise<{ slug: string }> }
@@ -40,7 +41,10 @@ export default async function BibliotecaLivroPage({ params }: Props) {
         </a>
       </div>
 
-      <div className="mx-auto max-w-4xl px-5 space-y-7">
+      <div className="mx-auto max-w-6xl px-5">
+      <div className="flex gap-6 items-start">
+      {/* ── Coluna principal ─────────────────────────────────────── */}
+      <div className="flex-1 min-w-0 space-y-7">
 
         {/* ── Hero ─────────────────────────────────────────────────── */}
         <div className="rounded-2xl overflow-hidden"
@@ -179,7 +183,15 @@ export default async function BibliotecaLivroPage({ params }: Props) {
         {/* ── FAQ ──────────────────────────────────────────────────── */}
         <FaqList />
 
+      </div>{/* fim coluna principal */}
+
+      {/* ── Pipeline sidebar ─────────────────────────────────────── */}
+      <div className="hidden lg:block w-64 shrink-0 sticky top-6">
+        <PublicationPipeline />
       </div>
+
+      </div>{/* fim flex */}
+      </div>{/* fim max-w-6xl */}
     </div>
   )
 }
