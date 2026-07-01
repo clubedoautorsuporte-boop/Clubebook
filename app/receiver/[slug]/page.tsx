@@ -140,7 +140,7 @@ export default async function ReceiverPage({ params }: Props) {
         )}
 
         {/* ── Planejamento Editorial ──────────────────────────────────── */}
-        <EditorialPlan plan={plan} />
+        <EditorialPlan plan={plan} slug={slug} />
 
         {/* ── Capítulos ───────────────────────────────────────────────── */}
         <div>

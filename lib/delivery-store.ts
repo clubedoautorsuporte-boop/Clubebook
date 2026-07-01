@@ -39,6 +39,13 @@ export async function createDelivery(data: {
   return slug
 }
 
+export async function updateDeliveryPlan(slug: string, planJson: BriefingPlan): Promise<void> {
+  await prisma.delivery.update({
+    where: { slug },
+    data: { planJson: planJson as object },
+  })
+}
+
 export async function getDelivery(slug: string): Promise<DeliveryRecord | null> {
   const d = await prisma.delivery.findUnique({ where: { slug } })
   if (!d) return null

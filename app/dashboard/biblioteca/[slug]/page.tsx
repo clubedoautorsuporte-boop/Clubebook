@@ -120,7 +120,7 @@ export default async function BibliotecaLivroPage({ params }: Props) {
         )}
 
         {/* ── Planejamento Editorial ───────────────────────────────── */}
-        <EditorialPlan plan={plan} />
+        <EditorialPlan plan={plan} slug={slug} />
 
         {/* ── Capítulos ────────────────────────────────────────────── */}
         <div>
