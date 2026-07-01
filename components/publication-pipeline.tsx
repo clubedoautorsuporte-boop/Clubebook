@@ -14,7 +14,7 @@ import {
 const PIPELINE = [
   { icon: FileText,     label: 'Livro Escrito',      status: 'feito',   href: ''     },
   { icon: Palette,      label: 'Capa do Livro',       status: 'a-fazer', href: 'capa' },
-  { icon: ImageIcon,    label: 'Ilustrar Livro',      status: 'a-fazer', href: null   },
+  { icon: ImageIcon,    label: 'Ilustrar Livro',      status: 'a-fazer', href: 'ilustrar' },
   { icon: Globe,        label: 'Preparar Publicação', status: 'a-fazer', href: null   },
   { icon: BookMarked,   label: 'Registro de ISBN',    status: 'a-fazer', href: null   },
   { icon: FileCheck,    label: 'Ficha Catalográfica', status: 'a-fazer', href: null   },
