@@ -18,7 +18,7 @@ const PIPELINE = [
   { icon: Globe,        label: 'Preparar Publicação', status: 'a-fazer', href: 'publicacao' },
   { icon: BookMarked,   label: 'Registro de ISBN',    status: 'a-fazer', href: 'isbn' },
   { icon: FileCheck,    label: 'Ficha Catalográfica', status: 'a-fazer', href: null   },
-  { icon: Megaphone,    label: 'Kit de Marketing',    status: 'a-fazer', href: null   },
+  { icon: Megaphone,    label: 'Kit de Marketing',    status: 'a-fazer', href: 'marketing' },
   { icon: Rocket,       label: 'Plano de Lançamento', status: 'a-fazer', href: null   },
   { icon: Headphones,   label: 'Audiobook',           status: 'a-fazer', href: null   },
   { icon: ShoppingCart, label: 'Vender',              status: 'a-fazer', href: null   },
