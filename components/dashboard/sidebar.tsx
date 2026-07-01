@@ -97,24 +97,13 @@ function SidebarInner({ userName, userImage, userEmail, credits = 0, isAdmin }: 
       }}
     >
       {/* Brand */}
-      <div className="flex flex-col items-center gap-3 px-5 py-6" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-        <div className="relative">
-          {/* Outer glow ring */}
-          <div className="absolute -inset-2 rounded-3xl opacity-60 blur-xl"
-            style={{ background: 'linear-gradient(135deg,#4f7fff,#a855f7)' }} />
-          {/* Inner glow ring */}
-          <div className="absolute -inset-[2px] rounded-2xl"
-            style={{ background: 'linear-gradient(135deg,#4f7fff,#a855f7)', padding: '1px' }}>
-            <div className="h-full w-full rounded-2xl" style={{ background: '#080e24' }} />
-          </div>
-          {/* Logo container */}
-          <div className="relative h-[72px] w-[72px] overflow-hidden rounded-2xl bg-white">
-            <Image src="/logo.png" alt="Logo" fill className="object-contain p-1.5" />
-          </div>
+      <div className="flex flex-col items-center gap-2 px-5 py-6" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+        <div className="relative w-[90px] h-[90px]">
+          <Image src="/logo.png" alt="Logo" fill className="object-contain" />
         </div>
         <div className="text-center">
           <p className="text-[15px] font-extrabold leading-tight tracking-tight text-white">Clube do Autor</p>
-          <p className="mt-0.5 text-[9px] font-black uppercase tracking-[0.25em]"
+          <p className="mt-0.5 text-[10px] font-bold tracking-[0.2em]"
             style={{ background: 'linear-gradient(90deg,#4f7fff,#a855f7)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
             IA Platform
           </p>
