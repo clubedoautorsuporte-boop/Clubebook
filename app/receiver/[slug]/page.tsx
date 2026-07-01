@@ -5,6 +5,7 @@ import type { Metadata } from 'next'
 import { getDelivery } from '@/lib/delivery-store'
 import { ChaptersList, FaqList, PricingBlock } from './receiver-client'
 import HolographicCard from '@/components/ui/holographic-card'
+import { EditorialPlan } from './editorial-plan'
 
 const SLUG_RE = /^[a-f0-9]{32}$/
 
@@ -137,6 +138,9 @@ export default async function ReceiverPage({ params }: Props) {
             </p>
           </div>
         )}
+
+        {/* ── Planejamento Editorial ──────────────────────────────────── */}
+        <EditorialPlan plan={plan} />
 
         {/* ── Capítulos ───────────────────────────────────────────────── */}
         <div>

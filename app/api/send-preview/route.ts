@@ -148,6 +148,11 @@ export async function POST(req: Request) {
     capitulos: plan.capitulos,
     promessa: plan.promessa,
     mensagem_final: plan.mensagem_final || '',
+    premissa: plan.premissa,
+    publico_alvo: plan.publico_alvo,
+    tom_estilo: plan.tom_estilo,
+    temas_centrais: plan.temas_centrais,
+    sinopse: plan.sinopse,
   }
 
   let emailSent = false

@@ -46,13 +46,18 @@ export async function POST(req: Request) {
       model: deepseek('deepseek-chat'),
       system:
         'Você é um especialista em criação de ebooks best-sellers. Responda APENAS com JSON válido, sem markdown, sem texto extra.',
-      prompt: `Crie um planejamento completo de ebook para o tema: "${tema}".
+      prompt: `Crie um planejamento editorial completo de livro para o tema: "${tema}".
 Nome do autor: "${nome || 'Autor'}".
 
 Retorne APENAS este JSON:
 {
   "titulo": "título criativo do livro (máx 80 chars)",
   "subtitulo": "subtítulo persuasivo (máx 100 chars)",
+  "premissa": "parágrafo de 3-4 frases explicando a proposta central do livro, o que ele oferece ao leitor e por que é único (máx 500 chars)",
+  "publico_alvo": "parágrafo de 3-4 frases descrevendo quem é o leitor ideal, faixa etária, interesses, o que buscam e por que este livro é para eles (máx 400 chars)",
+  "tom_estilo": "parágrafo de 3-4 frases descrevendo o tom narrativo, estilo de escrita, ritmo, referências estilísticas e como o leitor vai se sentir lendo (máx 400 chars)",
+  "temas_centrais": ["tema central 1 com breve explicação (máx 100 chars)", "tema central 2", "tema central 3", "tema central 4", "tema central 5"],
+  "sinopse": "sinopse completa de 4-6 parágrafos narrando a jornada do livro capítulo a capítulo, revelando os arcos narrativos e o que o leitor vai descobrir (máx 1500 chars)",
   "capitulos": [
     {
       "numero": 1,
@@ -67,7 +72,7 @@ Retorne APENAS este JSON:
     }
   ],
   "promessa": "resultado transformador que o leitor vai obter (máx 150 chars)",
-  "mensagem_final": "3 parágrafos motivacionais em itálico parabenizando ${nome || 'o autor'} pelo projeto e incentivando a finalizar a compra. Mencione o tema '${tema}' e o nome '${nome || 'você'}'. (máx 900 chars)"
+  "mensagem_final": "3 parágrafos motivacionais parabenizando ${nome || 'o autor'} pelo projeto e incentivando a finalizar. Mencione o tema '${tema}' e o nome '${nome || 'você'}'. (máx 900 chars)"
 }
 
 REGRAS:
@@ -88,6 +93,13 @@ REGRAS:
     return Response.json({
       titulo: String(parsed.titulo).slice(0, 100),
       subtitulo: String(parsed.subtitulo || '').slice(0, 150),
+      premissa: String(parsed.premissa || '').slice(0, 500),
+      publico_alvo: String(parsed.publico_alvo || '').slice(0, 400),
+      tom_estilo: String(parsed.tom_estilo || '').slice(0, 400),
+      temas_centrais: Array.isArray(parsed.temas_centrais)
+        ? (parsed.temas_centrais as unknown[]).slice(0, 6).map((t) => String(t).slice(0, 120))
+        : [],
+      sinopse: String(parsed.sinopse || '').slice(0, 1500),
       capitulos: (parsed.capitulos as unknown[]).slice(0, 10).map((c: unknown, i: number) => {
         const cap = c as Record<string, unknown>
         const blocos = Array.isArray(cap.blocos)

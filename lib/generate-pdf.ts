@@ -14,6 +14,11 @@ export type BriefingPlan = {
   capitulos: CapituloDetalhado[]
   promessa: string
   mensagem_final: string
+  premissa?: string
+  publico_alvo?: string
+  tom_estilo?: string
+  temas_centrais?: string[]
+  sinopse?: string
 }
 
 const MARGIN = 72

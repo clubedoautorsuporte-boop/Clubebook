@@ -4,6 +4,7 @@ import { BookOpen, Download, Sparkles, CheckCircle, ArrowRight, ArrowLeft } from
 import { getDelivery } from '@/lib/delivery-store'
 import { ChaptersList, FaqList, PricingBlock } from '@/app/receiver/[slug]/receiver-client'
 import HolographicCard from '@/components/ui/holographic-card'
+import { EditorialPlan } from '@/app/receiver/[slug]/editorial-plan'
 
 const SLUG_RE = /^[a-f0-9]{32}$/
 
@@ -117,6 +118,9 @@ export default async function BibliotecaLivroPage({ params }: Props) {
             </p>
           </div>
         )}
+
+        {/* ── Planejamento Editorial ───────────────────────────────── */}
+        <EditorialPlan plan={plan} />
 
         {/* ── Capítulos ────────────────────────────────────────────── */}
         <div>
