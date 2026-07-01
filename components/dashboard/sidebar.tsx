@@ -97,7 +97,7 @@ function SidebarInner({ userName, userImage, userEmail, credits = 0, isAdmin }: 
       }}
     >
       {/* Brand */}
-      <div className="flex flex-col items-center px-5 pt-6 pb-5" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', gap: '10px' }}>
+      <div className="flex flex-col items-center px-5 pt-5 pb-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', gap: '4px' }}>
         <div className="relative w-[78px] h-[78px]" style={{ filter: 'drop-shadow(0 0 18px rgba(79,127,255,0.5))' }}>
           <Image src="/logo.webp" alt="Logo" fill className="object-contain"
             style={{ mixBlendMode: 'screen' }} />
