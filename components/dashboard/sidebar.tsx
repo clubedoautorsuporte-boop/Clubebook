@@ -99,7 +99,7 @@ function SidebarInner({ userName, userImage, userEmail, credits = 0, isAdmin }: 
       {/* Brand */}
       <div className="flex flex-col items-center gap-2 px-5 py-6" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
         <div className="relative w-[90px] h-[90px]">
-          <Image src="/logo.webp" alt="Logo" fill className="object-contain" />
+          <Image src="/logo.webp" alt="Logo" fill className="object-contain" style={{ mixBlendMode: 'multiply' }} />
         </div>
         <div className="text-center">
           <p className="text-[15px] font-extrabold leading-tight tracking-tight text-white">Clube do Autor</p>
