@@ -20,9 +20,9 @@ const PIPELINE = [
   { icon: FileCheck,    label: 'Ficha Catalográfica', status: 'a-fazer', href: null   },
   { icon: Megaphone,    label: 'Kit de Marketing',    status: 'a-fazer', href: 'marketing' },
   { icon: Rocket,       label: 'Plano de Lançamento', status: 'a-fazer', href: null   },
-  { icon: Headphones,   label: 'Audiobook',           status: 'a-fazer', href: null   },
+  { icon: Headphones,   label: 'Audiobook',           status: 'a-fazer', href: 'audiobook' },
   { icon: ShoppingCart, label: 'Vender',              status: 'a-fazer', href: null   },
-  { icon: Languages,    label: 'Tradução',            status: 'a-fazer', href: null   },
+  { icon: Languages,    label: 'Tradução',            status: 'a-fazer', href: 'traducao' },
 ]
 
 const total = PIPELINE.length
