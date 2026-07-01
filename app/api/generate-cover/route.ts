@@ -19,11 +19,11 @@ const CORES_MAP: Record<string, string> = {
 }
 
 const ELEMENTO_MAP: Record<string, string> = {
-  pessoa:     'featuring a dramatic human figure or character silhouette as the focal point',
-  paisagem:   'featuring a sweeping landscape or scenic environment as the main composition',
-  objeto:     'featuring a symbolic meaningful object as the focal point',
-  abstrato:   'featuring flowing geometric shapes textures and abstract visual forms',
-  tipografia: 'typography-driven design with creative text arrangement as the primary visual element',
+  pessoa:     'mysterious lone figure standing in a dark narrow alley wearing a long coat and hat, silhouette partially illuminated by soft foggy street lights, dramatic shadows, noir atmosphere, high contrast lighting, fine art style, shallow depth of field, moody color grading, 35mm cinematic look, space reserved at top for title typography, centered subject',
+  paisagem:   'vast mountain valley with golden sunrise breaking through thick clouds, layered mountain ranges fading into mist, atmospheric depth, ultra realistic lighting, dramatic sky, soft volumetric light rays, fine art matte painting style, highly detailed environment, peaceful yet powerful mood, wide composition with negative space for title',
+  objeto:     'glowing ornate mystical key floating in dark space, intricate engravings, subtle magical energy particles, deep black and navy background, soft volumetric glow, highly detailed metal textures, fantasy fine art style, centered composition, dramatic lighting, minimalistic but powerful symbolism, space reserved for title text',
+  abstrato:   'flowing organic shapes and layered translucent geometric forms, dynamic composition with sense of motion and depth, soft glow effects, modern surreal digital art style, high-end editorial design, balanced negative space for typography, futuristic aesthetic, ultra clean premium art direction',
+  tipografia: 'minimalist cover focused only on layout and negative space, elegant composition, black textured background with subtle grain, soft dramatic lighting, premium modern design style, luxury branding aesthetic, space optimized for strong visual impact, art-directed cover composition',
 }
 
 export async function POST(req: NextRequest) {
