@@ -187,7 +187,7 @@ export default async function BibliotecaLivroPage({ params }: Props) {
 
       {/* ── Pipeline sidebar ─────────────────────────────────────── */}
       <div className="hidden lg:block w-64 shrink-0 sticky top-6">
-        <PublicationPipeline />
+        <PublicationPipeline slug={slug} />
       </div>
 
       </div>{/* fim flex */}
