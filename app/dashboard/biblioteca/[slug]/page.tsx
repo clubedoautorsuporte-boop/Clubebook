@@ -1,7 +1,8 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { BookOpen, Download, Sparkles, CheckCircle, ArrowRight, ArrowLeft } from 'lucide-react'
+import { BookOpen, Download, Sparkles, CheckCircle, ArrowLeft } from 'lucide-react'
 import { getDelivery } from '@/lib/delivery-store'
+import { CheckoutButton } from '@/components/checkout-button'
 
 const SLUG_RE = /^[a-f0-9]{32}$/
 import { ChaptersList, FaqList, PricingBlock } from '@/app/receiver/[slug]/receiver-client'
@@ -88,11 +89,9 @@ export default async function BibliotecaLivroPage({ params }: Props) {
               A Aurora escreve cada capítulo por você — do início ao fim, no seu tom. Por apenas{' '}
               <strong className="text-white">R$ 49,99</strong>, pagamento único.
             </p>
-            <Link href="#gerar"
-              className="inline-flex items-center gap-2 rounded-xl px-6 py-3 text-[13px] font-bold text-white transition hover:opacity-90"
-              style={{ background: 'linear-gradient(135deg,#4f7fff,#a855f7)', boxShadow: '0 6px 24px rgba(79,127,255,0.35)' }}>
-              Gerar meu livro completo <ArrowRight className="size-4" />
-            </Link>
+            <CheckoutButton slug={slug} title={plan.titulo} amount={49.99}>
+              Gerar meu livro completo
+            </CheckoutButton>
           </div>
         </div>
 
@@ -154,11 +153,9 @@ export default async function BibliotecaLivroPage({ params }: Props) {
               <p className="text-[12px] mb-3" style={{ color: '#5a6a84' }}>
                 Gostou do começo? O livro completo tem {capitulos.length} capítulos nesse nível.
               </p>
-              <Link href="#gerar"
-                className="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-[12px] font-bold text-white transition hover:opacity-90"
-                style={{ background: 'linear-gradient(135deg,#4f7fff,#a855f7)', boxShadow: '0 4px 16px rgba(79,127,255,0.3)' }}>
-                Continuar lendo meu livro completo <ArrowRight className="size-3.5" />
-              </Link>
+              <CheckoutButton slug={slug} title={plan.titulo} amount={49.99}>
+                Continuar lendo meu livro completo
+              </CheckoutButton>
             </div>
           </div>
         )}
