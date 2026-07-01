@@ -1,133 +1,269 @@
+import { auth } from '@/auth'
+import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
-import { Library, ArrowRight, BookOpen, Layers, Tag } from 'lucide-react'
+import {
+  BookOpen, Plus, Sparkles, Clock, ChevronRight,
+  Layers, CheckCircle2, FileText, Lock,
+} from 'lucide-react'
+import type { BriefingPlan } from '@/lib/generate-pdf'
 
-const TEMPLATES = [
-  {
-    categoria: 'Finanças',
-    cor: '#f97316',
-    titulo: 'Livre das Dívidas: O Guia Definitivo',
-    publicoAlvo: 'Endividados que querem reorganizar finanças',
-    preco: 'R$37–97',
-    capitulos: ['Diagnóstico Financeiro: Onde Você Está Agora','Os 3 Tipos de Dívida e Como Priorizar','O Método Bola de Neve na Prática','Cortando Gastos Sem Sofrimento','Negociando com Credores: Scripts Prontos','Criando Sua Reserva de Emergência','Investindo Seu Primeiro Real','Mantendo o Controle para Sempre'],
-  },
-  {
-    categoria: 'Saúde',
-    cor: '#00e5c3',
-    titulo: 'Emagreça 10kg em 60 Dias com Ciência',
-    publicoAlvo: 'Pessoas que tentaram dietas e falharam',
-    preco: 'R$27–67',
-    capitulos: ['Por Que as Dietas Tradicionais Falham','A Ciência do Déficit Calórico Sem Fome','Os 10 Alimentos que Aceleram o Metabolismo','Plano Alimentar Semana a Semana','Exercícios para Quem Nunca Praticou','Hábitos de Sono que Emagrecem','Como Lidar com a Ansiedade Alimentar','Mantendo o Peso para Toda a Vida'],
-  },
-  {
-    categoria: 'Marketing',
-    cor: '#a855f7',
-    titulo: 'De 0 a 10.000 Seguidores em 90 Dias',
-    publicoAlvo: 'Empreendedores iniciando no digital',
-    preco: 'R$47–127',
-    capitulos: ['Escolhendo Seu Nicho com Dados','A Anatomia do Perfil que Converte','O Calendário de Conteúdo Imbatível','Criando Reels que Viralizam','Parcerias e Collabs Estratégicas','Usando Hashtags do Jeito Certo','Convertendo Seguidores em Clientes','Métricas que Realmente Importam'],
-  },
-  {
-    categoria: 'IA e Tech',
-    cor: '#4f7fff',
-    titulo: 'ChatGPT para Negócios: 50 Usos Práticos',
-    publicoAlvo: 'Empresários e profissionais liberais',
-    preco: 'R$47–147',
-    capitulos: ['Entendendo a IA sem Tecnicismos','Prompts Prontos para Vendas','Automatizando Atendimento ao Cliente','IA para Criar Conteúdo em Massa','Análise de Dados com ChatGPT','Integrando com Ferramentas Existentes','Erros Fatais ao Usar IA','O Futuro do Seu Negócio com IA'],
-  },
-  {
-    categoria: 'Desenvolvimento',
-    cor: '#0ea5e9',
-    titulo: 'Hábitos dos Milionários: O Manual',
-    publicoAlvo: 'Profissionais que querem crescer',
-    preco: 'R$19–57',
-    capitulos: ['A Ciência dos Hábitos (Resumo Prático)','A Rotina Matinal dos Top Performers','Como Desenvolver Disciplina Real','O Poder do Foco Profundo','Relacionamentos que Aceleram o Sucesso','Gestão de Energia, Não de Tempo','Como Aprender Qualquer Coisa em 20h','Seu Plano de 12 Semanas'],
-  },
-  {
-    categoria: 'Negócios',
-    cor: '#ec4899',
-    titulo: 'Seu Primeiro Infoproduto do Zero',
-    publicoAlvo: 'Quem quer monetizar conhecimento',
-    preco: 'R$37–97',
-    capitulos: ['Descobrindo Seu Conhecimento Monetizável','Validando Antes de Criar','Estruturando Seu Infoproduto em 7 Dias','Escolhendo a Plataforma Certa','A Página de Vendas que Converte','Seu Lançamento Semente (sem audiência)','Escalonando com Afiliados','Da Renda Extra ao Negócio Principal'],
-  },
+// Gradientes determinísticos pelo slug
+const GRADIENTS = [
+  'linear-gradient(135deg,#1a1a6e,#4f7fff)',
+  'linear-gradient(135deg,#065f46,#10b981)',
+  'linear-gradient(135deg,#7c2d12,#f97316)',
+  'linear-gradient(135deg,#4c1d95,#a855f7)',
+  'linear-gradient(135deg,#7f1d1d,#ef4444)',
+  'linear-gradient(135deg,#164e63,#06b6d4)',
+  'linear-gradient(135deg,#14532d,#84cc16)',
+  'linear-gradient(135deg,#831843,#ec4899)',
 ]
+function bookGradient(slug: string) {
+  const n = parseInt(slug[0], 16) % GRADIENTS.length
+  return GRADIENTS[n]
+}
+function bookAccent(slug: string) {
+  const colors = ['#4f7fff','#10b981','#f97316','#a855f7','#ef4444','#06b6d4','#84cc16','#ec4899']
+  return colors[parseInt(slug[0], 16) % colors.length]
+}
 
-export default function BibliotecaPage() {
-  const totalCaps = TEMPLATES.reduce((acc, t) => acc + t.capitulos.length, 0)
+function timeAgo(date: Date) {
+  const diff  = Date.now() - date.getTime()
+  const mins  = Math.floor(diff / 60_000)
+  const hours = Math.floor(diff / 3_600_000)
+  const days  = Math.floor(diff / 86_400_000)
+  if (mins  < 60) return `há ${mins} min`
+  if (hours < 24) return `há ${hours}h`
+  if (days  <  7) return `há ${days} dia${days > 1 ? 's' : ''}`
+  return date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })
+}
+
+function BookCover({ slug, titulo, size = 'md' }: { slug: string; titulo: string; size?: 'sm' | 'md' | 'lg' }) {
+  const w = size === 'lg' ? 88 : size === 'md' ? 68 : 52
+  const h = size === 'lg' ? 120 : size === 'md' ? 92 : 72
+  const fs = size === 'lg' ? 18 : size === 'md' ? 14 : 11
+  const initials = titulo.split(' ').filter(w => w.length > 2).slice(0, 2).map(w => w[0].toUpperCase()).join('') || titulo.slice(0, 2).toUpperCase()
+  return (
+    <div style={{
+      width: w, height: h, borderRadius: size === 'lg' ? 12 : 8, flexShrink: 0,
+      background: bookGradient(slug),
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      boxShadow: `4px 4px 16px rgba(0,0,0,0.5), inset -3px 0 0 rgba(0,0,0,0.3)`,
+      position: 'relative',
+    }}>
+      <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 6, borderRadius: '8px 0 0 8px', background: 'rgba(0,0,0,0.25)' }} />
+      <span style={{ fontSize: fs, fontWeight: 900, color: 'rgba(255,255,255,0.9)', letterSpacing: '0.05em', zIndex: 1 }}>
+        {initials}
+      </span>
+    </div>
+  )
+}
+
+export default async function BibliotecaPage() {
+  const session = await auth()
+  const userId  = session?.user?.id
+  const email   = session?.user?.email
+  const nome    = (session?.user?.name ?? 'Autor').split(' ')[0]
+
+  type Row = {
+    slug: string; titulo: string; subtitulo: string
+    autor: string; caps: number; createdAt: Date; tipo: string
+  }
+
+  let livros: Row[]     = []
+  let rascunhos: Row[]  = []
+
+  if (userId || email) {
+    const where = userId && email
+      ? { OR: [{ userId }, { email }] }
+      : userId ? { userId } : { email: email! }
+
+    const deliveries = await prisma.delivery.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+      select: { slug: true, planJson: true, createdAt: true, tipo: true, nomeAutor: true },
+    })
+
+    const toRow = (d: typeof deliveries[0]): Row => {
+      const plan = d.planJson as BriefingPlan
+      return {
+        slug:      d.slug,
+        titulo:    plan.titulo    ?? 'Sem título',
+        subtitulo: plan.subtitulo ?? '',
+        autor:     d.nomeAutor    ?? plan.autor ?? '',
+        caps:      Array.isArray(plan.capitulos) ? plan.capitulos.length : 0,
+        createdAt: d.createdAt,
+        tipo:      d.tipo ?? 'preview',
+      }
+    }
+
+    livros    = deliveries.filter(d => d.tipo === 'livro').map(toRow)
+    rascunhos = deliveries.filter(d => d.tipo !== 'livro').map(toRow)
+  }
+
+  const totalCaps = livros.reduce((a, b) => a + b.caps, 0)
 
   return (
-    <div className="px-5 py-6 pb-16 md:px-8">
+    <div style={{ padding: '28px 24px 80px', maxWidth: 960, margin: '0 auto' }}>
 
-      <div className="mb-6 flex items-center gap-3">
-        <div className="grid h-12 w-12 place-items-center rounded-xl" style={{ background: 'linear-gradient(135deg,#f97316,#ea580c)', boxShadow: '0 4px 20px rgba(249,115,22,0.4)' }}>
-          <Library className="size-6 text-white" />
-        </div>
+      {/* ── Header ── */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 32, flexWrap: 'wrap', gap: 16 }}>
         <div>
-          <h1 className="text-xl font-bold text-white">Biblioteca de Templates</h1>
-          <p className="text-sm text-[#a0b0c8]">Estruturas dos ebooks mais vendidos — clique para criar</p>
+          <h1 style={{ fontSize: 24, fontWeight: 900, color: '#fff', margin: '0 0 6px', lineHeight: 1.2 }}>
+            Minha Biblioteca
+          </h1>
+          <p style={{ fontSize: 13, color: '#5a6a84', margin: 0 }}>
+            Todos os seus livros num só lugar, {nome} ✨
+          </p>
         </div>
+        <Link href="/dashboard/criar" style={{
+          display: 'inline-flex', alignItems: 'center', gap: 7,
+          borderRadius: 12, padding: '10px 20px', fontSize: 13, fontWeight: 700, color: '#fff',
+          background: 'linear-gradient(135deg,#1a3a8f,#4f7fff)',
+          boxShadow: '0 4px 20px rgba(79,127,255,0.3)', textDecoration: 'none',
+        }}>
+          <Plus style={{ width: 15, height: 15 }} /> Criar Novo Livro
+        </Link>
       </div>
 
-      <div className="mb-6 grid grid-cols-3 gap-3">
-        {[
-          { label: 'Templates',  value: TEMPLATES.length, icon: Layers,   g: 'linear-gradient(135deg,#4f7fff,#2554e0)', s: 'rgba(79,127,255,0.4)' },
-          { label: 'Categorias', value: TEMPLATES.length, icon: Tag,      g: 'linear-gradient(135deg,#6366f1,#4338ca)', s: 'rgba(99,102,241,0.4)' },
-          { label: 'Capítulos',  value: totalCaps,        icon: BookOpen, g: 'linear-gradient(135deg,#00e5c3,#00b09b)', s: 'rgba(0,229,195,0.4)' },
-        ].map(({ label, value, icon: Icon, g, s }) => (
-          <div key={label} className="overflow-hidden rounded-xl border border-[#1c2438]" style={{ background: '#0d1220' }}>
-            <div className="flex">
-              <div className="grid w-[60px] shrink-0 place-items-center py-4" style={{ background: g, boxShadow: s }}>
-                <Icon className="size-5 text-white" />
+      {/* ── Stats ── */}
+      {(livros.length > 0 || rascunhos.length > 0) && (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 12, marginBottom: 36 }}>
+          {[
+            { label: 'Livros gerados', value: livros.length,     icon: BookOpen,    cor: '#4f7fff' },
+            { label: 'Planejamentos',  value: rascunhos.length,   icon: FileText,    cor: '#a855f7' },
+            { label: 'Total de capítulos', value: totalCaps,     icon: Layers,      cor: '#10b981' },
+          ].map(({ label, value, icon: Icon, cor }) => (
+            <div key={label} style={{ borderRadius: 14, padding: '16px 18px', background: '#0d1220', border: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div style={{ width: 36, height: 36, borderRadius: 10, background: `${cor}18`, border: `1px solid ${cor}30`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <Icon style={{ width: 16, height: 16, color: cor }} strokeWidth={2} />
               </div>
-              <div className="flex flex-col justify-center p-3">
-                <p className="text-[9px] font-bold uppercase tracking-widest text-[#a0b0c8]">{label}</p>
-                <p className="text-xl font-black text-white tabular-nums">{value}</p>
+              <div>
+                <p style={{ fontSize: 20, fontWeight: 900, color: '#fff', margin: '0 0 2px', lineHeight: 1 }}>{value}</p>
+                <p style={{ fontSize: 10, color: '#4a5a70', margin: 0, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{label}</p>
               </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {TEMPLATES.map(({ categoria, cor, titulo, publicoAlvo, preco, capitulos }) => (
-          <div key={titulo} className="flex flex-col rounded-xl border border-[#1c2438] overflow-hidden transition hover:-translate-y-0.5 hover:border-[#2a3553]" style={{ background: '#0d1220' }}>
-            <div className="h-0.5 w-full" style={{ background: cor }} />
-            <div className="flex flex-col flex-1 p-5">
-              <div className="mb-3 flex items-start justify-between gap-2">
-                <span className="rounded-full px-2.5 py-0.5 text-[10px] font-bold" style={{ background: `${cor}18`, color: cor }}>
-                  {categoria}
-                </span>
-                <span className="text-[12px] font-bold text-white">{preco}</span>
-              </div>
-              <h3 className="mb-1 text-[13px] font-bold text-white leading-snug">{titulo}</h3>
-              <p className="mb-4 text-[11px] text-[#a0b0c8]">Público: {publicoAlvo}</p>
-              <div className="mb-5 rounded-lg border border-[#1c2438] p-3" style={{ background: '#0b0f1c' }}>
-                <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-[#8896b0]">
-                  Sumário · {capitulos.length} capítulos
-                </p>
-                <div className="space-y-1.5">
-                  {capitulos.slice(0, 4).map((cap, i) => (
-                    <div key={i} className="flex items-start gap-2">
-                      <span className="mt-0.5 text-[10px] font-bold tabular-nums" style={{ color: cor }}>{i + 1}.</span>
-                      <p className="text-[11px] text-[#a0b0c8] leading-tight">{cap}</p>
+      {/* ── Livros gerados ── */}
+      {livros.length > 0 && (
+        <div style={{ marginBottom: 40 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+            <CheckCircle2 style={{ width: 15, height: 15, color: '#10b981' }} />
+            <p style={{ fontSize: 11, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#10b981', margin: 0 }}>
+              Livros Completos
+            </p>
+            <span style={{ fontSize: 10, fontWeight: 700, color: '#2a3a4a', background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.15)', borderRadius: 999, padding: '2px 8px' }}>
+              {livros.length}
+            </span>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 14 }}>
+            {livros.map(livro => {
+              const accent = bookAccent(livro.slug)
+              return (
+                <Link
+                  key={livro.slug}
+                  href={`/dashboard/biblioteca/${livro.slug}`}
+                  style={{ textDecoration: 'none', borderRadius: 16, border: '1px solid rgba(255,255,255,0.07)', background: '#0a101e', overflow: 'hidden', display: 'flex', flexDirection: 'column', transition: 'border-color 0.15s, transform 0.12s' }}
+                  className="group"
+                >
+                  {/* Topo colorido */}
+                  <div style={{ height: 3, background: bookGradient(livro.slug) }} />
+                  <div style={{ padding: '18px 18px 16px', display: 'flex', gap: 14, flex: 1 }}>
+                    <BookCover slug={livro.slug} titulo={livro.titulo} size="md" />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+                        <span style={{ fontSize: 9, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.12em', color: accent, background: `${accent}18`, border: `1px solid ${accent}30`, borderRadius: 999, padding: '2px 8px' }}>
+                          Livro completo
+                        </span>
+                      </div>
+                      <h3 style={{ fontSize: 14, fontWeight: 800, color: '#e0e8f0', margin: '0 0 4px', lineHeight: 1.3, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>
+                        {livro.titulo}
+                      </h3>
+                      <p style={{ fontSize: 11, color: '#4a5a70', margin: '0 0 10px' }}>por {livro.autor}</p>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <span style={{ fontSize: 10, color: '#5a6a84', display: 'flex', alignItems: 'center', gap: 4 }}>
+                          <Sparkles style={{ width: 10, height: 10, color: accent }} /> {livro.caps} cap.
+                        </span>
+                        <span style={{ fontSize: 10, color: '#3a4a60', display: 'flex', alignItems: 'center', gap: 4 }}>
+                          <Clock style={{ width: 10, height: 10 }} /> {timeAgo(livro.createdAt)}
+                        </span>
+                      </div>
                     </div>
-                  ))}
-                  {capitulos.length > 4 && (
-                    <p className="text-[10px] text-[#8896b0] pl-4">+ {capitulos.length - 4} capítulos...</p>
-                  )}
-                </div>
-              </div>
-              <Link
-                href="/dashboard/criar"
-                className="mt-auto flex items-center justify-center gap-1.5 rounded-lg py-2.5 text-[12px] font-bold text-white transition hover:opacity-90"
-                style={{ background: `linear-gradient(135deg,${cor}dd,${cor})`, boxShadow: `0 4px 12px ${cor}40` }}
-              >
-                Usar este template <ArrowRight className="size-3.5" />
-              </Link>
-            </div>
+                  </div>
+                  <div style={{ padding: '10px 18px', borderTop: '1px solid rgba(255,255,255,0.04)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <span style={{ fontSize: 11, color: '#4a5a70' }}>Ver pipeline de publicação</span>
+                    <ChevronRight style={{ width: 13, height: 13, color: '#3a4a60' }} />
+                  </div>
+                </Link>
+              )
+            })}
           </div>
-        ))}
-      </div>
+        </div>
+      )}
+
+      {/* ── Planejamentos pendentes ── */}
+      {rascunhos.length > 0 && (
+        <div style={{ marginBottom: 40 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+            <Lock style={{ width: 13, height: 13, color: '#5a6a84' }} />
+            <p style={{ fontSize: 11, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#5a6a84', margin: 0 }}>
+              Planejamentos — aguardando geração
+            </p>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {rascunhos.map(r => (
+              <Link
+                key={r.slug}
+                href={`/dashboard/biblioteca/${r.slug}`}
+                style={{ textDecoration: 'none', borderRadius: 14, border: '1px solid rgba(255,255,255,0.06)', background: '#0a101e', padding: '14px 18px', display: 'flex', alignItems: 'center', gap: 14 }}
+              >
+                <BookCover slug={r.slug} titulo={r.titulo} size="sm" />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <h4 style={{ fontSize: 13, fontWeight: 700, color: '#8a9ab8', margin: '0 0 3px', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
+                    {r.titulo}
+                  </h4>
+                  <p style={{ fontSize: 11, color: '#3a4a60', margin: 0 }}>
+                    {r.caps} capítulos planejados · {timeAgo(r.createdAt)}
+                  </p>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+                  <span style={{ fontSize: 10, fontWeight: 700, color: '#f59e0b', background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.2)', borderRadius: 999, padding: '3px 10px' }}>
+                    Gerar por R$49,99
+                  </span>
+                  <ChevronRight style={{ width: 13, height: 13, color: '#3a4a60' }} />
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── Empty state ── */}
+      {livros.length === 0 && rascunhos.length === 0 && (
+        <div style={{ borderRadius: 20, padding: '60px 32px', textAlign: 'center', background: '#0d1220', border: '1px solid rgba(255,255,255,0.06)', marginTop: 20 }}>
+          <div style={{ width: 80, height: 80, borderRadius: 20, background: 'linear-gradient(135deg,#0d1a3a,#1a0d40)', border: '1px solid rgba(79,127,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
+            <BookOpen style={{ width: 36, height: 36, color: '#4f7fff' }} strokeWidth={1.5} />
+          </div>
+          <h2 style={{ fontSize: 20, fontWeight: 900, color: '#fff', margin: '0 0 10px' }}>
+            Sua biblioteca está esperando
+          </h2>
+          <p style={{ fontSize: 14, color: '#5a6a84', margin: '0 0 28px', lineHeight: 1.7, maxWidth: 380, marginLeft: 'auto', marginRight: 'auto' }}>
+            Crie seu primeiro livro e ele aparece aqui com toda a linha de publicação pronta.
+          </p>
+          <Link href="/dashboard/criar" style={{
+            display: 'inline-flex', alignItems: 'center', gap: 8,
+            borderRadius: 14, padding: '13px 28px', fontSize: 14, fontWeight: 800, color: '#fff',
+            background: 'linear-gradient(135deg,#1a3a8f,#4f7fff)',
+            boxShadow: '0 6px 28px rgba(79,127,255,0.35)', textDecoration: 'none',
+          }}>
+            <Plus style={{ width: 16, height: 16 }} /> Criar meu primeiro livro
+          </Link>
+        </div>
+      )}
+
     </div>
   )
 }
