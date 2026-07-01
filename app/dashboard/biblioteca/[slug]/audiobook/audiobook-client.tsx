@@ -8,12 +8,12 @@ import {
 } from 'lucide-react'
 
 const VOICES = [
-  { id: 'pt-BR-Neural2-A', label: 'Sofia',   tipo: 'Feminina', qualidade: 'Neural2', cor: '#a855f7' },
-  { id: 'pt-BR-Neural2-B', label: 'Gabriel', tipo: 'Masculina', qualidade: 'Neural2', cor: '#4f7fff' },
-  { id: 'pt-BR-Neural2-C', label: 'Isabela', tipo: 'Feminina', qualidade: 'Neural2', cor: '#ec4899' },
-  { id: 'pt-BR-Wavenet-A', label: 'Camila',  tipo: 'Feminina', qualidade: 'WaveNet', cor: '#10b981' },
-  { id: 'pt-BR-Wavenet-B', label: 'Rafael',  tipo: 'Masculina', qualidade: 'WaveNet', cor: '#f59e0b' },
-  { id: 'pt-BR-Standard-A', label: 'Ana',    tipo: 'Feminina', qualidade: 'Standard', cor: '#6a7a96' },
+  { id: 'rachel', label: 'Rachel', tipo: 'Feminina',  qualidade: 'Multilingual', cor: '#a855f7' },
+  { id: 'bella',  label: 'Bella',  tipo: 'Feminina',  qualidade: 'Multilingual', cor: '#ec4899' },
+  { id: 'domi',   label: 'Domi',   tipo: 'Feminina',  qualidade: 'Multilingual', cor: '#10b981' },
+  { id: 'adam',   label: 'Adam',   tipo: 'Masculina', qualidade: 'Multilingual', cor: '#4f7fff' },
+  { id: 'josh',   label: 'Josh',   tipo: 'Masculina', qualidade: 'Multilingual', cor: '#f59e0b' },
+  { id: 'arnold', label: 'Arnold', tipo: 'Masculina', qualidade: 'Multilingual', cor: '#6a7a96' },
 ]
 
 type ChapterState = {
@@ -32,7 +32,7 @@ interface Props {
 }
 
 export function AudiobookClient({ slug, titulo, nomeAutor, capitulos }: Props) {
-  const [voice, setVoice] = useState('pt-BR-Neural2-A')
+  const [voice, setVoice] = useState('rachel')
   const [chapters, setChapters] = useState<Record<number, ChapterState>>({})
   const [playingIndex, setPlayingIndex] = useState<number | null>(null)
   const [expandedVoices, setExpandedVoices] = useState(false)
@@ -319,7 +319,7 @@ export function AudiobookClient({ slug, titulo, nomeAutor, capitulos }: Props) {
         {/* Footer info */}
         <div style={{ marginTop: 28, padding: '16px 20px', borderRadius: 12, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', gap: 20, flexWrap: 'wrap' as const }}>
           {[
-            { label: 'Powered by', value: 'Google Neural TTS' },
+            { label: 'Powered by', value: 'ElevenLabs AI' },
             { label: 'Qualidade', value: '24kHz · MP3' },
             { label: 'Idioma', value: 'Português Brasileiro' },
           ].map(({ label, value }) => (
