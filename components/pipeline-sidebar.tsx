@@ -6,8 +6,8 @@ import { PublicationPipeline } from './publication-pipeline'
 export function PipelineSidebar() {
   const pathname = usePathname()
 
-  // Extrai o slug da URL /dashboard/biblioteca/[slug]/...
-  const match = pathname.match(/\/dashboard\/biblioteca\/([a-f0-9]{32})/)
+  // Extrai o slug da URL /dashboard/biblioteca/[slug]/... ou /dashboard/projetos/[slug]/...
+  const match = pathname.match(/\/dashboard\/(?:biblioteca|projetos)\/([a-f0-9]{32})/)
   const slug = match?.[1]
 
   if (!slug) return null
