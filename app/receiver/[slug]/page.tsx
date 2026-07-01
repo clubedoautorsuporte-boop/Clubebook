@@ -1,23 +1,33 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { Download, BookOpen, CheckCircle, Sparkles } from 'lucide-react'
+import { BookOpen, Download, Sparkles, CheckCircle, ArrowRight } from 'lucide-react'
 import type { Metadata } from 'next'
 import { getDelivery } from '@/lib/delivery-store'
-import PdfViewer from './pdf-viewer'
+import { ChaptersList, FaqList, PricingBlock } from './receiver-client'
 
 const SLUG_RE = /^[a-f0-9]{32}$/
 
-type Props = {
-  params: Promise<{ slug: string }>
-}
+const SERVICOS = [
+  { icon: '✦', label: 'Texto', desc: 'Escreva e edite o conteúdo do seu livro', color: '#f97316', badge: 'FAZENDO', badgeBg: 'rgba(249,115,22,0.15)', badgeColor: '#f97316' },
+  { icon: '◈', label: 'Capas', desc: 'Uma capa profissional atrai mais leitores!', color: '#a855f7', badge: 'A FAZER', badgeBg: 'rgba(79,127,255,0.12)', badgeColor: '#4f7fff' },
+  { icon: '◉', label: 'Ilustrações', desc: 'Ilustrações dão vida à sua história!', color: '#f59e0b', badge: 'A FAZER', badgeBg: 'rgba(79,127,255,0.12)', badgeColor: '#4f7fff' },
+  { icon: '⊕', label: 'Publicação', desc: 'Prepare tudo para publicar seu livro!', color: '#22d3ee', badge: 'A FAZER', badgeBg: 'rgba(79,127,255,0.12)', badgeColor: '#4f7fff' },
+  { icon: '◆', label: 'Kit de Marketing', desc: 'Posts prontos pra Instagram, e-mails e banners', color: '#ec4899', badge: 'A FAZER', badgeBg: 'rgba(79,127,255,0.12)', badgeColor: '#4f7fff' },
+  { icon: '◎', label: 'Plano de Lançamento', desc: 'Cronograma D-30 → D-0 e distribuição', color: '#f59e0b', badge: 'EM BREVE', badgeBg: 'rgba(168,85,247,0.12)', badgeColor: '#a855f7' },
+  { icon: '◐', label: 'Audiobook', desc: 'Alcance leitores que preferem ouvir histórias!', color: '#4f7fff', badge: 'A FAZER', badgeBg: 'rgba(79,127,255,0.12)', badgeColor: '#4f7fff' },
+  { icon: '◫', label: 'Vender', desc: 'Monetize seu livro na plataforma certa', color: '#22d3ee', badge: 'A FAZER', badgeBg: 'rgba(79,127,255,0.12)', badgeColor: '#4f7fff' },
+  { icon: '◴', label: 'Tradução', desc: 'Leitores do mundo inteiro podem ler seu livro!', color: '#a855f7', badge: 'A FAZER', badgeBg: 'rgba(79,127,255,0.12)', badgeColor: '#4f7fff' },
+  { icon: '◱', label: 'Registro de ISBN', desc: 'Documentação oficial do seu livro', color: '#f97316', badge: 'A FAZER', badgeBg: 'rgba(79,127,255,0.12)', badgeColor: '#4f7fff' },
+  { icon: '◳', label: 'Ficha Catalográfica', desc: 'Complete esta etapa!', color: '#a855f7', badge: 'A FAZER', badgeBg: 'rgba(79,127,255,0.12)', badgeColor: '#4f7fff' },
+]
+
+type Props = { params: Promise<{ slug: string }> }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
   if (!SLUG_RE.test(slug)) return { title: 'Planejamento | Clube do Autor IA' }
-
   const delivery = await getDelivery(slug)
   if (!delivery) return { title: 'Planejamento | Clube do Autor IA' }
-
   return {
     title: `${delivery.planJson.titulo} | Clube do Autor IA`,
     description: delivery.planJson.promessa,
@@ -27,127 +37,202 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ReceiverPage({ params }: Props) {
   const { slug } = await params
-
   if (!SLUG_RE.test(slug)) notFound()
 
   const delivery = await getDelivery(slug)
   if (!delivery) notFound()
 
-  const { planJson, nomeAutor } = delivery
-  const capitulos = planJson.capitulos ?? []
+  const { planJson: plan, nomeAutor } = delivery
+  const capitulos = plan.capitulos ?? []
+  const sampleBlocos = capitulos[0]?.blocos?.slice(0, 3) ?? []
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] text-white">
-      {/* Header */}
-      <header className="border-b border-white/5 bg-[#0d0d14]/80 backdrop-blur-md">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-500/20">
-              <BookOpen className="h-4 w-4 text-teal-400" />
+    <div className="min-h-screen" style={{ background: '#080e24', color: 'white' }}>
+
+      {/* ── Header ─────────────────────────────────────────────────── */}
+      <header className="sticky top-0 z-30"
+        style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: 'rgba(8,14,36,0.95)', backdropFilter: 'blur(12px)' }}>
+        <div className="mx-auto flex max-w-4xl items-center justify-between px-5 py-3">
+          <Link href="/dashboard" className="flex items-center gap-2.5">
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg"
+              style={{ background: 'linear-gradient(135deg,#4f7fff,#a855f7)' }}>
+              <BookOpen className="size-3.5 text-white" />
             </div>
-            <span className="text-sm font-semibold text-white/80">Clube do Autor IA</span>
+            <span className="text-sm font-bold text-white">Clube do Autor</span>
           </Link>
-          <span className="text-xs text-white/30">Planejamento exclusivo</span>
+          <a href={`/api/pdf/${slug}`} download
+            className="flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition hover:text-white"
+            style={{ borderColor: 'rgba(255,255,255,0.1)', color: '#6a7a96', background: 'rgba(255,255,255,0.04)' }}>
+            <Download className="size-3.5" /> Baixar PDF
+          </a>
         </div>
       </header>
 
-      <main className="mx-auto max-w-5xl px-4 py-12">
-        {/* Badge + Hero */}
-        <div className="mb-10 text-center">
-          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-teal-500/30 bg-teal-500/10 px-4 py-1.5 text-sm font-medium text-teal-400">
-            <CheckCircle className="h-4 w-4" />
-            SEU PLANEJAMENTO CHEGOU
-          </div>
+      <main className="mx-auto max-w-4xl px-5 py-10 space-y-8">
 
-          {nomeAutor && nomeAutor !== 'Autor' && (
-            <p className="mb-2 text-sm text-white/50">Preparado especialmente para {nomeAutor}</p>
-          )}
-
-          <h1 className="mb-3 text-3xl font-extrabold leading-tight tracking-tight text-white sm:text-4xl">
-            {planJson.titulo}
-          </h1>
-          <p className="mx-auto mb-2 max-w-2xl text-lg text-white/60">{planJson.subtitulo}</p>
-
-          <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm text-white/60">
-            <Sparkles className="h-3.5 w-3.5 text-yellow-400" />
-            {capitulos.length} capítulos planejados pela Aurora IA
+        {/* ── Hero ───────────────────────────────────────────────────── */}
+        <div className="rounded-2xl overflow-hidden"
+          style={{ background: '#0d1220', border: '1px solid rgba(255,255,255,0.06)' }}>
+          <div className="h-1 w-full" style={{ background: 'linear-gradient(90deg,#4f7fff,#a855f7)' }} />
+          <div className="p-6 sm:p-8">
+            <div className="flex items-start gap-5">
+              <div className="hidden sm:flex shrink-0 h-28 w-20 rounded-xl items-center justify-center"
+                style={{ background: 'linear-gradient(135deg,#0d1a3a,#1a0d40)', border: '1px solid rgba(79,127,255,0.2)' }}>
+                <BookOpen className="size-7" style={{ color: '#4f7fff' }} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest mb-3"
+                  style={{ background: 'rgba(0,229,195,0.1)', color: '#00e5c3', border: '1px solid rgba(0,229,195,0.2)' }}>
+                  <CheckCircle className="size-3" /> Planejamento aprovado
+                </div>
+                <h1 className="text-2xl sm:text-3xl font-black text-white leading-tight tracking-tight">{plan.titulo}</h1>
+                {plan.subtitulo && <p className="mt-1 text-[13px]" style={{ color: '#5a6a84' }}>{plan.subtitulo}</p>}
+                <div className="mt-3 flex flex-wrap items-center gap-3">
+                  <span className="text-[12px]" style={{ color: '#5a6a84' }}>
+                    por <span className="font-semibold" style={{ color: '#a0b0c8' }}>{nomeAutor}</span>
+                  </span>
+                  <span style={{ color: '#2a3a56' }}>·</span>
+                  <span className="flex items-center gap-1 text-[12px]" style={{ color: '#5a6a84' }}>
+                    <Sparkles className="size-3" style={{ color: '#4f7fff' }} /> {capitulos.length} capítulos
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Promessa */}
-        <div className="mb-10 rounded-2xl border border-teal-500/20 bg-teal-500/5 p-6 text-center">
-          <p className="text-base font-medium text-teal-300">✨ {planJson.promessa}</p>
+        {/* ── CTA Principal ───────────────────────────────────────────── */}
+        <div className="relative overflow-hidden rounded-2xl p-7 sm:p-8"
+          style={{ background: 'linear-gradient(135deg,#0a0f2e,#111836,#0d0a28)', border: '1px solid rgba(79,127,255,0.2)' }}>
+          <div className="pointer-events-none absolute -left-10 -top-10 h-40 w-40 rounded-full opacity-30 blur-2xl"
+            style={{ background: 'radial-gradient(circle,#4f7fff,transparent 65%)' }} />
+          <div className="pointer-events-none absolute right-10 bottom-0 h-32 w-32 rounded-full opacity-20 blur-2xl"
+            style={{ background: 'radial-gradient(circle,#a855f7,transparent 65%)' }} />
+          <div className="relative z-10">
+            <p className="text-[11px] font-black uppercase tracking-widest mb-2" style={{ color: '#f97316' }}>
+              Próximo passo
+            </p>
+            <h2 className="text-xl sm:text-2xl font-black text-white leading-snug mb-2">
+              Seu livro está a um clique de virar realidade
+            </h2>
+            <p className="text-[13px] mb-5" style={{ color: '#6a7a96' }}>
+              A Aurora escreve cada capítulo por você — do início ao fim, no seu tom. Por apenas{' '}
+              <strong className="text-white">R$ 49,99</strong>, pagamento único.
+            </p>
+            <Link href="#gerar"
+              className="inline-flex items-center gap-2 rounded-xl px-6 py-3 text-[13px] font-bold text-white transition hover:opacity-90 hover:scale-[1.02]"
+              style={{ background: 'linear-gradient(135deg,#4f7fff,#a855f7)', boxShadow: '0 6px 24px rgba(79,127,255,0.35)' }}>
+              Gerar meu livro completo <ArrowRight className="size-4" />
+            </Link>
+          </div>
         </div>
 
-        {/* Capítulos */}
-        <section className="mb-12">
-          <h2 className="mb-5 text-lg font-bold text-white/80">Estrutura do Livro</h2>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {capitulos.map((cap) => (
-              <div
-                key={cap.numero}
-                className="group flex gap-4 rounded-xl border border-white/5 bg-white/[0.03] p-4 transition hover:border-white/10 hover:bg-white/[0.06]"
-              >
-                <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-teal-500/15 text-xs font-bold text-teal-400">
-                  {cap.numero}
+        {/* ── Promessa ────────────────────────────────────────────────── */}
+        {plan.promessa && (
+          <div className="rounded-2xl p-5"
+            style={{ background: 'rgba(79,127,255,0.06)', border: '1px solid rgba(79,127,255,0.15)' }}>
+            <p className="text-[13px] font-medium leading-relaxed" style={{ color: '#a0b8e8' }}>
+              ✦ {plan.promessa}
+            </p>
+          </div>
+        )}
+
+        {/* ── Capítulos ───────────────────────────────────────────────── */}
+        <div>
+          <div className="mb-4">
+            <h2 className="text-[16px] font-black text-white tracking-tight">Estrutura do Livro</h2>
+            <p className="text-[12px] mt-0.5" style={{ color: '#5a6a84' }}>
+              {capitulos.length} capítulos planejados pela Aurora
+            </p>
+          </div>
+          <ChaptersList capitulos={capitulos} />
+        </div>
+
+        {/* ── Mensagem da Aurora ──────────────────────────────────────── */}
+        {plan.mensagem_final && (
+          <div className="rounded-2xl p-6"
+            style={{ background: '#0d1220', border: '1px solid rgba(255,255,255,0.05)' }}>
+            <p className="text-[10px] font-black uppercase tracking-widest mb-3" style={{ color: '#4f7fff' }}>
+              Aurora IA
+            </p>
+            {plan.mensagem_final.split('\n').filter(Boolean).map((p, i) => (
+              <p key={i} className="text-[13px] italic leading-relaxed mb-2 last:mb-0" style={{ color: '#6a7a96' }}>{p}</p>
+            ))}
+          </div>
+        )}
+
+        {/* ── Amostra Grátis ──────────────────────────────────────────── */}
+        {sampleBlocos.length > 0 && (
+          <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.06)' }}>
+            <div className="px-6 py-4"
+              style={{ background: '#0d1220', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+              <p className="text-[10px] font-black uppercase tracking-widest" style={{ color: '#00e5c3' }}>
+                Amostra grátis
+              </p>
+              <p className="text-[13px] font-bold text-white mt-0.5">
+                Capítulo 1 · {capitulos[0]?.titulo}
+              </p>
+            </div>
+            <div className="px-6 py-5 space-y-3 relative overflow-hidden" style={{ background: '#0a0e1e' }}>
+              {sampleBlocos.map((bloco, i) => (
+                <p key={i} className="text-[13px] leading-relaxed"
+                  style={{ color: i === sampleBlocos.length - 1 ? '#3a4a60' : '#8a9ab8' }}>
+                  {bloco}
+                </p>
+              ))}
+              <div className="absolute inset-x-0 bottom-0 h-12"
+                style={{ background: 'linear-gradient(to top, #0a0e1e, transparent)' }} />
+            </div>
+            <div className="px-6 py-4 text-center"
+              style={{ background: '#0d1220', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+              <p className="text-[12px] mb-3" style={{ color: '#5a6a84' }}>
+                Gostou do começo? O livro completo tem {capitulos.length} capítulos nesse nível.
+              </p>
+              <Link href="#gerar"
+                className="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-[12px] font-bold text-white transition hover:opacity-90"
+                style={{ background: 'linear-gradient(135deg,#4f7fff,#a855f7)', boxShadow: '0 4px 16px rgba(79,127,255,0.3)' }}>
+                Continuar lendo meu livro completo <ArrowRight className="size-3.5" />
+              </Link>
+            </div>
+          </div>
+        )}
+
+        {/* ── Pricing ─────────────────────────────────────────────────── */}
+        <PricingBlock />
+
+        {/* ── Serviços ────────────────────────────────────────────────── */}
+        <div>
+          <h2 className="text-[16px] font-black text-white tracking-tight mb-1">Serviços</h2>
+          <p className="text-[12px] mb-5" style={{ color: '#5a6a84' }}>
+            Tudo que você precisa para publicar e vender seu livro
+          </p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {SERVICOS.map(s => (
+              <div key={s.label} className="rounded-xl p-4 flex flex-col gap-2"
+                style={{ background: '#0d1220', border: '1px solid rgba(255,255,255,0.05)' }}>
+                <div className="flex items-center justify-between">
+                  <span className="text-[18px]" style={{ color: s.color }}>{s.icon}</span>
+                  <span className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full"
+                    style={{ background: s.badgeBg, color: s.badgeColor }}>
+                    {s.badge}
+                  </span>
                 </div>
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold text-white/90">{cap.titulo}</p>
-                  {cap.descricao && (
-                    <p className="mt-0.5 line-clamp-2 text-xs text-white/40">{cap.descricao}</p>
-                  )}
-                </div>
+                <p className="text-[13px] font-bold text-white">{s.label}</p>
+                <p className="text-[11px] leading-snug" style={{ color: '#5a6a84' }}>{s.desc}</p>
               </div>
             ))}
           </div>
-        </section>
+        </div>
 
-        {/* Mensagem da Aurora */}
-        {planJson.mensagem_final && (
-          <section className="mb-12">
-            <h2 className="mb-4 text-lg font-bold text-white/80">Mensagem da Aurora IA</h2>
-            <div className="rounded-2xl border border-white/5 bg-white/[0.03] p-6">
-              {planJson.mensagem_final.split('\n').filter(Boolean).map((para, i) => (
-                <p
-                  key={i}
-                  className="mb-3 text-sm italic leading-relaxed text-white/60 last:mb-0"
-                >
-                  {para}
-                </p>
-              ))}
-            </div>
-          </section>
-        )}
+        {/* ── FAQ ─────────────────────────────────────────────────────── */}
+        <FaqList />
 
-        {/* PDF Viewer */}
-        <section className="mb-8">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-lg font-bold text-white/80">Seu Documento</h2>
-            <a
-              href={`/api/pdf/${slug}`}
-              download
-              className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white/70 transition hover:border-teal-500/40 hover:bg-teal-500/10 hover:text-teal-400"
-            >
-              <Download className="h-4 w-4" />
-              Baixar PDF
-            </a>
-          </div>
-          <PdfViewer slug={slug} titulo={planJson.titulo} />
-        </section>
-
-        {/* CTA */}
-        <div className="rounded-2xl border border-teal-500/30 bg-gradient-to-br from-teal-500/10 to-transparent p-8 text-center">
-          <h3 className="mb-2 text-xl font-bold text-white">
-            Pronto para receber seu ebook completo?
-          </h3>
-          <p className="mb-6 text-sm text-white/60">
-            Finalize agora e em menos de 1 hora você recebe o livro completo no WhatsApp e e-mail.
-          </p>
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 rounded-xl bg-teal-500 px-8 py-3 text-sm font-bold text-black shadow-lg shadow-teal-500/25 transition hover:bg-teal-400"
-          >
-            🚀 Finalizar meu ebook — R$ 67
+        {/* ── Footer ──────────────────────────────────────────────────── */}
+        <div className="text-center pb-10">
+          <Link href="/dashboard"
+            className="text-[12px] font-semibold transition hover:text-white"
+            style={{ color: '#4f7fff' }}>
+            ← Voltar ao Dashboard
           </Link>
         </div>
       </main>
