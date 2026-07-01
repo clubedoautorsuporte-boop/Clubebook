@@ -2,20 +2,20 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, ChevronRight, CheckCircle2, Megaphone, Instagram, Mail, ShoppingCart, Globe, FileText, Star, Sparkles } from 'lucide-react'
+import { ArrowLeft, ChevronRight, CheckCircle2, Megaphone, Camera, Mail, ShoppingCart, Globe, FileText, Star, Sparkles } from 'lucide-react'
 
 const CONTEUDOS = [
   {
     id: 'posts-ig',
-    icon: Instagram,
-    label: 'Posts para Instagram',
+    icon: Camera,
+    label: 'Posts para Camera',
     desc: '12 posts prontos para publicar',
     detalhes: ['Legenda otimizada', 'Sugestão de hashtags', 'Design do card incluso'],
     cor: '#e1306c',
   },
   {
     id: 'stories',
-    icon: Instagram,
+    icon: Camera,
     label: 'Stories e Reels',
     desc: '8 roteiros de Stories + 4 ideias de Reels',
     detalhes: ['Scripts palavra por palavra', 'Trilha sonora sugerida', 'CTA personalizado'],
