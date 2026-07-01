@@ -97,14 +97,14 @@ function SidebarInner({ userName, userImage, userEmail, credits = 0, isAdmin }: 
       }}
     >
       {/* Brand */}
-      <div className="flex flex-col items-center gap-2 px-5 py-6" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-        <div className="relative w-[80px] h-[80px] rounded-2xl overflow-hidden"
-          style={{ background: 'white', padding: '6px' }}>
-          <Image src="/logo.webp" alt="Logo" fill className="object-contain" />
+      <div className="flex flex-col items-center px-5 pt-6 pb-5" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', gap: '10px' }}>
+        <div className="relative w-[78px] h-[78px]" style={{ filter: 'drop-shadow(0 0 18px rgba(79,127,255,0.5))' }}>
+          <Image src="/logo.webp" alt="Logo" fill className="object-contain"
+            style={{ mixBlendMode: 'screen' }} />
         </div>
-        <div className="text-center">
-          <p className="text-[15px] font-extrabold leading-tight tracking-tight text-white">Clube do Autor</p>
-          <p className="mt-0.5 text-[10px] font-bold tracking-[0.2em]"
+        <div className="text-center" style={{ marginTop: '-2px' }}>
+          <p className="text-[14px] font-bold leading-tight text-white tracking-tight">Clube do Autor</p>
+          <p className="text-[9px] font-bold uppercase tracking-[0.22em] mt-0.5"
             style={{ background: 'linear-gradient(90deg,#4f7fff,#a855f7)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
             IA Platform
           </p>
