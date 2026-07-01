@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { ChevronDown, ChevronUp } from 'lucide-react'
 import type { BriefingPlan } from '@/lib/generate-pdf'
 
 function Section({ label, color, children }: { label: string; color: string; children: React.ReactNode }) {
@@ -118,7 +119,60 @@ export function EditorialPlan({ plan, slug }: { plan: BriefingPlan; slug: string
               <p className="text-[12px] leading-relaxed whitespace-pre-line" style={{ color: '#8a9ab8' }}>{p.sinopse}</p>
             </Section>
           )}
+
+        {/* Capítulos */}
+        {p.capitulos?.length > 0 && (
+          <CapitulosSection capitulos={p.capitulos} />
+        )}
       </div>
+    </div>
+  )
+}
+
+function CapitulosSection({ capitulos }: { capitulos: BriefingPlan['capitulos'] }) {
+  const [showAll, setShowAll] = useState(false)
+  const visible = showAll ? capitulos : capitulos.slice(0, 6)
+
+  return (
+    <div className="px-6 py-5">
+      <p className="text-[10px] font-black uppercase tracking-[0.15em] mb-4" style={{ color: '#5a6a84' }}>
+        Seus {capitulos.length} capítulos · já planejados
+      </p>
+      <div className="space-y-4">
+        {visible.map(cap => (
+          <div key={cap.numero} className="flex gap-4">
+            {/* Número */}
+            <div className="flex flex-col items-center gap-1 shrink-0">
+              <span className="text-[11px] font-black tabular-nums" style={{ color: '#4f7fff' }}>
+                {String(cap.numero).padStart(2, '0')}
+              </span>
+              {cap.numero < capitulos.length && (
+                <div className="w-px flex-1 min-h-[16px]" style={{ background: 'rgba(79,127,255,0.15)' }} />
+              )}
+            </div>
+            {/* Conteúdo */}
+            <div className="pb-4 min-w-0">
+              <p className="text-[13px] font-bold text-white leading-snug mb-1">{cap.titulo}</p>
+              {cap.descricao && (
+                <p className="text-[11px] leading-relaxed" style={{ color: '#5a6a84' }}>{cap.descricao}</p>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {capitulos.length > 6 && (
+        <button
+          onClick={() => setShowAll(o => !o)}
+          className="mt-2 flex items-center gap-1.5 text-[12px] font-semibold transition hover:text-white"
+          style={{ color: '#4f7fff' }}
+        >
+          {showAll
+            ? <><ChevronUp className="size-3.5" /> Mostrar menos</>
+            : <><ChevronDown className="size-3.5" /> Ver todos os {capitulos.length} capítulos</>
+          }
+        </button>
+      )}
     </div>
   )
 }
