@@ -6,22 +6,7 @@ import { getDelivery } from '@/lib/delivery-store'
 import { ChaptersList, FaqList, PricingBlock } from './receiver-client'
 import HolographicCard from '@/components/ui/holographic-card'
 import { EditorialPlan } from './editorial-plan'
-
-const SLUG_RE = /^[a-f0-9]{32}$/
-
-const SERVICOS = [
-  { icon: '✦', label: 'Texto', desc: 'Escreva e edite o conteúdo do seu livro', color: '#f97316', badge: 'FAZENDO', badgeBg: 'rgba(249,115,22,0.15)', badgeColor: '#f97316' },
-  { icon: '◈', label: 'Capas', desc: 'Uma capa profissional atrai mais leitores!', color: '#a855f7', badge: 'A FAZER', badgeBg: 'rgba(79,127,255,0.12)', badgeColor: '#4f7fff' },
-  { icon: '◉', label: 'Ilustrações', desc: 'Ilustrações dão vida à sua história!', color: '#f59e0b', badge: 'A FAZER', badgeBg: 'rgba(79,127,255,0.12)', badgeColor: '#4f7fff' },
-  { icon: '⊕', label: 'Publicação', desc: 'Prepare tudo para publicar seu livro!', color: '#22d3ee', badge: 'A FAZER', badgeBg: 'rgba(79,127,255,0.12)', badgeColor: '#4f7fff' },
-  { icon: '◆', label: 'Kit de Marketing', desc: 'Posts prontos pra Instagram, e-mails e banners', color: '#ec4899', badge: 'A FAZER', badgeBg: 'rgba(79,127,255,0.12)', badgeColor: '#4f7fff' },
-  { icon: '◎', label: 'Plano de Lançamento', desc: 'Cronograma D-30 → D-0 e distribuição', color: '#f59e0b', badge: 'EM BREVE', badgeBg: 'rgba(168,85,247,0.12)', badgeColor: '#a855f7' },
-  { icon: '◐', label: 'Audiobook', desc: 'Alcance leitores que preferem ouvir histórias!', color: '#4f7fff', badge: 'A FAZER', badgeBg: 'rgba(79,127,255,0.12)', badgeColor: '#4f7fff' },
-  { icon: '◫', label: 'Vender', desc: 'Monetize seu livro na plataforma certa', color: '#22d3ee', badge: 'A FAZER', badgeBg: 'rgba(79,127,255,0.12)', badgeColor: '#4f7fff' },
-  { icon: '◴', label: 'Tradução', desc: 'Leitores do mundo inteiro podem ler seu livro!', color: '#a855f7', badge: 'A FAZER', badgeBg: 'rgba(79,127,255,0.12)', badgeColor: '#4f7fff' },
-  { icon: '◱', label: 'Registro de ISBN', desc: 'Documentação oficial do seu livro', color: '#f97316', badge: 'A FAZER', badgeBg: 'rgba(79,127,255,0.12)', badgeColor: '#4f7fff' },
-  { icon: '◳', label: 'Ficha Catalográfica', desc: 'Complete esta etapa!', color: '#a855f7', badge: 'A FAZER', badgeBg: 'rgba(79,127,255,0.12)', badgeColor: '#4f7fff' },
-]
+import { SERVICOS } from '@/lib/servicos-data'
 
 type Props = { params: Promise<{ slug: string }> }
 
