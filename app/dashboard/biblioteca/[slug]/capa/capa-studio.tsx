@@ -32,35 +32,12 @@ const CORES = [
   { id: 'neutro',   label: 'Neutro e Elegante',    desc: 'Branco, cinza, prateado',      img: '/capa-cards/cores/Neutro%20e%20Elegante.webp',    gradient: 'linear-gradient(135deg,#1f2937,#4b5563,#9ca3af)' },
 ]
 
-const _p = (prompt: string, seed: number) =>
-  `https://gen.pollinations.ai/image/${encodeURIComponent(prompt)}?model=flux&width=400&height=280&nologo=true&seed=${seed}`
-
 const ELEMENTOS = [
-  {
-    id: 'pessoa', label: 'Pessoa / Personagem', desc: 'Figura humana em destaque',
-    gradient: 'linear-gradient(135deg,#1e1b4b,#312e81,#4338ca)',
-    img: _p('Cinematic book cover illustration mysterious lone figure dark narrow alley long coat hat silhouette foggy street lights noir atmosphere dramatic shadows high contrast fine art style moody color grading 35mm cinematic look', 51001),
-  },
-  {
-    id: 'paisagem', label: 'Paisagem / Cenário', desc: 'Ambiente ou natureza',
-    gradient: 'linear-gradient(135deg,#0c4a6e,#155e75,#164e63)',
-    img: _p('Epic cinematic landscape vast mountain valley golden sunrise breaking through thick clouds layered mountain ranges mist atmospheric depth dramatic sky volumetric light rays fine art matte painting highly detailed environment', 51002),
-  },
-  {
-    id: 'objeto', label: 'Objeto Simbólico', desc: 'Item com significado',
-    gradient: 'linear-gradient(135deg,#3b0764,#6b21a8,#a21caf)',
-    img: _p('Cinematic book cover glowing ornate mystical key floating dark space intricate engravings magical energy particles deep black navy background soft volumetric glow highly detailed metal textures fantasy fine art centered composition', 51003),
-  },
-  {
-    id: 'abstrato', label: 'Formas Abstratas', desc: 'Geometria e texturas',
-    gradient: 'linear-gradient(135deg,#1e3a5f,#1e40af,#3b82f6)',
-    img: _p('Abstract cinematic flowing organic shapes layered translucent geometric forms purple deep blue neon accents dynamic composition sense of motion depth soft glow effects modern surreal digital art futuristic aesthetic premium art direction', 51004),
-  },
-  {
-    id: 'tipografia', label: 'Apenas Tipografia', desc: 'Texto como elemento visual',
-    gradient: 'linear-gradient(135deg,#111827,#1f2937,#111827)',
-    img: _p('Minimalist cinematic book cover focused typography elegant bold title centered strong kerning high-end editorial design black textured background subtle grain soft dramatic lighting premium modern design luxury branding aesthetic no imagery', 51005),
-  },
+  { id: 'pessoa',     label: 'Pessoa / Personagem', desc: 'Figura humana em destaque',  gradient: 'linear-gradient(135deg,#1e1b4b,#312e81,#4338ca)', img: '/capa-cards/elementos/pessoa.webp' },
+  { id: 'paisagem',   label: 'Paisagem / Cenário',  desc: 'Ambiente ou natureza',       gradient: 'linear-gradient(135deg,#0c4a6e,#155e75,#164e63)', img: '/capa-cards/elementos/paisagem.webp' },
+  { id: 'objeto',     label: 'Objeto Simbólico',    desc: 'Item com significado',       gradient: 'linear-gradient(135deg,#3b0764,#6b21a8,#a21caf)', img: '/capa-cards/elementos/objeto.webp' },
+  { id: 'abstrato',   label: 'Formas Abstratas',    desc: 'Geometria e texturas',       gradient: 'linear-gradient(135deg,#1e3a5f,#1e40af,#3b82f6)', img: '/capa-cards/elementos/abstrato.webp' },
+  { id: 'tipografia', label: 'Apenas Tipografia',   desc: 'Texto como elemento visual', gradient: 'linear-gradient(135deg,#111827,#1f2937,#111827)', img: '/capa-cards/elementos/tipografia.webp' },
 ]
 
 const FONTES = [
