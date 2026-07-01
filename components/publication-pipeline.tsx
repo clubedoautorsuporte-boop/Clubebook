@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import {
   FileText, Palette, ImageIcon, Globe, BookMarked, FileCheck,
   Megaphone, Rocket, Headphones, ShoppingCart, Languages,
@@ -8,23 +9,33 @@ import {
 } from 'lucide-react'
 
 const PIPELINE = [
-  { icon: FileText,     label: 'Livro Escrito',       status: 'aqui',    href: null },
+  { icon: FileText,     label: 'Livro Escrito',       status: 'feito',   href: null   },
   { icon: Palette,      label: 'Capa do Livro',        status: 'a-fazer', href: 'capa' },
-  { icon: ImageIcon,    label: 'Ilustrar Livro',       status: 'a-fazer', href: null },
-  { icon: Globe,        label: 'Preparar Publicação',  status: 'a-fazer', href: null },
-  { icon: BookMarked,   label: 'Registro de ISBN',     status: 'a-fazer', href: null },
-  { icon: FileCheck,    label: 'Ficha Catalográfica',  status: 'a-fazer', href: null },
-  { icon: Megaphone,    label: 'Kit de Marketing',     status: 'a-fazer', href: null },
-  { icon: Rocket,       label: 'Plano de Lançamento',  status: 'a-fazer', href: null },
-  { icon: Headphones,   label: 'Audiobook',            status: 'a-fazer', href: null },
-  { icon: ShoppingCart, label: 'Vender',               status: 'a-fazer', href: null },
-  { icon: Languages,    label: 'Tradução',             status: 'a-fazer', href: null },
+  { icon: ImageIcon,    label: 'Ilustrar Livro',       status: 'a-fazer', href: null   },
+  { icon: Globe,        label: 'Preparar Publicação',  status: 'a-fazer', href: null   },
+  { icon: BookMarked,   label: 'Registro de ISBN',     status: 'a-fazer', href: null   },
+  { icon: FileCheck,    label: 'Ficha Catalográfica',  status: 'a-fazer', href: null   },
+  { icon: Megaphone,    label: 'Kit de Marketing',     status: 'a-fazer', href: null   },
+  { icon: Rocket,       label: 'Plano de Lançamento',  status: 'a-fazer', href: null   },
+  { icon: Headphones,   label: 'Audiobook',            status: 'a-fazer', href: null   },
+  { icon: ShoppingCart, label: 'Vender',               status: 'a-fazer', href: null   },
+  { icon: Languages,    label: 'Tradução',             status: 'a-fazer', href: null   },
 ]
 
 const total = PIPELINE.length
 const done = PIPELINE.filter(p => p.status === 'feito').length
 
 export function PublicationPipeline({ slug }: { slug: string }) {
+  const pathname = usePathname()
+
+  // Detecta qual etapa está ativa pela URL
+  const activeHref = (() => {
+    const base = `/dashboard/biblioteca/${slug}`
+    if (pathname === base) return null          // página principal = Livro Escrito
+    const sub = pathname.replace(base + '/', '')
+    return sub || null
+  })()
+
   return (
     <div style={{
       background: '#0d1220',
@@ -63,34 +74,48 @@ export function PublicationPipeline({ slug }: { slug: string }) {
       <div style={{ padding: '8px 0' }}>
         {PIPELINE.map((step, i) => {
           const Icon = step.icon
-          const isAqui = step.status === 'aqui'
           const isFeito = step.status === 'feito'
-          const linkHref = step.href ? `/dashboard/biblioteca/${slug}/${step.href}` : undefined
+          const linkHref = step.href ? `/dashboard/biblioteca/${slug}/${step.href}` : `/dashboard/biblioteca/${slug}`
+
+          // Ativo = página atual corresponde a este step
+          const isActive = step.href === null
+            ? pathname === `/dashboard/biblioteca/${slug}`
+            : activeHref === step.href
 
           const content = (
             <>
               <div style={{
                 width: '28px', height: '28px', borderRadius: '8px', flexShrink: 0,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                background: isFeito ? 'rgba(0,229,195,0.1)' : isAqui ? 'rgba(79,127,255,0.15)' : 'rgba(255,255,255,0.04)',
-                border: isAqui ? '1px solid rgba(79,127,255,0.3)' : '1px solid rgba(255,255,255,0.06)',
+                background: isFeito
+                  ? 'rgba(0,229,195,0.12)'
+                  : isActive
+                    ? 'rgba(79,127,255,0.18)'
+                    : 'rgba(255,255,255,0.04)',
+                border: isActive
+                  ? '1px solid rgba(79,127,255,0.35)'
+                  : isFeito
+                    ? '1px solid rgba(0,229,195,0.2)'
+                    : '1px solid rgba(255,255,255,0.06)',
               }}>
                 <Icon style={{
                   width: '13px', height: '13px',
-                  color: isFeito ? '#00e5c3' : isAqui ? '#4f7fff' : '#3a4a60',
+                  color: isFeito ? '#00e5c3' : isActive ? '#4f7fff' : '#3a4a60',
                 }} strokeWidth={2} />
               </div>
 
               <span style={{
                 flex: 1, fontSize: '12px',
-                fontWeight: isAqui ? 700 : linkHref ? 600 : 500,
-                color: isFeito ? '#00e5c3' : isAqui ? '#fff' : linkHref ? '#a0b0c8' : '#5a6a84',
+                fontWeight: isActive ? 700 : isFeito ? 600 : 500,
+                color: isFeito ? '#00e5c3' : isActive ? '#fff' : step.href ? '#8a9ab8' : '#4a5a70',
               }}>
                 {step.label}
               </span>
 
-              {isFeito && <CheckCircle2 style={{ width: '13px', height: '13px', color: '#00e5c3', flexShrink: 0 }} />}
-              {isAqui && (
+              {isFeito && (
+                <CheckCircle2 style={{ width: '13px', height: '13px', color: '#00e5c3', flexShrink: 0 }} />
+              )}
+              {!isFeito && isActive && (
                 <span style={{
                   fontSize: '8px', fontWeight: 900, textTransform: 'uppercase',
                   letterSpacing: '0.08em', padding: '2px 7px', borderRadius: '999px',
@@ -99,10 +124,12 @@ export function PublicationPipeline({ slug }: { slug: string }) {
                   AQUI
                 </span>
               )}
-              {!isFeito && !isAqui && (
+              {!isFeito && !isActive && (
                 <span style={{
                   fontSize: '8px', fontWeight: 700, textTransform: 'uppercase',
-                  letterSpacing: '0.06em', color: linkHref ? '#5a6a84' : '#3a4a60', flexShrink: 0,
+                  letterSpacing: '0.06em',
+                  color: step.href ? '#4a5a70' : '#2a3a50',
+                  flexShrink: 0,
                 }}>
                   A FAZER
                 </span>
@@ -113,16 +140,16 @@ export function PublicationPipeline({ slug }: { slug: string }) {
           const rowStyle: React.CSSProperties = {
             display: 'flex', alignItems: 'center', gap: '10px',
             padding: '9px 16px', textDecoration: 'none',
-            background: isAqui ? 'rgba(79,127,255,0.07)' : 'transparent',
-            borderLeft: isAqui ? '2px solid #4f7fff' : '2px solid transparent',
+            background: isActive ? 'rgba(79,127,255,0.07)' : 'transparent',
+            borderLeft: isActive ? '2px solid #4f7fff' : '2px solid transparent',
             transition: 'background 0.15s',
-            cursor: linkHref ? 'pointer' : 'default',
+            cursor: step.href !== null || !isActive ? 'pointer' : 'default',
           }
 
-          if (linkHref) {
+          if (!isActive || step.href !== null) {
             return (
               <Link key={i} href={linkHref} style={rowStyle}
-                className="hover:bg-white/5">
+                className="hover:bg-white/[0.03]">
                 {content}
               </Link>
             )
