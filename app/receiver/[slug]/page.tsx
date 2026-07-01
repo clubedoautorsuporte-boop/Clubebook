@@ -4,6 +4,7 @@ import { BookOpen, Download, Sparkles, CheckCircle, ArrowRight } from 'lucide-re
 import type { Metadata } from 'next'
 import { getDelivery } from '@/lib/delivery-store'
 import { ChaptersList, FaqList, PricingBlock } from './receiver-client'
+import HolographicCard from '@/components/ui/holographic-card'
 
 const SLUG_RE = /^[a-f0-9]{32}$/
 
@@ -208,18 +209,7 @@ export default async function ReceiverPage({ params }: Props) {
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {SERVICOS.map(s => (
-              <div key={s.label} className="rounded-xl p-4 flex flex-col gap-2"
-                style={{ background: '#0d1220', border: '1px solid rgba(255,255,255,0.05)' }}>
-                <div className="flex items-center justify-between">
-                  <span className="text-[18px]" style={{ color: s.color }}>{s.icon}</span>
-                  <span className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full"
-                    style={{ background: s.badgeBg, color: s.badgeColor }}>
-                    {s.badge}
-                  </span>
-                </div>
-                <p className="text-[13px] font-bold text-white">{s.label}</p>
-                <p className="text-[11px] leading-snug" style={{ color: '#5a6a84' }}>{s.desc}</p>
-              </div>
+              <HolographicCard key={s.label} {...s} />
             ))}
           </div>
         </div>
