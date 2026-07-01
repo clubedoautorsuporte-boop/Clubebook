@@ -1,12 +1,22 @@
-import {
-  FileText, Palette, ImageIcon, Globe, Megaphone, Rocket,
-  Headphones, ShoppingCart, Languages, BookMarked, FileCheck,
-} from 'lucide-react'
-import type { HolographicCardProps } from '@/components/ui/holographic-card'
+export type ServicoStatus = 'fazendo' | 'a-fazer' | 'em-breve'
 
-export const SERVICOS: Omit<HolographicCardProps, 'className'>[] = [
+export interface ServicoData {
+  iconName: string
+  label: string
+  desc: string
+  color: string
+  badge: string
+  badgeBg: string
+  badgeColor: string
+  status: ServicoStatus
+  statusLabel: string
+  btnLabel: string
+  btnHref?: string
+}
+
+export const SERVICOS: ServicoData[] = [
   {
-    icon: FileText,
+    iconName: 'FileText',
     label: 'Texto',
     desc: 'Escreva e edite o conteúdo do seu livro com IA',
     color: '#f97316',
@@ -18,7 +28,7 @@ export const SERVICOS: Omit<HolographicCardProps, 'className'>[] = [
     btnLabel: 'Abrir Editor',
   },
   {
-    icon: Palette,
+    iconName: 'Palette',
     label: 'Capas',
     desc: 'Uma capa profissional atrai mais leitores!',
     color: '#a855f7',
@@ -30,7 +40,7 @@ export const SERVICOS: Omit<HolographicCardProps, 'className'>[] = [
     btnLabel: 'Criar minha capa',
   },
   {
-    icon: ImageIcon,
+    iconName: 'ImageIcon',
     label: 'Ilustrações',
     desc: 'Ilustrações dão vida à sua história!',
     color: '#f59e0b',
@@ -42,7 +52,7 @@ export const SERVICOS: Omit<HolographicCardProps, 'className'>[] = [
     btnLabel: 'Ilustrar capítulos',
   },
   {
-    icon: Globe,
+    iconName: 'Globe',
     label: 'Publicação',
     desc: 'Prepare tudo para publicar seu livro no mundo!',
     color: '#22d3ee',
@@ -54,7 +64,7 @@ export const SERVICOS: Omit<HolographicCardProps, 'className'>[] = [
     btnLabel: 'Preparar publicação',
   },
   {
-    icon: Megaphone,
+    iconName: 'Megaphone',
     label: 'Kit de Marketing',
     desc: 'Posts prontos pra Instagram, e-mails e banners — só copiar e postar.',
     color: '#ec4899',
@@ -66,7 +76,7 @@ export const SERVICOS: Omit<HolographicCardProps, 'className'>[] = [
     btnLabel: 'Pegar meus materiais',
   },
   {
-    icon: Rocket,
+    iconName: 'Rocket',
     label: 'Plano de Lançamento',
     desc: 'Plano dia-a-dia D-30 → D-0: posts, Amazon KDP, imprensa e influenciadores.',
     color: '#f59e0b',
@@ -78,7 +88,7 @@ export const SERVICOS: Omit<HolographicCardProps, 'className'>[] = [
     btnLabel: 'Planejar meu lançamento',
   },
   {
-    icon: Headphones,
+    iconName: 'Headphones',
     label: 'Audiobook',
     desc: 'Alcance leitores que preferem ouvir histórias!',
     color: '#4f7fff',
@@ -90,7 +100,7 @@ export const SERVICOS: Omit<HolographicCardProps, 'className'>[] = [
     btnLabel: 'Criar audiobook',
   },
   {
-    icon: ShoppingCart,
+    iconName: 'ShoppingCart',
     label: 'Vender',
     desc: 'Monetize seu livro nas principais plataformas de venda.',
     color: '#22d3ee',
@@ -102,7 +112,7 @@ export const SERVICOS: Omit<HolographicCardProps, 'className'>[] = [
     btnLabel: 'Começar a vender',
   },
   {
-    icon: Languages,
+    iconName: 'Languages',
     label: 'Tradução',
     desc: 'Leitores do mundo inteiro podem ler seu livro!',
     color: '#a855f7',
@@ -114,7 +124,7 @@ export const SERVICOS: Omit<HolographicCardProps, 'className'>[] = [
     btnLabel: 'Traduzir agora',
   },
   {
-    icon: BookMarked,
+    iconName: 'BookMarked',
     label: 'Registro de ISBN',
     desc: 'Documentação oficial e registro da sua obra.',
     color: '#f97316',
@@ -126,7 +136,7 @@ export const SERVICOS: Omit<HolographicCardProps, 'className'>[] = [
     btnLabel: 'Registrar ISBN',
   },
   {
-    icon: FileCheck,
+    iconName: 'FileCheck',
     label: 'Ficha Catalográfica',
     desc: 'Ficha catalográfica obrigatória para publicação.',
     color: '#a855f7',

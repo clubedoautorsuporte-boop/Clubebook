@@ -2,6 +2,8 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { BookOpen, Download, Sparkles, CheckCircle, ArrowRight, ArrowLeft } from 'lucide-react'
 import { getDelivery } from '@/lib/delivery-store'
+
+const SLUG_RE = /^[a-f0-9]{32}$/
 import { ChaptersList, FaqList, PricingBlock } from '@/app/receiver/[slug]/receiver-client'
 import HolographicCard from '@/components/ui/holographic-card'
 import { EditorialPlan } from '@/app/receiver/[slug]/editorial-plan'

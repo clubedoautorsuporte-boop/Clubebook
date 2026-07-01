@@ -1,19 +1,29 @@
 'use client'
 
 import React, { useRef } from 'react'
+import {
+  FileText, Palette, ImageIcon, Globe, Megaphone, Rocket,
+  Headphones, ShoppingCart, Languages, BookMarked, FileCheck,
+  ArrowRight, Clock, CheckCircle2, Sparkles,
+} from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
-import { ArrowRight, Clock, CheckCircle2, Sparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import type { ServicoStatus } from '@/lib/servicos-data'
+
+const ICON_MAP: Record<string, LucideIcon> = {
+  FileText, Palette, ImageIcon, Globe, Megaphone, Rocket,
+  Headphones, ShoppingCart, Languages, BookMarked, FileCheck,
+}
 
 export interface HolographicCardProps {
-  icon: LucideIcon
+  iconName: string
   label: string
   desc: string
   color: string
   badge: string
   badgeBg: string
   badgeColor: string
-  status: 'fazendo' | 'a-fazer' | 'em-breve'
+  status: ServicoStatus
   statusLabel: string
   btnLabel: string
   btnHref?: string
@@ -27,10 +37,11 @@ const StatusIcon = ({ status }: { status: string }) => {
 }
 
 const HolographicCard = ({
-  icon: Icon, label, desc, color, badge, badgeBg, badgeColor,
+  iconName, label, desc, color, badge, badgeBg, badgeColor,
   status, statusLabel, btnLabel, btnHref = '#', className,
 }: HolographicCardProps) => {
   const cardRef = useRef<HTMLDivElement>(null)
+  const Icon = ICON_MAP[iconName] ?? FileText
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const card = cardRef.current
@@ -96,7 +107,6 @@ const HolographicCard = ({
 
         {/* Topo: ícone + badge */}
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px' }}>
-          {/* Ícone */}
           <div style={{
             width: '52px', height: '52px', borderRadius: '14px', flexShrink: 0,
             background: `linear-gradient(135deg, ${color}30, ${color}15)`,
@@ -107,7 +117,6 @@ const HolographicCard = ({
             <Icon style={{ color, width: '24px', height: '24px' }} strokeWidth={1.75} />
           </div>
 
-          {/* Badge */}
           <span style={{
             fontSize: '9px', fontWeight: 900, textTransform: 'uppercase',
             letterSpacing: '0.1em', padding: '3px 8px', borderRadius: '999px',

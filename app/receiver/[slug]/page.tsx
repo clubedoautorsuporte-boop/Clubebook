@@ -3,6 +3,8 @@ import Link from 'next/link'
 import { BookOpen, Download, Sparkles, CheckCircle, ArrowRight } from 'lucide-react'
 import type { Metadata } from 'next'
 import { getDelivery } from '@/lib/delivery-store'
+
+const SLUG_RE = /^[a-f0-9]{32}$/
 import { ChaptersList, FaqList, PricingBlock } from './receiver-client'
 import HolographicCard from '@/components/ui/holographic-card'
 import { EditorialPlan } from './editorial-plan'
