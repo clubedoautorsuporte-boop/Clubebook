@@ -1,15 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-const MAX_CHARS = 2500
-
-const VOICES: Record<string, string> = {
-  'rachel':  '21m00Tcm4TlvDq8ikWAM',
-  'bella':   'EXAVITQu4vr4xnSDxMaL',
-  'domi':    'AZnzlk1XvdvUeBnXmlld',
-  'adam':    'pNInz6obpgDQGcFmaJgB',
-  'josh':    'TxGEqnHWrfWFTfGW9XjX',
-  'arnold':  'VR6AewLTigWG4xSOukaG',
-}
+const MAX_CHARS = 4000
 
 function splitIntoChunks(text: string): string[] {
   if (text.length <= MAX_CHARS) return [text]
@@ -29,40 +20,34 @@ function splitIntoChunks(text: string): string[] {
 }
 
 export async function POST(req: NextRequest) {
-  const apiKey = process.env.ELEVENLABS_API_KEY
+  const apiKey = process.env.OPENAI_API_KEY
   if (!apiKey) {
-    return NextResponse.json({ error: 'ELEVENLABS_API_KEY não configurada' }, { status: 500 })
+    return NextResponse.json({ error: 'OPENAI_API_KEY não configurada' }, { status: 500 })
   }
 
-  const { text, voice } = await req.json() as { text: string; voice: string }
+  const { text, voice, hd } = await req.json() as { text: string; voice: string; hd?: boolean }
   if (!text?.trim()) return NextResponse.json({ error: 'Texto vazio' }, { status: 400 })
 
-  const voiceId = VOICES[voice] ?? VOICES['rachel']
+  const model = hd ? 'tts-1-hd' : 'tts-1'
   const chunks = splitIntoChunks(text.trim())
   const audioParts: Buffer[] = []
 
   for (const chunk of chunks) {
-    const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
+    const res = await fetch('https://api.openai.com/v1/audio/speech', {
       method: 'POST',
       headers: {
-        'xi-api-key': apiKey,
+        'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
-        'Accept': 'audio/mpeg',
       },
-      body: JSON.stringify({
-        text: chunk,
-        model_id: 'eleven_multilingual_v2',
-        voice_settings: { stability: 0.5, similarity_boost: 0.75, style: 0.2 },
-      }),
+      body: JSON.stringify({ model, input: chunk, voice, response_format: 'mp3' }),
     })
 
     if (!res.ok) {
       const err = await res.text()
-      return NextResponse.json({ error: `ElevenLabs error: ${err}` }, { status: 502 })
+      return NextResponse.json({ error: `OpenAI TTS error: ${err}` }, { status: 502 })
     }
 
-    const buf = Buffer.from(await res.arrayBuffer())
-    audioParts.push(buf)
+    audioParts.push(Buffer.from(await res.arrayBuffer()))
   }
 
   const audio = Buffer.concat(audioParts)

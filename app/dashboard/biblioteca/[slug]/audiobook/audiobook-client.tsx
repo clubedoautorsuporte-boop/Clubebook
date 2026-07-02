@@ -8,12 +8,12 @@ import {
 } from 'lucide-react'
 
 const VOICES = [
-  { id: 'rachel', label: 'Rachel', tipo: 'Feminina',  qualidade: 'Multilingual', cor: '#a855f7' },
-  { id: 'bella',  label: 'Bella',  tipo: 'Feminina',  qualidade: 'Multilingual', cor: '#ec4899' },
-  { id: 'domi',   label: 'Domi',   tipo: 'Feminina',  qualidade: 'Multilingual', cor: '#10b981' },
-  { id: 'adam',   label: 'Adam',   tipo: 'Masculina', qualidade: 'Multilingual', cor: '#4f7fff' },
-  { id: 'josh',   label: 'Josh',   tipo: 'Masculina', qualidade: 'Multilingual', cor: '#f59e0b' },
-  { id: 'arnold', label: 'Arnold', tipo: 'Masculina', qualidade: 'Multilingual', cor: '#6a7a96' },
+  { id: 'nova',    label: 'Nova',    tipo: 'Feminina',  qualidade: 'HD', cor: '#a855f7' },
+  { id: 'shimmer', label: 'Shimmer', tipo: 'Feminina',  qualidade: 'HD', cor: '#ec4899' },
+  { id: 'alloy',   label: 'Alloy',   tipo: 'Neutra',    qualidade: 'HD', cor: '#10b981' },
+  { id: 'onyx',    label: 'Onyx',    tipo: 'Masculina', qualidade: 'HD', cor: '#4f7fff' },
+  { id: 'fable',   label: 'Fable',   tipo: 'Masculina', qualidade: 'HD', cor: '#f59e0b' },
+  { id: 'echo',    label: 'Echo',    tipo: 'Masculina', qualidade: 'HD', cor: '#6a7a96' },
 ]
 
 type ChapterState = {
@@ -32,7 +32,7 @@ interface Props {
 }
 
 export function AudiobookClient({ slug, titulo, nomeAutor, capitulos }: Props) {
-  const [voice, setVoice] = useState('rachel')
+  const [voice, setVoice] = useState('nova')
   const [chapters, setChapters] = useState<Record<number, ChapterState>>({})
   const [playingIndex, setPlayingIndex] = useState<number | null>(null)
   const [expandedVoices, setExpandedVoices] = useState(false)
@@ -319,7 +319,7 @@ export function AudiobookClient({ slug, titulo, nomeAutor, capitulos }: Props) {
         {/* Footer info */}
         <div style={{ marginTop: 28, padding: '16px 20px', borderRadius: 12, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', gap: 20, flexWrap: 'wrap' as const }}>
           {[
-            { label: 'Powered by', value: 'ElevenLabs AI' },
+            { label: 'Powered by', value: 'OpenAI TTS' },
             { label: 'Qualidade', value: '24kHz · MP3' },
             { label: 'Idioma', value: 'Português Brasileiro' },
           ].map(({ label, value }) => (
