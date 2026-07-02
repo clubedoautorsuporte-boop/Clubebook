@@ -207,13 +207,20 @@ export default async function BibliotecaLivroPage({ params }: Props) {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
               {capitulos.map((cap: typeof capitulos[0], i: number) => {
                 const paginas = estimarPaginas(cap.blocos ?? [])
-                const blocos = (cap.blocos ?? []).map(stripMd).filter(Boolean)
-                const propIdx = blocos.findIndex((b: string) => /^propósito|^proposito/i.test(b))
-                const topicos = propIdx >= 0 ? blocos.slice(0, propIdx) : blocos
-                const proposito = propIdx >= 0 ? blocos[propIdx] : null
+
+                // Usa a descrição planejada como resumo do capítulo (independente de ser livro gerado ou preview)
+                const descricao = stripMd(cap.descricao ?? '')
+
+                // Tópicos: apenas blocos que parecem bullets (curtos, sem prosa longa)
+                const bloquesRaw = (cap.blocos ?? []).map(stripMd).filter(Boolean)
+                const propIdx = bloquesRaw.findIndex((b: string) => /^propósito|^proposito/i.test(b))
+                const candidatos = propIdx >= 0 ? bloquesRaw.slice(0, propIdx) : bloquesRaw
+                // Considera tópico se tiver menos de 120 chars (bullet curto, não prosa)
+                const topicos = candidatos.filter((b: string) => b.length < 120)
+                const proposito = propIdx >= 0 ? bloquesRaw[propIdx] : null
 
                 return (
-                  <div key={i} style={{ display: 'grid', gridTemplateColumns: '36px 1fr 48px', gap: 12, paddingBottom: 32, marginBottom: 32, borderBottom: i < capitulos.length - 1 ? '1px solid #f0f0f0' : 'none' }}>
+                  <div key={i} style={{ display: 'grid', gridTemplateColumns: '36px 1fr 48px', gap: 12, paddingBottom: 28, marginBottom: 28, borderBottom: i < capitulos.length - 1 ? '1px solid #f0f0f0' : 'none' }}>
 
                     {/* Número */}
                     <div>
@@ -224,24 +231,32 @@ export default async function BibliotecaLivroPage({ params }: Props) {
 
                     {/* Conteúdo */}
                     <div>
-                      <p style={{ fontSize: 13, fontWeight: 800, color: '#111', margin: '0 0 12px', lineHeight: 1.4, fontFamily: 'system-ui', textTransform: 'uppercase' as const, letterSpacing: '0.03em' }}>
+                      <p style={{ fontSize: 13, fontWeight: 800, color: '#111', margin: '0 0 10px', lineHeight: 1.4, fontFamily: 'system-ui', textTransform: 'uppercase' as const, letterSpacing: '0.03em' }}>
                         {cap.titulo}
                       </p>
 
-                      {/* Descrição */}
-                      {cap.descricao && (
-                        <p style={{ fontSize: 14, lineHeight: 1.8, color: '#333', margin: '0 0 14px', fontFamily: 'Georgia, serif', textAlign: 'justify' }}>
-                          {stripMd(cap.descricao)}
+                      {/* Descrição — exatamente 9 linhas */}
+                      {descricao && (
+                        <p style={{
+                          fontSize: 14, lineHeight: 1.72, color: '#333',
+                          margin: topicos.length > 0 || proposito ? '0 0 12px' : '0',
+                          fontFamily: 'Georgia, serif', textAlign: 'justify',
+                          display: '-webkit-box',
+                          WebkitLineClamp: 9,
+                          WebkitBoxOrient: 'vertical' as const,
+                          overflow: 'hidden',
+                        }}>
+                          {descricao}
                         </p>
                       )}
 
-                      {/* Tópicos */}
+                      {/* Tópicos curtos (bullets de planejamento) */}
                       {topicos.length > 0 && (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 5, marginBottom: proposito ? 12 : 0 }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: proposito ? 10 : 0 }}>
                           {topicos.map((t: string, j: number) => (
                             <div key={j} style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
-                              <span style={{ fontSize: 11, color: '#999', marginTop: 4, flexShrink: 0 }}>•</span>
-                              <p style={{ fontSize: 13, lineHeight: 1.7, color: '#555', margin: 0, fontFamily: 'Georgia, serif' }}>{t}</p>
+                              <span style={{ fontSize: 11, color: '#bbb', marginTop: 4, flexShrink: 0 }}>•</span>
+                              <p style={{ fontSize: 13, lineHeight: 1.65, color: '#666', margin: 0, fontFamily: 'Georgia, serif' }}>{t}</p>
                             </div>
                           ))}
                         </div>
@@ -249,7 +264,7 @@ export default async function BibliotecaLivroPage({ params }: Props) {
 
                       {/* Propósito */}
                       {proposito && (
-                        <p style={{ fontSize: 13, lineHeight: 1.7, color: '#777', margin: 0, fontFamily: 'Georgia, serif', fontStyle: 'italic' }}>
+                        <p style={{ fontSize: 12, lineHeight: 1.65, color: '#999', margin: 0, fontFamily: 'Georgia, serif', fontStyle: 'italic' }}>
                           {proposito}
                         </p>
                       )}
