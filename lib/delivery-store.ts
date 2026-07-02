@@ -7,9 +7,11 @@ export type DeliveryRecord = {
   slug: string
   nomeAutor: string
   planJson: BriefingPlan
+  roteiroJson: unknown | null
   pdfBase64: string
   createdAt: Date
   expiresAt: Date
+  tipo?: string
 }
 
 export async function createDelivery(data: {
@@ -55,8 +57,17 @@ export async function getDelivery(slug: string): Promise<DeliveryRecord | null> 
     slug: d.slug,
     nomeAutor: d.nomeAutor,
     planJson: d.planJson as unknown as BriefingPlan,
+    roteiroJson: (d as Record<string, unknown>).roteiroJson ?? null,
     pdfBase64: d.pdfBase64,
     createdAt: d.createdAt,
     expiresAt: d.expiresAt,
+    tipo: (d as Record<string, unknown>).tipo as string | undefined,
   }
+}
+
+export async function saveRoteiroJson(slug: string, roteiroJson: unknown): Promise<void> {
+  await prisma.delivery.update({
+    where: { slug },
+    data: { roteiroJson: roteiroJson as object },
+  })
 }

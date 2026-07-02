@@ -75,17 +75,18 @@ model Draft {
 }
 
 model Delivery {
-  id        String   @id @default(cuid())
-  slug      String   @unique @db.VarChar(32)
-  nomeAutor String   @db.VarChar(100)
-  email     String?  @db.VarChar(254)
-  tipo      String   @default("preview") // "preview" | "livro"
-  planJson  Json
-  pdfBase64 String   @db.Text
-  createdAt DateTime @default(now())
-  expiresAt DateTime
-  userId    String?
-  user      User?    @relation(fields: [userId], references: [id])
+  id          String   @id @default(cuid())
+  slug        String   @unique @db.VarChar(32)
+  nomeAutor   String   @db.VarChar(100)
+  email       String?  @db.VarChar(254)
+  tipo        String   @default("preview") // "preview" | "livro"
+  planJson    Json
+  roteiroJson Json?
+  pdfBase64   String   @db.Text
+  createdAt   DateTime @default(now())
+  expiresAt   DateTime
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id])
 
   @@index([slug])
   @@index([expiresAt])

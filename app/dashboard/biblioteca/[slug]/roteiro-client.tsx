@@ -28,17 +28,22 @@ interface Props {
   tipo: string
   paginas: number[]
   resumosFallback: string[]
+  roteiroInicial: unknown | null
 }
 
 const CACHE_KEY = (slug: string) => `roteiro_v2_${slug}`
 
-export function RoteiroClient({ slug, titulo, autor, premissa, publico_alvo, sinopse, capitulos, tipo, paginas, resumosFallback }: Props) {
-  const [roteiro, setRoteiro] = useState<RoteiroCapitulo[] | null>(null)
-  const [loading, setLoading] = useState(true)
+export function RoteiroClient({ slug, titulo, autor, premissa, publico_alvo, sinopse, capitulos, tipo, paginas, resumosFallback, roteiroInicial }: Props) {
+  const inicial = (roteiroInicial as { capitulos?: RoteiroCapitulo[] } | null)?.capitulos ?? null
+  const [roteiro, setRoteiro] = useState<RoteiroCapitulo[] | null>(inicial)
+  const [loading, setLoading] = useState(inicial === null)
   const [erro, setErro] = useState<string | null>(null)
 
   async function gerarRoteiro(force = false) {
-    // Tenta cache primeiro
+    // Se já tem roteiro do banco e não é regeneração forçada, não faz nada
+    if (!force && roteiro !== null) return
+
+    // Tenta cache localStorage
     if (!force) {
       try {
         const cached = localStorage.getItem(CACHE_KEY(slug))
@@ -63,6 +68,13 @@ export function RoteiroClient({ slug, titulo, autor, premissa, publico_alvo, sin
 
       setRoteiro(data.capitulos)
       try { localStorage.setItem(CACHE_KEY(slug), JSON.stringify(data.capitulos)) } catch {}
+
+      // Salva no banco para próximas visitas serem instantâneas
+      fetch(`/api/roteiro/${slug}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      }).catch(() => {})
     } catch (e) {
       setErro(e instanceof Error ? e.message : 'Falha ao gerar roteiro')
     } finally {

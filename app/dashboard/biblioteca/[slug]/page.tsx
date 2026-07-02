@@ -203,7 +203,7 @@ export default async function BibliotecaLivroPage({ params }: Props) {
           {/* ── Divisor ── */}
           <div style={{ borderTop: '1px solid #ddd', margin: '8px 0 32px' }} />
 
-          {/* ── Roteiro de Capítulos (gerado pela IA ao entrar na página) ── */}
+          {/* ── Roteiro de Capítulos ── */}
           <RoteiroClient
             slug={slug}
             titulo={plan.titulo}
@@ -219,6 +219,7 @@ export default async function BibliotecaLivroPage({ params }: Props) {
             resumosFallback={capitulos.map((cap: typeof capitulos[0]) =>
               montarResumoCapitulo(cap.descricao, cap.blocos ?? [])
             )}
+            roteiroInicial={delivery.roteiroJson ?? null}
           />
 
           {/* ── Notas de Pesquisa ── */}
