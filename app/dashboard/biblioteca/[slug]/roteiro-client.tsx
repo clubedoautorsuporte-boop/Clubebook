@@ -12,7 +12,9 @@ interface Capitulo {
 interface RoteiroCapitulo {
   numero: number
   titulo: string
-  linhas: string[]
+  resumo: string
+  topicos: string[]
+  proposito: string
 }
 
 interface Props {
@@ -27,12 +29,26 @@ interface Props {
   paginas: number[]
 }
 
-export function RoteiroClient({ titulo, autor, premissa, publico_alvo, sinopse, capitulos, tipo, paginas }: Props) {
+const CACHE_KEY = (slug: string) => `roteiro_v2_${slug}`
+
+export function RoteiroClient({ slug, titulo, autor, premissa, publico_alvo, sinopse, capitulos, tipo, paginas }: Props) {
   const [roteiro, setRoteiro] = useState<RoteiroCapitulo[] | null>(null)
   const [loading, setLoading] = useState(true)
   const [erro, setErro] = useState<string | null>(null)
 
-  async function gerarRoteiro() {
+  async function gerarRoteiro(force = false) {
+    // Tenta cache primeiro
+    if (!force) {
+      try {
+        const cached = localStorage.getItem(CACHE_KEY(slug))
+        if (cached) {
+          setRoteiro(JSON.parse(cached))
+          setLoading(false)
+          return
+        }
+      } catch {}
+    }
+
     setLoading(true)
     setErro(null)
     try {
@@ -43,7 +59,9 @@ export function RoteiroClient({ titulo, autor, premissa, publico_alvo, sinopse, 
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Erro desconhecido')
+
       setRoteiro(data.capitulos)
+      try { localStorage.setItem(CACHE_KEY(slug), JSON.stringify(data.capitulos)) } catch {}
     } catch (e) {
       setErro(e instanceof Error ? e.message : 'Falha ao gerar roteiro')
     } finally {
@@ -59,21 +77,26 @@ export function RoteiroClient({ titulo, autor, premissa, publico_alvo, sinopse, 
       {/* Cabeçalho */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, flexWrap: 'wrap', gap: 10 }}>
         <p style={{ fontSize: 11, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.18em', color: '#111', margin: 0, fontFamily: 'system-ui' }}>
-          Roteiro de Capítulos
+          Estrutura de Capítulos
         </p>
 
         {!loading && (
           <button
-            onClick={gerarRoteiro}
+            onClick={() => gerarRoteiro(true)}
             style={{
               display: 'inline-flex', alignItems: 'center', gap: 6,
               fontSize: 11, fontWeight: 700, cursor: 'pointer',
-              color: '#6366f1', background: 'transparent',
-              border: '1px solid #e0e0e0', borderRadius: 7, padding: '5px 12px',
-              transition: 'all 0.2s',
+              color: '#888', background: 'transparent',
+              border: '1px solid #e8e8e8', borderRadius: 7, padding: '5px 12px',
+              fontFamily: 'system-ui',
             }}
           >
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
+              <path d="M21 3v5h-5"/>
+              <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
+              <path d="M8 16H3v5"/>
+            </svg>
             Regenerar
           </button>
         )}
@@ -83,7 +106,7 @@ export function RoteiroClient({ titulo, autor, premissa, publico_alvo, sinopse, 
         <div style={{ background: '#fff5f5', border: '1px solid #fecaca', borderRadius: 8, padding: '10px 14px', marginBottom: 16 }}>
           <p style={{ fontSize: 13, color: '#dc2626', margin: 0, fontFamily: 'system-ui' }}>
             {erro} —{' '}
-            <button onClick={gerarRoteiro} style={{ background: 'none', border: 'none', color: '#6366f1', cursor: 'pointer', fontSize: 13, fontWeight: 700, padding: 0 }}>
+            <button onClick={() => gerarRoteiro(true)} style={{ background: 'none', border: 'none', color: '#6366f1', cursor: 'pointer', fontSize: 13, fontWeight: 700, padding: 0 }}>
               Tentar novamente
             </button>
           </p>
@@ -92,15 +115,15 @@ export function RoteiroClient({ titulo, autor, premissa, publico_alvo, sinopse, 
 
       {/* Cabeçalho da tabela */}
       <div style={{ display: 'grid', gridTemplateColumns: '36px 1fr 48px', gap: 12, borderBottom: '1px solid #ddd', paddingBottom: 8, marginBottom: 20 }}>
-        <span style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#bbb' }}>Cap</span>
-        <span style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#bbb' }}>Estrutura de Capítulos</span>
-        <span style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#bbb', textAlign: 'right' }}>Págs</span>
+        <span style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#bbb', fontFamily: 'system-ui' }}>Cap</span>
+        <span style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#bbb', fontFamily: 'system-ui' }}>Estrutura de Capítulos</span>
+        <span style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#bbb', fontFamily: 'system-ui', textAlign: 'right' }}>Págs</span>
       </div>
 
       {/* Capítulos */}
       <div>
         {capitulos.map((cap, i) => {
-          const roteiroCapitulo = roteiro?.find(r => r.numero === cap.numero)
+          const rc = roteiro?.find(r => r.numero === cap.numero)
           const pags = paginas[i] ?? 4
 
           return (
@@ -115,41 +138,56 @@ export function RoteiroClient({ titulo, autor, premissa, publico_alvo, sinopse, 
 
               {/* Conteúdo */}
               <div>
-                <p style={{ fontSize: 13, fontWeight: 800, color: '#111', margin: '0 0 12px', lineHeight: 1.4, fontFamily: 'system-ui', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+                <p style={{ fontSize: 13, fontWeight: 800, color: '#111', margin: '0 0 10px', lineHeight: 1.4, fontFamily: 'system-ui', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
                   {cap.titulo}
                 </p>
 
                 {loading ? (
-                  /* Skeleton de 9 linhas */
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                    {Array.from({ length: 9 }).map((_, j) => (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+                    {Array.from({ length: 7 }).map((_, j) => (
                       <div key={j} style={{
-                        height: 13, borderRadius: 4,
+                        height: 13, borderRadius: 3,
                         background: 'linear-gradient(90deg,#f0f0f0 25%,#e8e8e8 50%,#f0f0f0 75%)',
                         backgroundSize: '200% 100%',
                         animation: 'shimmer 1.5s infinite',
-                        width: j === 8 ? '55%' : j % 3 === 1 ? '85%' : '100%',
+                        width: j === 6 ? '60%' : '100%',
                       }} />
                     ))}
+                    <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                      {[80, 70, 75].map((w, j) => (
+                        <div key={j} style={{
+                          height: 11, borderRadius: 3,
+                          background: 'linear-gradient(90deg,#f5f5f5 25%,#ececec 50%,#f5f5f5 75%)',
+                          backgroundSize: '200% 100%',
+                          animation: 'shimmer 1.5s infinite',
+                          width: `${w}%`,
+                        }} />
+                      ))}
+                    </div>
                   </div>
-                ) : roteiroCapitulo ? (
-                  /* 9 linhas numeradas geradas pela IA */
-                  <ol style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 8 }}>
-                    {roteiroCapitulo.linhas.slice(0, 9).map((linha, j) => (
-                      <li key={j} style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-                        <span style={{
-                          fontSize: 10, fontWeight: 900, color: '#8b5cf6',
-                          fontFamily: 'system-ui', flexShrink: 0, marginTop: 4,
-                          minWidth: 16, textAlign: 'right',
-                        }}>
-                          {j + 1}.
-                        </span>
-                        <p style={{ fontSize: 13.5, lineHeight: 1.7, color: '#2d2d2d', margin: 0, fontFamily: 'Georgia, serif' }}>
-                          {linha}
-                        </p>
-                      </li>
-                    ))}
-                  </ol>
+                ) : rc ? (
+                  <>
+                    <p style={{ fontSize: 14, lineHeight: 1.78, color: '#333', margin: '0 0 12px', fontFamily: 'Georgia, serif', textAlign: 'justify' }}>
+                      {rc.resumo}
+                    </p>
+
+                    {rc.topicos?.length > 0 && (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 5, marginBottom: rc.proposito ? 10 : 0 }}>
+                        {rc.topicos.map((t, j) => (
+                          <div key={j} style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+                            <span style={{ color: '#ccc', flexShrink: 0, marginTop: 2, fontSize: 13 }}>•</span>
+                            <p style={{ fontSize: 13, lineHeight: 1.6, color: '#666', margin: 0, fontFamily: 'Georgia, serif' }}>{t}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {rc.proposito && (
+                      <p style={{ fontSize: 12, lineHeight: 1.6, color: '#aaa', margin: 0, fontFamily: 'Georgia, serif', fontStyle: 'italic' }}>
+                        Propósito: {rc.proposito}
+                      </p>
+                    )}
+                  </>
                 ) : null}
               </div>
 

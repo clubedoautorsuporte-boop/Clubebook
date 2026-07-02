@@ -36,17 +36,14 @@ export async function POST(req: NextRequest) {
 
   const livroGerado = tipo === 'livro'
 
-  // Para livros gerados: usa o conteúdo real dos blocos (prosa)
-  // Para planejamento: usa descricao + blocos de planejamento
   const capsList = capitulos.map(c => {
-    const blocos = (c.blocos ?? []).slice(0, 3).join(' ').slice(0, 600)
     const conteudo = livroGerado
-      ? `Conteúdo: ${blocos}`
-      : `Descrição: ${c.descricao ?? ''} | Blocos: ${(c.blocos ?? []).slice(0, 2).join('; ')}`
+      ? (c.blocos ?? []).slice(0, 2).join(' ').slice(0, 500)
+      : `${c.descricao ?? ''} ${(c.blocos ?? []).slice(0, 2).join(' ')}`.slice(0, 500)
     return `Capítulo ${c.numero}: ${c.titulo}\n${conteudo}`
   }).join('\n\n')
 
-  const prompt = `Você é um roteirista profissional. Com base nos dados do livro abaixo, crie um ROTEIRO DETALHADO com exatamente 9 linhas por capítulo, explicando o que o redator deve produzir em cada capítulo.
+  const prompt = `Você é um especialista em estruturação de livros. Com base nos dados abaixo, escreva para cada capítulo um BRIEFING DETALHADO em parágrafo corrido — sem listas, sem números — explicando claramente o que acontecerá naquele capítulo e o que o redator deve produzir.
 
 LIVRO: "${titulo}"
 AUTOR: ${autor}
@@ -57,14 +54,11 @@ ${sinopse ? `SINOPSE: ${sinopse}` : ''}
 CAPÍTULOS:
 ${capsList}
 
-REGRAS OBRIGATÓRIAS:
-- Cada capítulo DEVE ter EXATAMENTE 9 linhas — nem mais, nem menos
-- Cada linha explica objetivamente um elemento, cena, desenvolvimento ou momento do capítulo
-- NÃO escreva a história em si — apenas descreva o que será desenvolvido
-- Cada linha deve ser específica e orientar o redator sobre o que produzir
-- As linhas devem seguir ordem cronológica/lógica dentro do capítulo
-- Conecte os capítulos naturalmente entre si
-- Seja objetivo, profissional e informativo
+REGRAS:
+- Cada capítulo terá exatamente 3 campos: "resumo", "topicos" e "proposito"
+- "resumo": parágrafo único corrido de 9 linhas (≈ 500 a 600 caracteres) explicando o que acontece no capítulo — NÃO escreva a história, apenas descreva o conteúdo que o redator deve criar
+- "topicos": array com 3 bullets curtos (cada um com menos de 80 chars) destacando os principais elementos do capítulo
+- "proposito": 1 frase curta explicando o objetivo narrativo do capítulo
 
 Retorne APENAS JSON válido, sem markdown:
 {
@@ -72,7 +66,9 @@ Retorne APENAS JSON válido, sem markdown:
     {
       "numero": 1,
       "titulo": "título do capítulo",
-      "linhas": ["linha 1", "linha 2", "linha 3", "linha 4", "linha 5", "linha 6", "linha 7", "linha 8", "linha 9"]
+      "resumo": "parágrafo corrido de 9 linhas descrevendo o conteúdo...",
+      "topicos": ["elemento chave 1", "elemento chave 2", "elemento chave 3"],
+      "proposito": "objetivo narrativo deste capítulo"
     }
   ]
 }`

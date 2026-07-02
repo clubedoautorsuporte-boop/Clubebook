@@ -306,9 +306,31 @@ function CriarPageContent() {
         body: JSON.stringify({ nome: form.nome, email, telefone, plan }),
       })
       if (!sendRes.ok) { const d = await sendRes.json(); throw new Error(d.error || 'Falha ao enviar ebook') }
+      const sendData = await sendRes.json()
 
       setGeracaoEtapa('Enviando via WhatsApp...')
       if (draftId) fetch(`/api/draft?id=${draftId}`, { method: 'DELETE' }).catch(() => {})
+
+      // Pré-gera roteiro em background e salva no localStorage
+      if (sendData?.deliveryUrl) {
+        const slugMatch = String(sendData.deliveryUrl).match(/\/([a-f0-9]{32})/)
+        if (slugMatch) {
+          const slug = slugMatch[1]
+          fetch('/api/roteiro', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              titulo: plan.titulo, autor: form.nome || 'Autor',
+              premissa: plan.premissa, publico_alvo: plan.publico_alvo, sinopse: plan.sinopse,
+              capitulos: plan.capitulos, tipo: 'preview',
+            }),
+          }).then(r => r.json()).then(data => {
+            if (data.capitulos) {
+              try { localStorage.setItem(`roteiro_v2_${slug}`, JSON.stringify(data.capitulos)) } catch {}
+            }
+          }).catch(() => {})
+        }
+      }
       setSuccess(true)
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Erro inesperado.')
