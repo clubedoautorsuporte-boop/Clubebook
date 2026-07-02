@@ -27,11 +27,12 @@ interface Props {
   capitulos: Capitulo[]
   tipo: string
   paginas: number[]
+  resumosFallback: string[]
 }
 
 const CACHE_KEY = (slug: string) => `roteiro_v2_${slug}`
 
-export function RoteiroClient({ slug, titulo, autor, premissa, publico_alvo, sinopse, capitulos, tipo, paginas }: Props) {
+export function RoteiroClient({ slug, titulo, autor, premissa, publico_alvo, sinopse, capitulos, tipo, paginas, resumosFallback }: Props) {
   const [roteiro, setRoteiro] = useState<RoteiroCapitulo[] | null>(null)
   const [loading, setLoading] = useState(true)
   const [erro, setErro] = useState<string | null>(null)
@@ -143,28 +144,17 @@ export function RoteiroClient({ slug, titulo, autor, premissa, publico_alvo, sin
                 </p>
 
                 {loading ? (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
-                    {Array.from({ length: 7 }).map((_, j) => (
-                      <div key={j} style={{
-                        height: 13, borderRadius: 3,
-                        background: 'linear-gradient(90deg,#f0f0f0 25%,#e8e8e8 50%,#f0f0f0 75%)',
-                        backgroundSize: '200% 100%',
-                        animation: 'shimmer 1.5s infinite',
-                        width: j === 6 ? '60%' : '100%',
-                      }} />
-                    ))}
-                    <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 6 }}>
-                      {[80, 70, 75].map((w, j) => (
-                        <div key={j} style={{
-                          height: 11, borderRadius: 3,
-                          background: 'linear-gradient(90deg,#f5f5f5 25%,#ececec 50%,#f5f5f5 75%)',
-                          backgroundSize: '200% 100%',
-                          animation: 'shimmer 1.5s infinite',
-                          width: `${w}%`,
-                        }} />
-                      ))}
-                    </div>
-                  </div>
+                  /* Enquanto a IA gera, mostra o resumo estático do planejamento */
+                  <p style={{
+                    fontSize: 14, lineHeight: 1.78, color: '#555',
+                    margin: 0, fontFamily: 'Georgia, serif', textAlign: 'justify',
+                    display: '-webkit-box',
+                    WebkitLineClamp: 9,
+                    WebkitBoxOrient: 'vertical',
+                    overflow: 'hidden',
+                  }}>
+                    {resumosFallback[i] ?? ''}
+                  </p>
                 ) : rc ? (
                   <>
                     <p style={{ fontSize: 14, lineHeight: 1.78, color: '#333', margin: '0 0 12px', fontFamily: 'Georgia, serif', textAlign: 'justify' }}>
@@ -200,12 +190,6 @@ export function RoteiroClient({ slug, titulo, autor, premissa, publico_alvo, sin
         })}
       </div>
 
-      <style>{`
-        @keyframes shimmer {
-          0% { background-position: 200% 0; }
-          100% { background-position: -200% 0; }
-        }
-      `}</style>
     </div>
   )
 }

@@ -216,6 +216,9 @@ export default async function BibliotecaLivroPage({ params }: Props) {
             paginas={capitulos.map((cap: typeof capitulos[0]) =>
               estimarPaginas(cap.blocos ?? [])
             )}
+            resumosFallback={capitulos.map((cap: typeof capitulos[0]) =>
+              montarResumoCapitulo(cap.descricao, cap.blocos ?? [])
+            )}
           />
 
           {/* ── Notas de Pesquisa ── */}
