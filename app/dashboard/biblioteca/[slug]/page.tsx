@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { ArrowLeft, Download, RefreshCw, Pencil } from 'lucide-react'
 import { getDelivery } from '@/lib/delivery-store'
 import { CheckoutButton } from '@/components/checkout-button'
+import { RoteiroClient } from './roteiro-client'
 
 const SLUG_RE = /^[a-f0-9]{32}$/
 type Props = { params: Promise<{ slug: string }> }
@@ -14,6 +15,20 @@ function stripMd(text: string): string {
     .replace(/\*(.*?)\*/g, '$1')
     .replace(/^[-*•]\s+/gm, '')
     .trim()
+}
+
+function stripBlocoPrefix(text: string): string {
+  // Remove "Bloco 1:", "Bloco 2 -", etc.
+  return text.replace(/^[Bb]loco\s*\d+\s*[:\-–]\s*/i, '').trim()
+}
+
+function montarResumoCapitulo(descricao: string, blocos: string[]): string {
+  const desc = stripMd(descricao ?? '')
+  // Filtra blocos que são planejamento (short) ou início de prosa, remove prefixo "Bloco N:"
+  const extras = blocos
+    .map(b => stripBlocoPrefix(stripMd(b)))
+    .filter(b => b.length > 10 && !/^propósito|^proposito/i.test(b))
+  return [desc, ...extras].filter(Boolean).join(' ')
 }
 
 function estimarPaginas(blocos: string[]): number {
@@ -188,97 +203,20 @@ export default async function BibliotecaLivroPage({ params }: Props) {
           {/* ── Divisor ── */}
           <div style={{ borderTop: '1px solid #ddd', margin: '8px 0 32px' }} />
 
-          {/* ── Gerador de Estrutura ── */}
-          <div style={{ marginBottom: 40 }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-              <p style={{ fontSize: 11, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.18em', color: '#111', margin: 0, fontFamily: 'system-ui' }}>
-                Gerador de Estrutura
-              </p>
-            </div>
-
-            {/* Cabeçalho da tabela */}
-            <div style={{ display: 'grid', gridTemplateColumns: '36px 1fr 48px', gap: 12, borderBottom: '1px solid #ddd', paddingBottom: 8, marginBottom: 20 }}>
-              <span style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#bbb' }}>Cap</span>
-              <span style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#bbb' }}>Estrutura de Capítulos</span>
-              <span style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#bbb', textAlign: 'right' as const }}>Págs</span>
-            </div>
-
-            {/* Capítulos */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-              {capitulos.map((cap: typeof capitulos[0], i: number) => {
-                const paginas = estimarPaginas(cap.blocos ?? [])
-
-                // Usa a descrição planejada como resumo do capítulo (independente de ser livro gerado ou preview)
-                const descricao = stripMd(cap.descricao ?? '')
-
-                // Tópicos: apenas blocos que parecem bullets (curtos, sem prosa longa)
-                const bloquesRaw = (cap.blocos ?? []).map(stripMd).filter(Boolean)
-                const propIdx = bloquesRaw.findIndex((b: string) => /^propósito|^proposito/i.test(b))
-                const candidatos = propIdx >= 0 ? bloquesRaw.slice(0, propIdx) : bloquesRaw
-                // Considera tópico se tiver menos de 120 chars (bullet curto, não prosa)
-                const topicos = candidatos.filter((b: string) => b.length < 120)
-                const proposito = propIdx >= 0 ? bloquesRaw[propIdx] : null
-
-                return (
-                  <div key={i} style={{ display: 'grid', gridTemplateColumns: '36px 1fr 48px', gap: 12, paddingBottom: 28, marginBottom: 28, borderBottom: i < capitulos.length - 1 ? '1px solid #f0f0f0' : 'none' }}>
-
-                    {/* Número */}
-                    <div>
-                      <span style={{ fontSize: 12, fontWeight: 800, color: '#bbb', fontFamily: 'system-ui' }}>
-                        {String(cap.numero).padStart(2, '0')}
-                      </span>
-                    </div>
-
-                    {/* Conteúdo */}
-                    <div>
-                      <p style={{ fontSize: 13, fontWeight: 800, color: '#111', margin: '0 0 10px', lineHeight: 1.4, fontFamily: 'system-ui', textTransform: 'uppercase' as const, letterSpacing: '0.03em' }}>
-                        {cap.titulo}
-                      </p>
-
-                      {/* Descrição — exatamente 9 linhas */}
-                      {descricao && (
-                        <p style={{
-                          fontSize: 14, lineHeight: 1.72, color: '#333',
-                          margin: topicos.length > 0 || proposito ? '0 0 12px' : '0',
-                          fontFamily: 'Georgia, serif', textAlign: 'justify',
-                          display: '-webkit-box',
-                          WebkitLineClamp: 9,
-                          WebkitBoxOrient: 'vertical' as const,
-                          overflow: 'hidden',
-                        }}>
-                          {descricao}
-                        </p>
-                      )}
-
-                      {/* Tópicos curtos (bullets de planejamento) */}
-                      {topicos.length > 0 && (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: proposito ? 10 : 0 }}>
-                          {topicos.map((t: string, j: number) => (
-                            <div key={j} style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
-                              <span style={{ fontSize: 11, color: '#bbb', marginTop: 4, flexShrink: 0 }}>•</span>
-                              <p style={{ fontSize: 13, lineHeight: 1.65, color: '#666', margin: 0, fontFamily: 'Georgia, serif' }}>{t}</p>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-
-                      {/* Propósito */}
-                      {proposito && (
-                        <p style={{ fontSize: 12, lineHeight: 1.65, color: '#999', margin: 0, fontFamily: 'Georgia, serif', fontStyle: 'italic' }}>
-                          {proposito}
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Páginas */}
-                    <div style={{ textAlign: 'right' as const }}>
-                      <span style={{ fontSize: 11, color: '#bbb', fontFamily: 'Georgia, serif' }}>~{paginas}p</span>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          </div>
+          {/* ── Roteiro de Capítulos (gerado pela IA ao entrar na página) ── */}
+          <RoteiroClient
+            slug={slug}
+            titulo={plan.titulo}
+            autor={nomeAutor ?? plan.autor ?? 'Autor'}
+            premissa={p.premissa}
+            publico_alvo={p.publico_alvo}
+            sinopse={p.sinopse}
+            capitulos={capitulos}
+            tipo={delivery.tipo ?? 'plano'}
+            paginas={capitulos.map((cap: typeof capitulos[0]) =>
+              estimarPaginas(cap.blocos ?? [])
+            )}
+          />
 
           {/* ── Notas de Pesquisa ── */}
           {Array.isArray(p.notas_pesquisa) && p.notas_pesquisa.length > 0 && (
