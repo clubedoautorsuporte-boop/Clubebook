@@ -7,6 +7,11 @@ import { CheckoutButton } from '@/components/checkout-button'
 const SLUG_RE = /^[a-f0-9]{32}$/
 type Props = { params: Promise<{ slug: string }> }
 
+function estimarPaginas(blocos: string[]): number {
+  const chars = blocos.join(' ').length
+  return Math.max(4, Math.round(chars / 1800))
+}
+
 export default async function BibliotecaLivroPage({ params }: Props) {
   const { slug } = await params
   if (!SLUG_RE.test(slug)) notFound()
@@ -18,14 +23,10 @@ export default async function BibliotecaLivroPage({ params }: Props) {
   const capitulos = plan.capitulos ?? []
   const livroGerado = delivery.tipo === 'livro'
 
-  // Capítulos visíveis: livro completo = todos; preview = primeiro capítulo livre + resto bloqueado
-  const capitulosVisiveis = livroGerado ? capitulos : capitulos.slice(0, 1)
-  const capitulosBloqueados = livroGerado ? [] : capitulos.slice(1)
-
   return (
     <div style={{ minHeight: '100vh', background: '#080e24' }}>
 
-      {/* ── Topbar escura ── */}
+      {/* ── Topbar ── */}
       <div style={{
         position: 'sticky', top: 0, zIndex: 30,
         background: 'rgba(8,14,36,0.97)', backdropFilter: 'blur(12px)',
@@ -50,137 +51,128 @@ export default async function BibliotecaLivroPage({ params }: Props) {
         </div>
       </div>
 
-      {/* ── Página do livro (fundo branco) ── */}
+      {/* ── Corpo do livro (fundo branco) ── */}
       <div style={{ background: '#fff', minHeight: 'calc(100vh - 48px)', paddingBottom: livroGerado ? 60 : 120 }}>
         <div style={{ maxWidth: 680, margin: '0 auto', padding: '56px 40px 0' }}>
 
-          {/* Capa / cabeçalho */}
-          <div style={{ textAlign: 'center', marginBottom: 64, paddingBottom: 48, borderBottom: '1px solid #e8e8e8' }}>
+          {/* Capa */}
+          <div style={{ textAlign: 'center', marginBottom: 64, paddingBottom: 48, borderBottom: '2px solid #111' }}>
             <p style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.25em', color: '#999', margin: '0 0 20px' }}>
-              {livroGerado ? 'Clube do Autor IA' : 'Prévia — Capítulo 1'}
+              Clube do Autor IA
             </p>
-            <h1 style={{ fontSize: 38, fontWeight: 900, color: '#111', margin: '0 0 12px', lineHeight: 1.15, fontFamily: 'Georgia, serif', letterSpacing: '-0.02em' }}>
+            <h1 style={{ fontSize: 36, fontWeight: 900, color: '#111', margin: '0 0 14px', lineHeight: 1.15, fontFamily: 'Georgia, serif', letterSpacing: '-0.01em' }}>
               {plan.titulo}
             </h1>
             {plan.subtitulo && (
-              <p style={{ fontSize: 18, color: '#555', margin: '0 0 20px', fontFamily: 'Georgia, serif', fontStyle: 'italic', lineHeight: 1.4 }}>
+              <p style={{ fontSize: 17, color: '#555', margin: '0 0 24px', fontFamily: 'Georgia, serif', fontStyle: 'italic', lineHeight: 1.5 }}>
                 {plan.subtitulo}
               </p>
             )}
-            <p style={{ fontSize: 14, color: '#888', margin: '0 0 8px', fontWeight: 500 }}>
-              por <strong style={{ color: '#333', fontWeight: 700 }}>{nomeAutor ?? plan.autor}</strong>
-            </p>
-            <p style={{ fontSize: 12, color: '#bbb', margin: 0 }}>
+            <p style={{ fontSize: 13, color: '#888', margin: 0 }}>
+              por <strong style={{ color: '#222', fontWeight: 700 }}>{nomeAutor ?? plan.autor}</strong>
+              <span style={{ color: '#ccc', margin: '0 10px' }}>·</span>
               {capitulos.length} capítulos
             </p>
           </div>
 
           {/* Promessa como epígrafe */}
           {plan.promessa && (
-            <div style={{ textAlign: 'center', margin: '0 auto 56px', maxWidth: 480 }}>
-              <p style={{ fontSize: 15, color: '#666', fontFamily: 'Georgia, serif', fontStyle: 'italic', lineHeight: 1.8, margin: 0 }}>
+            <div style={{ textAlign: 'center', margin: '0 auto 56px', maxWidth: 500, paddingBottom: 48, borderBottom: '1px solid #eee' }}>
+              <p style={{ fontSize: 15, color: '#555', fontFamily: 'Georgia, serif', fontStyle: 'italic', lineHeight: 1.9, margin: 0 }}>
                 &ldquo;{plan.promessa}&rdquo;
               </p>
             </div>
           )}
 
-          {/* ── Capítulos visíveis ── */}
-          {capitulosVisiveis.map((cap, i) => (
-            <div key={i} style={{ marginBottom: 64 }}>
-              {/* Cabeçalho do capítulo */}
-              <div style={{ textAlign: 'center', marginBottom: 36, paddingBottom: 28, borderBottom: '1px solid #eee' }}>
+          {/* ── Livro gerado: conteúdo completo ── */}
+          {livroGerado && capitulos.map((cap, i) => (
+            <div key={i} style={{ marginBottom: 72 }}>
+              <div style={{ textAlign: 'center', marginBottom: 36, paddingBottom: 24, borderBottom: '1px solid #eee' }}>
                 <p style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.3em', color: '#bbb', margin: '0 0 10px' }}>
                   Capítulo {cap.numero}
                 </p>
-                <h2 style={{ fontSize: 24, fontWeight: 800, color: '#1a1a1a', margin: 0, fontFamily: 'Georgia, serif', lineHeight: 1.3 }}>
+                <h2 style={{ fontSize: 22, fontWeight: 800, color: '#1a1a1a', margin: 0, fontFamily: 'Georgia, serif', lineHeight: 1.3 }}>
                   {cap.titulo}
                 </h2>
-                {cap.descricao && (
-                  <p style={{ fontSize: 13, color: '#999', margin: '10px 0 0', fontStyle: 'italic' }}>
-                    {cap.descricao}
-                  </p>
-                )}
               </div>
-
-              {/* Blocos de texto */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
                 {(cap.blocos ?? []).map((bloco, j) => (
-                  <p key={j} style={{
-                    fontSize: 16, lineHeight: 1.85, color: '#2a2a2a',
-                    margin: 0, fontFamily: 'Georgia, serif',
-                    textAlign: 'justify', textIndent: j === 0 ? 0 : '2em',
-                  }}>
+                  <p key={j} style={{ fontSize: 16, lineHeight: 1.9, color: '#2a2a2a', margin: 0, fontFamily: 'Georgia, serif', textAlign: 'justify', textIndent: j === 0 ? 0 : '2em' }}>
                     {bloco}
                   </p>
                 ))}
               </div>
-
-              {/* Separador de capítulo */}
-              {i < capitulosVisiveis.length - 1 && (
-                <div style={{ textAlign: 'center', margin: '48px 0 0', color: '#ccc', fontSize: 18, letterSpacing: '0.5em' }}>
-                  ✦ ✦ ✦
-                </div>
+              {i < capitulos.length - 1 && (
+                <div style={{ textAlign: 'center', margin: '52px 0 0', color: '#ccc', fontSize: 16, letterSpacing: '0.5em' }}>✦ ✦ ✦</div>
               )}
             </div>
           ))}
 
-          {/* ── Capítulos bloqueados (preview) ── */}
-          {capitulosBloqueados.length > 0 && (
-            <div style={{ position: 'relative' }}>
-              {/* Fade nos primeiros capítulos bloqueados */}
-              <div style={{ position: 'relative', overflow: 'hidden', maxHeight: 220 }}>
-                <div style={{ opacity: 0.25, filter: 'blur(1px)' }}>
-                  <div style={{ textAlign: 'center', marginBottom: 28 }}>
-                    <p style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.3em', color: '#bbb', margin: '0 0 10px' }}>
-                      Capítulo {capitulosBloqueados[0].numero}
-                    </p>
-                    <h2 style={{ fontSize: 24, fontWeight: 800, color: '#1a1a1a', margin: 0, fontFamily: 'Georgia, serif' }}>
-                      {capitulosBloqueados[0].titulo}
-                    </h2>
-                  </div>
-                  <p style={{ fontSize: 16, lineHeight: 1.85, color: '#2a2a2a', fontFamily: 'Georgia, serif' }}>
-                    {capitulosBloqueados[0].blocos?.[0] ?? ''}
+          {/* ── Preview: todos os capítulos no estilo "o que vai ter" ── */}
+          {!livroGerado && capitulos.map((cap, i) => {
+            const paginas = estimarPaginas(cap.blocos ?? [])
+
+            // Separa blocos normais de "Propósito:"
+            const blocos = cap.blocos ?? []
+            const propIdx = blocos.findIndex(b => b.toLowerCase().startsWith('propósito') || b.toLowerCase().startsWith('proposito'))
+            const topicos = propIdx >= 0 ? blocos.slice(0, propIdx) : blocos
+            const proposito = propIdx >= 0 ? blocos[propIdx] : null
+
+            return (
+              <div key={i} style={{ marginBottom: 52, paddingBottom: 48, borderBottom: '1px solid #e8e8e8' }}>
+
+                {/* Cabeçalho do capítulo */}
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, marginBottom: 14 }}>
+                  <h2 style={{
+                    fontSize: 14, fontWeight: 900, color: '#111',
+                    margin: 0, lineHeight: 1.35, textTransform: 'uppercase', letterSpacing: '0.04em',
+                    fontFamily: 'system-ui, sans-serif',
+                    flex: 1,
+                  }}>
+                    {cap.titulo}
+                  </h2>
+                  <span style={{ fontSize: 11, color: '#bbb', whiteSpace: 'nowrap', fontFamily: 'Georgia, serif', marginTop: 2 }}>
+                    ~{paginas}p
+                  </span>
+                </div>
+
+                {/* Descrição */}
+                {cap.descricao && (
+                  <p style={{ fontSize: 15, lineHeight: 1.8, color: '#333', margin: '0 0 18px', fontFamily: 'Georgia, serif', textAlign: 'justify' }}>
+                    {cap.descricao}
                   </p>
-                </div>
-                <div style={{
-                  position: 'absolute', inset: 0,
-                  background: 'linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,0.6) 40%, rgba(255,255,255,1) 80%)',
-                }} />
-              </div>
+                )}
 
-              {/* Mais capítulos bloqueados listados */}
-              <div style={{ background: '#fafafa', borderRadius: 16, border: '1px solid #eee', padding: '28px 32px', marginTop: 8 }}>
-                <p style={{ fontSize: 11, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em', color: '#bbb', margin: '0 0 16px', textAlign: 'center' }}>
-                  Capítulos bloqueados
-                </p>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 28 }}>
-                  {capitulosBloqueados.slice(0, 6).map((cap, i) => (
-                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px', borderRadius: 10, background: '#fff', border: '1px solid #f0f0f0' }}>
-                      <span style={{ fontSize: 10, fontWeight: 800, color: '#ccc', minWidth: 24 }}>{cap.numero}</span>
-                      <span style={{ fontSize: 14, color: '#999', fontFamily: 'Georgia, serif' }}>{cap.titulo}</span>
-                      <span style={{ marginLeft: 'auto', fontSize: 16 }}>🔒</span>
-                    </div>
-                  ))}
-                  {capitulosBloqueados.length > 6 && (
-                    <p style={{ fontSize: 12, color: '#bbb', textAlign: 'center', margin: '4px 0 0' }}>
-                      + {capitulosBloqueados.length - 6} capítulos...
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
+                {/* Tópicos como bullets */}
+                {topicos.length > 0 && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: proposito ? 16 : 0 }}>
+                    {topicos.map((t, j) => (
+                      <div key={j} style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                        <span style={{ color: '#888', fontSize: 11, marginTop: 4, flexShrink: 0 }}>♦</span>
+                        <p style={{ fontSize: 14, lineHeight: 1.65, color: '#444', margin: 0, fontFamily: 'Georgia, serif' }}>
+                          {t}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )}
 
-          {/* Mensagem final (só para livro gerado) */}
+                {/* Propósito em itálico */}
+                {proposito && (
+                  <p style={{ fontSize: 13, lineHeight: 1.75, color: '#777', margin: 0, fontFamily: 'Georgia, serif', fontStyle: 'italic' }}>
+                    {proposito}
+                  </p>
+                )}
+              </div>
+            )
+          })}
+
+          {/* Mensagem final (livro gerado) */}
           {livroGerado && plan.mensagem_final && (
             <div style={{ textAlign: 'center', marginTop: 64, paddingTop: 48, borderTop: '1px solid #eee' }}>
-              <p style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.25em', color: '#bbb', margin: '0 0 20px' }}>
-                Fim
-              </p>
+              <p style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.25em', color: '#bbb', margin: '0 0 20px' }}>Fim</p>
               {plan.mensagem_final.split('\n').filter(Boolean).map((p, i) => (
-                <p key={i} style={{ fontSize: 14, color: '#888', fontFamily: 'Georgia, serif', fontStyle: 'italic', lineHeight: 1.8, margin: '0 0 12px' }}>
-                  {p}
-                </p>
+                <p key={i} style={{ fontSize: 14, color: '#888', fontFamily: 'Georgia, serif', fontStyle: 'italic', lineHeight: 1.8, margin: '0 0 12px' }}>{p}</p>
               ))}
             </div>
           )}
